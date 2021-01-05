@@ -27,7 +27,7 @@ def is_boundary_available(z_floor, z_start, z_ceil):
     return z_floor + 1 < z_ceil
 
 
-class ModelTools:
+class Model:
     def __init__(self, scenario):
         self.dimension = scenario["dimension"]
         self.data = scenario["data"]

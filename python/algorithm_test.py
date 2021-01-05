@@ -1,7 +1,7 @@
 import unittest
 
-from model_tools import create_obstacle_array, has_collision, is_boundary_available
-from model_tools import ModelTools
+from model import create_obstacle_array, has_collision, is_boundary_available
+from model import Model
 from a_star import AStar
 
 scenario = {
@@ -28,7 +28,7 @@ scenario = {
 
 class AlgorithmTest(unittest.TestCase):
     def setUp(self):
-        self.model = ModelTools(scenario)
+        self.model = Model(scenario)
         init_Q = self.model.create_initial_Q()
         self.assertEqual(len(init_Q), 3)
 

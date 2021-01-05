@@ -1,5 +1,5 @@
-from model_tools import create_obstacle_array
-from model_tools import ModelTools
+from model import create_obstacle_array
+from model import Model
 from a_star import AStar
 
 scenario = {
@@ -24,7 +24,7 @@ scenario = {
 }
 
 if __name__ == "__main__":
-    model = ModelTools(scenario)
+    model = Model(scenario)
     init_Q = model.create_initial_Q()
     # print(len(init_Q))
     # print(init_Q)
