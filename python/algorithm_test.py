@@ -2,7 +2,6 @@ import unittest
 
 from model_tools import create_obstacle_array, has_collision, is_boundary_available
 from model_tools import ModelTools
-from a_star import create_path_from_final_Q
 from a_star import AStar
 
 scenario = {
@@ -29,9 +28,15 @@ scenario = {
 
 class AlgorithmTest(unittest.TestCase):
     def setUp(self):
-        obstacle_array = create_obstacle_array(scenario["data"])
-        scenario["obstacle_array"] = obstacle_array
         self.model = ModelTools(scenario)
+        init_Q = self.model.create_initial_Q()
+        self.assertEqual(len(init_Q), 3)
+
+        obstacle_array = create_obstacle_array(scenario["data"])
+        self.num_obstacles = len(obstacle_array)
+        a_star = AStar(init_Q, scenario, obstacle_array)
+        final_Q = a_star.calculate_path()
+        self.path = final_Q["path"]
 
     def test_numpy(self):
         import numpy as np
@@ -51,32 +56,7 @@ class AlgorithmTest(unittest.TestCase):
         zFloor = int(scenario["boundary"]["zFloor"])
         self.assertTrue(is_boundary_available(zFloor, zStart, zCeil))
 
-    # def test_initQ(self):
-    #     init_Q = self.model.create_initial_Q()
-    #     self.assertEqual(len(init_Q), 3)
-
 
 if __name__ == "__main__":
     # unittest.main()  # repl process died unexpectedly
     unittest.main(verbosity=2, exit=False)
-
-    obstacle_array = create_obstacle_array(scenario["data"])
-
-    model = ModelTools(scenario)
-    init_Q = model.create_initial_Q()
-    # print(len(init_Q))
-    # print(init_Q)
-
-    a_star = AStar(init_Q, scenario, obstacle_array)
-    final_Q = a_star.calculate_path()
-    finalQ = final_Q["finalQ"]
-    # print(finalQ)
-
-    # for [key, value] in finalQ.items():
-    #     print(key, value)
-
-    # path = create_path_from_final_Q(finalQ, scenario)
-    path = final_Q["path"]
-    print("x:", path["x"])
-    print("y:", path["y"])
-    print("z:", path["z"])
