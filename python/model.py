@@ -20,11 +20,14 @@ def has_collision(obj_a, obj_b):
 
 
 def is_boundary_available(z_floor, z_start, z_ceil):
-    if z_floor and z_start <= z_floor:
+    z_floor = -inf if z_floor is None else z_floor
+    z_ceil = inf if z_ceil is None else z_ceil
+
+    if z_start <= z_floor:
         print("z_start <= z_floor")
         return False
 
-    if z_ceil and z_start >= z_ceil:
+    if z_start >= z_ceil:
         print("z_start >= z_ceil")
         return False
 
@@ -40,7 +43,7 @@ class Model:
         self.obstacle_array = create_obstacle_array(self.data)
 
         self.waypoint = scenario["waypoint"]
-        self.boundary = scenario["boundary"]
+        self.boundary = scenario["boundary"] if "boundary" in scenario else None
 
     def create_initial_Q(self):
         x = int(self.dimension["x"])
@@ -53,9 +56,10 @@ class Model:
         start_grid = Grid(start["x"], start["y"], start["z"], self.is_2d)
         stop_grid = Grid(stop["x"], stop["y"], stop["z"], self.is_2d)
 
-        z_ceil = int(self.boundary["zCeil"])
-        z_floor = int(self.boundary["zFloor"])
-        print("z_ceil: {}, z_floor: {}".format(z_ceil, z_floor))
+        if not self.is_2d:
+            z_ceil = int(self.boundary["zCeil"]) if (self.boundary and "zCeil" in self.boundary) else None
+            z_floor = int(self.boundary["zFloor"]) if (self.boundary and "zFloor" in self.boundary) else None
+            print("z_ceil: {}, z_floor: {}".format(z_ceil, z_floor))
 
         # print(self.obstacle_array)
         # print(len(self.obstacle_array))
@@ -85,7 +89,7 @@ class Model:
 
                     init_Q[str(cell_grid)] = cell
 
-            return {"initQ": init_Q, "zCeil": z_ceil, "zFloor": z_floor}
+            return {"initQ": init_Q, "zCeil": None, "zFloor": None}
         else:
             if not is_boundary_available(z_floor, start_grid.z, z_ceil):
                 return {"initQ": init_Q, "zCeil": z_ceil, "zFloor": z_floor}
