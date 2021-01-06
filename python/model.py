@@ -2,45 +2,15 @@ from math import inf
 from grid import Grid
 
 
-def create_obstacle_array(data):
-    # print(len(data))
-    if len(data) == 0 or int(data["size"]) == 0:
-        return
-
-    x_array = data["x"]
-    y_array = data["y"]
-    z_array = data["z"]
-    size = int(data["size"])
-
-    return [{"x": x_array[i], "y": y_array[i], "z": z_array[i]} for i in range(size)]
-
-
-def has_collision(obj_a, obj_b):
-    return obj_a == obj_b
-
-
-def is_boundary_available(z_floor, z_start, z_ceil):
-    z_floor = -inf if z_floor is None else z_floor
-    z_ceil = inf if z_ceil is None else z_ceil
-
-    if z_start <= z_floor:
-        print("z_start <= z_floor")
-        return False
-
-    if z_start >= z_ceil:
-        print("z_start >= z_ceil")
-        return False
-
-    return z_floor + 1 < z_ceil
-
-
 class Model:
     def __init__(self, scenario):
         self.dimension = scenario["dimension"]
         self.is_2d = True if int(scenario["dimension"]["z"]) == 0 else False
 
         self.data = scenario["data"]
-        self.obstacle_array = create_obstacle_array(self.data)
+        self.obstacle_array = Model.create_obstacle_array(self.data, self.is_2d)
+        # print(self.obstacle_array)
+        # print(len(self.obstacle_array))
 
         waypoint = scenario["waypoint"]
         start = waypoint["start"]
@@ -59,73 +29,79 @@ class Model:
 
         self.init_Q = dict()
 
-    def update_init_Q(self, row, col, z=None, obstacle=None):
-        cell_grid = None
+    @staticmethod
+    def create_obstacle_array(data, is_2d):
+        # print(len(data))
+        if len(data) == 0 or int(data["size"]) == 0:
+            return
+
+        size = int(data["size"])
+
+        x_array = data["x"]
+        y_array = data["y"]
+
+        if is_2d:
+            return [Grid(x_array[i], y_array[i]) for i in range(size)]
+        else:
+            z_array = data["z"]
+            return [Grid(x_array[i], y_array[i], z_array[i], is_2d) for i in range(size)]
+
+    @staticmethod
+    def is_boundary_available(lower_bound, value, upper_bound):
+        lower_bound = -inf if lower_bound is None else lower_bound
+        upper_bound = inf if upper_bound is None else upper_bound
+
+        if value <= lower_bound:
+            print("value <= lower_bound")
+            return False
+
+        if value >= upper_bound:
+            print("value >= lower_bound")
+            return False
+
+        return lower_bound + 1 < upper_bound
+
+    def update_init_Q(self, row, col, z, obstacle=None):
+        cell_grid = Grid(row, col, z, self.is_2d)
+        if cell_grid == obstacle:
+            return None
+
         cell_obj = {
             "row": row,
             "col": col,
-            "prev": None
+            "z": z,
+            "prev": None,
+            "dist": inf,
+            "f": inf
         }
 
-        if z is None:
-            if has_collision({"x": row, "y": col}, obstacle):
-                return
-
-            cell_grid = Grid(row, col)
-            if cell_grid == self.start_grid:
-                cell_obj["dist"] = 0
-                cell_obj["f"] = cell_obj["dist"] + abs(self.dist_x) + abs(self.dist_y)
-            else:
-                cell_obj["dist"] = inf
-                cell_obj["f"] = inf
+        if cell_grid == self.start_grid:
+            cell_obj["dist"] = 0
+            cell_obj["f"] = cell_obj["dist"] + abs(self.dist_x) + abs(self.dist_y) if self.is_2d \
+                else cell_obj["dist"] + abs(self.dist_x) + abs(self.dist_y) + abs(self.dist_z)
 
         self.init_Q[str(cell_grid)] = cell_obj
 
-    def create_initial_Q(self):
+    def create_initial_Q(self, threshold=1):
         x = int(self.dimension["x"])
         y = int(self.dimension["y"])
         z = int(self.dimension["z"])
         print("Scenario dimension: {}, {}, {}".format(x, y, z))
 
-        # print(self.obstacle_array)
-        # print(len(self.obstacle_array))
-
-        if z == 0:
-            # for row in range(x):
-            #     for col in range(y):
-            #         for _, obstacle in enumerate(self.obstacle_array):
-            #             if has_collision({"x": row, "y": col}, obstacle):
-            #                 continue
-            #
-            #         cell = {
-            #             "row": row,
-            #             "col": col,
-            #             "prev": None
-            #         }
-            #
-            #         cell_grid = Grid(row, col)
-            #         if cell_grid == start_grid:
-            #             cell["dist"] = 0
-            #             cell["f"] = cell["dist"] + abs(stop_grid.x - start_grid.x) + abs(stop_grid.y - start_grid.y)
-            #         else:
-            #             cell["dist"] = inf
-            #             cell["f"] = inf
-            #
-            #         init_Q[str(cell_grid)] = cell
-
-            [self.update_init_Q(r, c, None, obs) for r in range(x) for c in range(y) for obs in self.obstacle_array]
+        if self.is_2d:
+            [self.update_init_Q(row, col, 0, obstacle) for row in range(x) for col in range(y)
+                for obstacle in self.obstacle_array]
 
             return {"initQ": self.init_Q, "zCeil": None, "zFloor": None}
         else:
-            if not is_boundary_available(self.z_floor, self.start_grid.z, self.z_ceil):
+            if not Model.is_boundary_available(self.z_floor, self.start_grid.z, self.z_ceil):
                 return {"initQ": self.init_Q, "zCeil": self.z_ceil, "zFloor": self.z_floor}
 
-            threshold = 1  # 1000
             if int(self.data["size"]) >= threshold:
                 print("Deal with 3D large scenario creation.")
-                for _, obs in enumerate(self.obstacle_array):
-                    # print(obs)
-                    if has_collision({"x": self.start_grid.x, "y": self.start_grid.y, "z": self.start_grid.z}, obs):
+                for _, obstacle_grid in enumerate(self.obstacle_array):
+                    # print(obstacle_grid)
+                    if self.start_grid == obstacle_grid:
                         print("the start point is located on obstacle")
                         return {"initQ": self.init_Q, "zCeil": self.z_ceil, "zFloor": self.z_floor}
 
@@ -141,10 +117,8 @@ class Model:
                     "dist": 0,
                     "f": f_value
                 }
-
-                # print(len(init_Q))
-                # print(init_Q)
-
-                return {"initQ": self.init_Q, "zCeil": self.z_ceil, "zFloor": self.z_floor}
             else:
-                print("Deal with 3D small scenario creation.")
+                [self.update_init_Q(row, col, iz, obstacle) for row in range(x) for col in range(y) for iz in range(z)
+                    for obstacle in self.obstacle_array]
+
+            return {"initQ": self.init_Q, "zCeil": self.z_ceil, "zFloor": self.z_floor}

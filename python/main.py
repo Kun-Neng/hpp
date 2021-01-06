@@ -1,4 +1,3 @@
-from model import create_obstacle_array
 from model import Model
 from a_star import AStar
 
@@ -21,7 +20,7 @@ scenario = {
     "waypoint": {  # 3D
         "start": {"x": 5, "y": 9, "z": 2},
         "stop": {"x": 5, "y": 0, "z": 4},
-        "allowDiagonal": False
+        "allowDiagonal": True
     },
     "boundary": {
         "zCeil": 6,
@@ -31,12 +30,14 @@ scenario = {
 
 if __name__ == "__main__":
     model = Model(scenario)
-    init_Q = model.create_initial_Q()
+    threshold = 1  # 1000
+    init_Q = model.create_initial_Q(threshold)
     # print(init_Q)
     # print(len(init_Q))
     # print(len(init_Q["initQ"]))
 
-    obstacle_array = create_obstacle_array(scenario["data"])
+    is_2d = True if int(scenario["dimension"]["z"]) == 0 else False
+    obstacle_array = Model.create_obstacle_array(scenario["data"], is_2d)
     a_star = AStar(init_Q, scenario, obstacle_array)
     final_Q = a_star.calculate_path()
     finalQ = final_Q["finalQ"]

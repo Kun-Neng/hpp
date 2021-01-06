@@ -2,64 +2,14 @@ from math import inf, sqrt
 from grid import Grid
 
 
-def find_the_min_f(hashmap):
-    objKey = None
-    objValue = None
-    minF = inf
-    for [key, obj] in hashmap.items():
-        # print(key + ':' + str(obj["f"]))
-        if obj["f"] < minF:
-            objKey = key
-            objValue = obj
-            minF = obj["f"]
-
-    return {
-        "key": objKey,
-        "value": objValue
-    }
-
-
-def create_path_from_final_Q(finalQ, scenario):
-    scenario_z = int(scenario["dimension"]["z"])
-
-    stop = scenario["waypoint"]["stop"]
-    stopPosition = str(stop["x"]) + "," + str(stop["y"]) if scenario_z == 0 \
-        else str(stop["x"]) + "," + str(stop["y"]) + "," + str(stop["z"])
-    finalObject = finalQ[stopPosition]
-
-    newXArray = [finalObject["row"]]
-    newYArray = [finalObject["col"]]
-    newZArray = [0] if scenario_z == 0 else [finalObject["z"]]
-
-    while finalObject["prev"] is not None:
-        finalObject = finalQ[finalObject["prev"]]
-
-        current_row = finalObject["row"]
-        current_col = finalObject["col"]
-        current_z = 0 if scenario_z == 0 else finalObject["z"]
-
-        # newXArray.push(current_row)
-        # newYArray.push(current_col)
-        # newZArray.push(current_z)
-        newXArray.append(current_row)
-        newYArray.append(current_col)
-        newZArray.append(current_z)
-
-    return {
-        "x": newXArray,
-        "y": newYArray,
-        "z": newZArray
-    }
-
-
 class AStar:
     def __init__(self, init_Q, scenario, obstacle_array):
         self.Q = init_Q["initQ"]
         self.z_ceil = inf if init_Q["zCeil"] is None else int(init_Q["zCeil"])
-        self.z_floor = 0 if init_Q["zFloor"] is None else int(init_Q["zFloor"])
+        self.z_floor = -inf if init_Q["zFloor"] is None else int(init_Q["zFloor"])
 
         self.scenario = scenario
-        self.is_2d = True if int(scenario["dimension"]["z"]) == 0 else False
+        self.is_2d = True if int(scenario["dimension"]["z"]) <= 0 else False
 
         self.obstacle_array = obstacle_array
         self.num_obstacles = len(self.obstacle_array)
@@ -67,80 +17,118 @@ class AStar:
         self.waypoint = scenario["waypoint"]
         start = self.waypoint["start"]
         start_grid = Grid(start["x"], start["y"], start["z"], self.is_2d)
-        self.openSet = dict()
-        self.openSet[str(start_grid)] = self.Q.get(str(start_grid))
+        stop = self.waypoint["stop"]
+        self.stop_grid = Grid(stop["x"], stop["y"], stop["z"], self.is_2d)
+        self.open_set = dict()
+        self.open_set[str(start_grid)] = self.Q.get(str(start_grid))
 
-        self.allowDiagonal = bool(self.waypoint["allowDiagonal"])
+        self.allowDiagonal = bool(self.waypoint["allowDiagonal"]) if "allowDiagonal" in self.waypoint else False
+
+    @staticmethod
+    def find_the_min_f(hashmap):
+        objKey = None
+        objValue = None
+        minF = inf
+        for [key, obj] in hashmap.items():
+            # print(key + ':' + str(obj["f"]))
+            if obj["f"] < minF:
+                objKey = key
+                objValue = obj
+                minF = obj["f"]
+
+        return {
+            "key": objKey,
+            "value": objValue
+        }
+
+    def create_path_from_final_Q(self, finalQ):
+        finalObject = finalQ[str(self.stop_grid)]
+
+        newXArray = [int(finalObject["row"])]
+        newYArray = [int(finalObject["col"])]
+        newZArray = [0] if self.is_2d else [finalObject["z"]]
+
+        while finalObject["prev"] is not None:
+            finalObject = finalQ[finalObject["prev"]]
+
+            current_row = int(finalObject["row"])
+            current_col = int(finalObject["col"])
+            current_z = 0 if self.is_2d else finalObject["z"]
+
+            newXArray.append(current_row)
+            newYArray.append(current_col)
+            newZArray.append(current_z)
+
+        return {
+            "x": newXArray,
+            "y": newYArray,
+            "z": newZArray
+        }
 
     def calculate_path(self):
         print("A* Path Finding (2D)") if self.is_2d else print("A* Path Finding (3D)")
-
-        stop = self.waypoint["stop"]
-        stop_grid = Grid(stop["x"], stop["y"], stop["z"], self.is_2d)
-
         finalQ = dict()
         visitedQ = dict()
 
-        size = len(self.openSet)
+        size = len(self.open_set)
         while size > 0:
-            obj = find_the_min_f(self.openSet)
+            obj = AStar.find_the_min_f(self.open_set)
             objKey = obj["key"]
             currentObj = obj["value"]
             finalQ[objKey] = currentObj
-            # openSet.delete(objKey)
-            del self.openSet[objKey]
+            del self.open_set[objKey]
 
             if self.is_2d:
                 current_grid = Grid(currentObj["row"], currentObj["col"])
             else:
                 current_grid = Grid(currentObj["row"], currentObj["col"], currentObj["z"], self.is_2d)
-            if current_grid == stop_grid:
+            if current_grid == self.stop_grid:
                 print("Arrival!")
                 break
 
             shift_grid = [-1, 0, 1]
-            for shiftRow in shift_grid:
-                for shiftCol in shift_grid:
+            for shift_row in shift_grid:
+                for shift_col in shift_grid:
                     if self.is_2d:
                         # 不允許斜走
-                        isNotDiagonal = (shiftRow == 0 or shiftCol == 0) and (shiftRow != shiftCol)
+                        isNotDiagonal = (shift_row == 0 or shift_col == 0) and (shift_row != shift_col)
                         # 允許斜走
-                        isDiagonal = not (shiftRow == 0 and shiftCol == 0)
+                        isDiagonal = not (shift_row == 0 and shift_col == 0)
 
                         isAllowed = isDiagonal if self.allowDiagonal else isNotDiagonal
                         if isAllowed:
-                            neighbor_grid = current_grid.shift(shiftRow, shiftCol)
+                            neighbor_grid = current_grid.shift(shift_row, shift_col)
                             neighbor = self.Q.get(str(neighbor_grid))
 
                             if neighbor is not None and str(neighbor_grid) not in finalQ:
                                 visitedQ[str(neighbor_grid)] = neighbor
 
-                                if str(neighbor_grid) not in self.openSet:
-                                    self.openSet[str(neighbor_grid)] = neighbor
+                                if str(neighbor_grid) not in self.open_set:
+                                    self.open_set[str(neighbor_grid)] = neighbor
 
-                                dist = sqrt(shiftRow ** 2 + shiftCol ** 2)
+                                dist = sqrt(shift_row ** 2 + shift_col ** 2)
                                 alt = currentObj["dist"] + dist
                                 # print('compare ' + str(alt) + ' to ' + neighbor["dist"])
                                 if alt < neighbor["dist"]:
                                     # print('update neighbor object dist: ' + alt)
                                     neighbor["dist"] = alt
-                                    leftX = stop["x"] - neighbor["row"]
-                                    leftY = stop["y"] - neighbor["col"]
-                                    neighbor["f"] = alt + abs(leftX) + abs(leftY)
-                                    # neighbor["f"] = alt + sqrt(leftX ** 2 + leftY ** 2 + leftZ ** 2)
+                                    dist_x = self.stop_grid.x - neighbor["row"]
+                                    dist_y = self.stop_grid.y - neighbor["col"]
+                                    neighbor["f"] = alt + abs(dist_x) + abs(dist_y)
+                                    # neighbor["f"] = alt + sqrt(dist_x ** 2 + dist_y ** 2)
                                     neighbor["prev"] = str(current_grid)
-                                    self.openSet[str(neighbor_grid)] = neighbor
+                                    self.open_set[str(neighbor_grid)] = neighbor
                     else:
-                        for shiftZ in shift_grid:
+                        for shift_z in shift_grid:
                             # 不允許斜走
-                            isNotDiagonal = (shiftRow == 0 or shiftCol == 0) and (shiftRow != shiftCol)
+                            isNotDiagonal = (shift_row == 0 or shift_col == 0) and (shift_row != shift_col)
                             # 允許斜走
-                            isDiagonal = not (shiftRow == 0 and shiftCol == 0 and shiftZ == 0)
+                            isDiagonal = not (shift_row == 0 and shift_col == 0 and shift_z == 0)
 
                             isAllowed = isDiagonal if self.allowDiagonal else isNotDiagonal
                             if isAllowed:
-                                # print(str(shiftRow) + ' ' + str(shiftCol) + ' ' + str(shiftZ))
-                                neighbor_grid = current_grid.shift(shiftRow, shiftCol, shiftZ)
+                                # print(str(shift_row) + ' ' + str(shift_col) + ' ' + str(shift_z))
+                                neighbor_grid = current_grid.shift(shift_row, shift_col, shift_z)
 
                                 if neighbor_grid.is_out_of_bound([self.z_floor, self.z_ceil]):
                                     continue
@@ -150,20 +138,18 @@ class AStar:
                                 # if neighbor is not None and str(neighbor_grid) not in finalQ:
                                 #     visitedQ[str(neighbor_grid)] = neighbor
                                 #
-                                #     dist = sqrt(shiftRow ** 2 + shiftCol ** 2 + shiftZ ** 2)
+                                #     dist = sqrt(shift_row ** 2 + shift_col ** 2 + shift_z ** 2)
                                 #     alt = currentObj["dist"] + dist
                                 #     # ...
 
                                 # Fast search
                                 isObstacleFound = False
                                 for index in range(self.num_obstacles):
-                                    obstacle = self.obstacle_array[index]
-                                    obstacle_grid = Grid(obstacle["x"], obstacle["y"], obstacle["z"], self.is_2d)
+                                    obstacle_grid = self.obstacle_array[index]
                                     if obstacle_grid == neighbor_grid:
                                         # Find out an obstacle on the neighbor grid
                                         isObstacleFound = True
                                         break
-
                                 if isObstacleFound:
                                     continue
 
@@ -185,27 +171,27 @@ class AStar:
                                     }
                                     visitedQ[str(neighbor_grid)] = neighbor
 
-                                if str(neighbor_grid) not in self.openSet:
-                                    self.openSet[str(neighbor_grid)] = neighbor
+                                if str(neighbor_grid) not in self.open_set:
+                                    self.open_set[str(neighbor_grid)] = neighbor
 
-                                dist = sqrt(shiftRow ** 2 + shiftCol ** 2 + shiftZ ** 2)
+                                dist = sqrt(shift_row ** 2 + shift_col ** 2 + shift_z ** 2)
                                 alt = currentObj["dist"] + dist
                                 # print('compare ' + str(alt) + ' to ' + neighbor["dist"])
                                 if alt < neighbor["dist"]:
                                     # print('update neighbor object dist: ' + alt)
                                     neighbor["dist"] = alt
-                                    leftX = stop["x"] - neighbor["row"]
-                                    leftY = stop["y"] - neighbor["col"]
-                                    leftZ = stop["z"] - neighbor["z"]
-                                    # neighbor["f"] = alt + abs(leftX) + abs(leftY) + abs(leftZ)
-                                    neighbor["f"] = alt + sqrt(leftX ** 2 + leftY ** 2 + leftZ ** 2)
+                                    dist_x = self.stop_grid.x - neighbor["row"]
+                                    dist_y = self.stop_grid.y - neighbor["col"]
+                                    dist_z = self.stop_grid.z - neighbor["z"]
+                                    # neighbor["f"] = alt + abs(dist_x) + abs(dist_y) + abs(dist_z)
+                                    neighbor["f"] = alt + sqrt(dist_x ** 2 + dist_y ** 2 + dist_z ** 2)
                                     neighbor["prev"] = str(current_grid)
-                                    self.openSet[str(neighbor_grid)] = neighbor
+                                    self.open_set[str(neighbor_grid)] = neighbor
 
-            size = len(self.openSet)
+            size = len(self.open_set)
 
         return {
             "visitedQ": visitedQ,
             "finalQ": finalQ,
-            "path": create_path_from_final_Q(finalQ, self.scenario)
+            "path": self.create_path_from_final_Q(finalQ)
         }

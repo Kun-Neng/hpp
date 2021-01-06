@@ -35,7 +35,7 @@ class AlgorithmTest(unittest.TestCase):
         obstacle_array = create_obstacle_array(scenario["data"])
         self.num_obstacles = len(obstacle_array)
         a_star = AStar(init_Q, scenario, obstacle_array)
-        final_Q = a_star.calculate_path()
+        final_Q = a_star.calculate_path
         self.path = final_Q["path"]
 
     def test_numpy(self):
