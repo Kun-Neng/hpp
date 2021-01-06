@@ -1,4 +1,5 @@
 import numpy as np
+from math import inf
 
 
 def create_obstacle_array(data):
@@ -64,9 +65,31 @@ class Model:
         init_Q = dict()
 
         if z == 0:
-            print("two dimension")
+            for row in range(x):
+                for col in range(y):
+                    for _, obstacle in enumerate(self.obstacle_array):
+                        if has_collision({"x": row, "y": col}, obstacle):
+                            continue
+
+                    cell = {
+                        "row": row,
+                        "col": col,
+                        "prev": None
+                    }
+
+                    if row == x_start and col == y_start:
+                        cell["dist"] = 0
+                        cell["f"] = cell["dist"] + abs(x_stop - x_start) + abs(y_stop - y_start)
+                    else:
+                        cell["dist"] = inf
+                        cell["f"] = inf
+
+                    key = str(row) + "," + str(col)
+                    init_Q[key] = cell
+
+            return {"initQ": init_Q, "zCeil": z_ceil, "zFloor": z_floor}
         else:
-            if not is_boundary_available(z_floor, x_start, z_ceil):
+            if not is_boundary_available(z_floor, z_start, z_ceil):
                 return {"initQ": init_Q, "zCeil": z_ceil, "zFloor": z_floor}
 
             if int(self.data["size"]) >= 1:  # 1000
