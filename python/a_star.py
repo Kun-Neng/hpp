@@ -2,6 +2,23 @@ from math import inf, sqrt
 from grid import Grid
 
 
+def find_the_min_f(hashmap):
+    objKey = None
+    objValue = None
+    minF = inf
+    for [key, obj] in hashmap.items():
+        # print(key + ':' + str(obj["f"]))
+        if obj["f"] < minF:
+            objKey = key
+            objValue = obj
+            minF = obj["f"]
+
+    return {
+        "key": objKey,
+        "value": objValue
+    }
+
+
 def create_path_from_final_Q(finalQ, scenario):
     scenario_z = int(scenario["dimension"]["z"])
 
@@ -43,6 +60,7 @@ class AStar:
 
         self.scenario = scenario
         self.is_2d = True if int(scenario["dimension"]["z"]) == 0 else False
+
         self.obstacle_array = obstacle_array
         self.num_obstacles = len(self.obstacle_array)
 
@@ -55,40 +73,64 @@ class AStar:
         self.allowDiagonal = bool(self.waypoint["allowDiagonal"])
 
     def calculate_path(self):
+        print("A* Path Finding (2D)") if self.is_2d else print("A* Path Finding (3D)")
+
         stop = self.waypoint["stop"]
         stop_grid = Grid(stop["x"], stop["y"], stop["z"], self.is_2d)
 
         finalQ = dict()
         visitedQ = dict()
 
-        if self.is_2d:
-            print("A* Path Finding (2D)")
-        else:
-            print("A* Path Finding (3D)")
-            size = len(self.openSet)
-            while size > 0:
-                objKey = None
-                currentObj = None
-                minF = inf
-                for [key, obj] in self.openSet.items():
-                    # print(key + ':' + str(obj["f"]))
-                    if obj["f"] < minF:
-                        objKey = key
-                        currentObj = obj
-                        minF = obj["f"]
+        size = len(self.openSet)
+        while size > 0:
+            obj = find_the_min_f(self.openSet)
+            objKey = obj["key"]
+            currentObj = obj["value"]
+            finalQ[objKey] = currentObj
+            # openSet.delete(objKey)
+            del self.openSet[objKey]
 
-                finalQ[objKey] = currentObj
-                # openSet.delete(objKey)
-                del self.openSet[objKey]
-
+            if self.is_2d:
+                current_grid = Grid(currentObj["row"], currentObj["col"])
+            else:
                 current_grid = Grid(currentObj["row"], currentObj["col"], currentObj["z"], self.is_2d)
-                if current_grid == stop_grid:
-                    print("Arrival!")
-                    break
+            if current_grid == stop_grid:
+                print("Arrival!")
+                break
 
-                shift_grid = [-1, 0, 1]
-                for shiftRow in shift_grid:
-                    for shiftCol in shift_grid:
+            shift_grid = [-1, 0, 1]
+            for shiftRow in shift_grid:
+                for shiftCol in shift_grid:
+                    if self.is_2d:
+                        # 不允許斜走
+                        isNotDiagonal = (shiftRow == 0 or shiftCol == 0) and (shiftRow != shiftCol)
+                        # 允許斜走
+                        isDiagonal = not (shiftRow == 0 and shiftCol == 0)
+
+                        isAllowed = isDiagonal if self.allowDiagonal else isNotDiagonal
+                        if isAllowed:
+                            neighbor_grid = current_grid.shift(shiftRow, shiftCol)
+                            neighbor = self.Q.get(str(neighbor_grid))
+
+                            if neighbor is not None and str(neighbor_grid) not in finalQ:
+                                visitedQ[str(neighbor_grid)] = neighbor
+
+                                if str(neighbor_grid) not in self.openSet:
+                                    self.openSet[str(neighbor_grid)] = neighbor
+
+                                dist = sqrt(shiftRow ** 2 + shiftCol ** 2)
+                                alt = currentObj["dist"] + dist
+                                # print('compare ' + str(alt) + ' to ' + neighbor["dist"])
+                                if alt < neighbor["dist"]:
+                                    # print('update neighbor object dist: ' + alt)
+                                    neighbor["dist"] = alt
+                                    leftX = stop["x"] - neighbor["row"]
+                                    leftY = stop["y"] - neighbor["col"]
+                                    neighbor["f"] = alt + abs(leftX) + abs(leftY)
+                                    # neighbor["f"] = alt + sqrt(leftX ** 2 + leftY ** 2 + leftZ ** 2)
+                                    neighbor["prev"] = str(current_grid)
+                                    self.openSet[str(neighbor_grid)] = neighbor
+                    else:
                         for shiftZ in shift_grid:
                             # 不允許斜走
                             isNotDiagonal = (shiftRow == 0 or shiftCol == 0) and (shiftRow != shiftCol)
@@ -102,6 +144,15 @@ class AStar:
 
                                 if neighbor_grid.is_out_of_bound([self.z_floor, self.z_ceil]):
                                     continue
+
+                                # Full search (time-consuming) = 2D
+                                # neighbor = self.Q.get(str(neighbor_grid))
+                                # if neighbor is not None and str(neighbor_grid) not in finalQ:
+                                #     visitedQ[str(neighbor_grid)] = neighbor
+                                #
+                                #     dist = sqrt(shiftRow ** 2 + shiftCol ** 2 + shiftZ ** 2)
+                                #     alt = currentObj["dist"] + dist
+                                #     # ...
 
                                 # Fast search
                                 isObstacleFound = False
@@ -134,12 +185,12 @@ class AStar:
                                     }
                                     visitedQ[str(neighbor_grid)] = neighbor
 
-                                dist = sqrt(shiftRow ** 2 + shiftCol ** 2 + shiftZ ** 2)
-                                alt = currentObj["dist"] + dist
-                                # print('compare ' + str(alt) + ' to ' + neighbor["dist"])
                                 if str(neighbor_grid) not in self.openSet:
                                     self.openSet[str(neighbor_grid)] = neighbor
 
+                                dist = sqrt(shiftRow ** 2 + shiftCol ** 2 + shiftZ ** 2)
+                                alt = currentObj["dist"] + dist
+                                # print('compare ' + str(alt) + ' to ' + neighbor["dist"])
                                 if alt < neighbor["dist"]:
                                     # print('update neighbor object dist: ' + alt)
                                     neighbor["dist"] = alt
@@ -151,10 +202,10 @@ class AStar:
                                     neighbor["prev"] = str(current_grid)
                                     self.openSet[str(neighbor_grid)] = neighbor
 
-                size = len(self.openSet)
+            size = len(self.openSet)
 
-            return {
-                "visitedQ": visitedQ,
-                "finalQ": finalQ,
-                "path": create_path_from_final_Q(finalQ, self.scenario)
-            }
+        return {
+            "visitedQ": visitedQ,
+            "finalQ": finalQ,
+            "path": create_path_from_final_Q(finalQ, self.scenario)
+        }
