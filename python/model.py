@@ -1,5 +1,5 @@
-import numpy as np
 from math import inf
+from grid import Grid
 
 
 def create_obstacle_array(data):
@@ -11,6 +11,7 @@ def create_obstacle_array(data):
     y_array = data["y"]
     z_array = data["z"]
     size = int(data["size"])
+
     return [{"x": x_array[i], "y": y_array[i], "z": z_array[i]} for i in range(size)]
 
 
@@ -22,17 +23,22 @@ def is_boundary_available(z_floor, z_start, z_ceil):
     if z_floor and z_start <= z_floor:
         print("z_start <= z_floor")
         return False
+
     if z_ceil and z_start >= z_ceil:
         print("z_start >= z_ceil")
         return False
+
     return z_floor + 1 < z_ceil
 
 
 class Model:
     def __init__(self, scenario):
         self.dimension = scenario["dimension"]
+        self.is_2d = True if int(scenario["dimension"]["z"]) == 0 else False
+
         self.data = scenario["data"]
         self.obstacle_array = create_obstacle_array(self.data)
+
         self.waypoint = scenario["waypoint"]
         self.boundary = scenario["boundary"]
 
@@ -44,16 +50,8 @@ class Model:
 
         start = self.waypoint["start"]
         stop = self.waypoint["stop"]
-
-        x_start = int(start["x"])
-        y_start = int(start["y"])
-        z_start = int(start["z"])
-        x_stop = int(stop["x"])
-        y_stop = int(stop["y"])
-        z_stop = int(stop["z"])
-
-        start_array = np.array([x_start, y_start, z_start])
-        stop_array = np.array([x_stop, y_stop, z_stop])
+        start_grid = Grid(start["x"], start["y"], start["z"], self.is_2d)
+        stop_grid = Grid(stop["x"], stop["y"], stop["z"], self.is_2d)
 
         z_ceil = int(self.boundary["zCeil"])
         z_floor = int(self.boundary["zFloor"])
@@ -77,19 +75,19 @@ class Model:
                         "prev": None
                     }
 
-                    if row == x_start and col == y_start:
+                    cell_grid = Grid(row, col)
+                    if cell_grid == start_grid:
                         cell["dist"] = 0
-                        cell["f"] = cell["dist"] + abs(x_stop - x_start) + abs(y_stop - y_start)
+                        cell["f"] = cell["dist"] + abs(stop_grid.x - start_grid.x) + abs(stop_grid.y - start_grid.y)
                     else:
                         cell["dist"] = inf
                         cell["f"] = inf
 
-                    key = str(row) + "," + str(col)
-                    init_Q[key] = cell
+                    init_Q[str(cell_grid)] = cell
 
             return {"initQ": init_Q, "zCeil": z_ceil, "zFloor": z_floor}
         else:
-            if not is_boundary_available(z_floor, z_start, z_ceil):
+            if not is_boundary_available(z_floor, start_grid.z, z_ceil):
                 return {"initQ": init_Q, "zCeil": z_ceil, "zFloor": z_floor}
 
             if int(self.data["size"]) >= 1:  # 1000
@@ -100,26 +98,17 @@ class Model:
                         print("the start point is located on obstacle")
                         return {"initQ": init_Q, "zCeil": z_ceil, "zFloor": z_floor}
 
-                key = ",".join([str(x_start), str(y_start), str(z_start)])
-                # start_str_array = np.array(map(str, start_array))
-                # print(start_str_array)
-                # key = ",".join(start_str_array)
-                # print(key)
+                left_x = stop_grid.x - start_grid.x
+                left_y = stop_grid.y - start_grid.y
+                left_z = stop_grid.z - start_grid.z
+                # f_value = abs(left_x) + abs(left_y) + abs(left_z)  # option 1
+                from math import sqrt
+                f_value = sqrt(left_x**2 + left_y**2 + left_z**2)  # option 2
 
-                # leftX = x_stop - x_start
-                # leftY = y_stop - y_start
-                # leftZ = z_stop - z_start
-                # # f_value = abs(stop["x"] - x_start) + abs(stop["y"] - y_start) + abs(stop["z"] - z_start)  # option 1
-                # from math import sqrt
-                # f_value = sqrt(leftX**2 + leftY**2 + leftZ**2)  # option 2
-
-                left = np.subtract(stop_array, start_array)
-                f_value = np.sqrt(left[0] ** 2 + left[1] ** 2 + left[2] ** 2)
-
-                init_Q[key] = {
-                    "row": x_start,
-                    "col": y_start,
-                    "z": z_start,
+                init_Q[str(start_grid)] = {
+                    "row": start_grid.x,
+                    "col": start_grid.y,
+                    "z": start_grid.z,
                     "prev": None,
                     "dist": 0,
                     "f": f_value
