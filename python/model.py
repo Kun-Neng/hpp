@@ -5,7 +5,7 @@ from grid import Grid
 class Model:
     def __init__(self, scenario):
         self.dimension = scenario["dimension"]
-        self.is_2d = True if int(scenario["dimension"]["z"]) == 0 else False
+        self.is_2d = True if int(scenario["dimension"]["z"]) <= 0 else False
 
         self.data = scenario["data"]
         self.obstacle_array = Model.create_obstacle_array(self.data, self.is_2d)

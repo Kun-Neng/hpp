@@ -1,17 +1,21 @@
 from math import inf, sqrt
 from grid import Grid
+from model import Model
 
 
 class AStar:
-    def __init__(self, init_Q, scenario, obstacle_array):
+    def __init__(self, scenario):
+        self.is_2d = True if int(scenario["dimension"]["z"]) <= 0 else False
+
+        init_Q = AStar.create_init_Q(scenario)
+        # print(init_Q)
+        # print(len(init_Q))
+        # print(len(init_Q["initQ"]))
         self.Q = init_Q["initQ"]
         self.z_ceil = inf if init_Q["zCeil"] is None else int(init_Q["zCeil"])
         self.z_floor = -inf if init_Q["zFloor"] is None else int(init_Q["zFloor"])
 
-        self.scenario = scenario
-        self.is_2d = True if int(scenario["dimension"]["z"]) <= 0 else False
-
-        self.obstacle_array = obstacle_array
+        self.obstacle_array = Model.create_obstacle_array(scenario["data"], self.is_2d)
         self.num_obstacles = len(self.obstacle_array)
 
         self.waypoint = scenario["waypoint"]
@@ -23,6 +27,12 @@ class AStar:
         self.open_set[str(start_grid)] = self.Q.get(str(start_grid))
 
         self.allowDiagonal = bool(self.waypoint["allowDiagonal"]) if "allowDiagonal" in self.waypoint else False
+
+    @staticmethod
+    def create_init_Q(scenario):
+        model = Model(scenario)
+        threshold = 1  # 1000
+        return model.create_initial_Q(threshold)
 
     @staticmethod
     def find_the_min_f(hashmap):
