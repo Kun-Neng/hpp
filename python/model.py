@@ -3,16 +3,14 @@ from grid import Grid
 
 
 class Model:
-    def __init__(self, scenario):
-        self.dimension = scenario["dimension"]
-        self.is_2d = True if int(scenario["dimension"]["z"]) <= 0 else False
+    def __init__(self, dimension, obstacle_array, waypoint):
+        self.dimension = dimension
+        self.is_2d = True if ("z" not in dimension or int(self.dimension["z"]) <= 0) else False
 
-        self.data = scenario["data"]
-        self.obstacle_array = Model.create_obstacle_array(self.data, self.is_2d)
+        self.obstacle_array = obstacle_array
         # print(self.obstacle_array)
         # print(len(self.obstacle_array))
 
-        waypoint = scenario["waypoint"]
         start = waypoint["start"]
         stop = waypoint["stop"]
         self.start_grid = Grid(start["x"], start["y"], start["z"], self.is_2d)
@@ -20,12 +18,6 @@ class Model:
         self.dist_x = self.stop_grid.x - self.start_grid.x
         self.dist_y = self.stop_grid.y - self.start_grid.y
         self.dist_z = self.stop_grid.z - self.start_grid.z
-
-        self.boundary = scenario["boundary"] if "boundary" in scenario else None
-        if not self.is_2d:
-            self.z_ceil = int(self.boundary["zCeil"]) if (self.boundary and "zCeil" in self.boundary) else None
-            self.z_floor = int(self.boundary["zFloor"]) if (self.boundary and "zFloor" in self.boundary) else None
-            print("z_ceil: {}, z_floor: {}".format(self.z_ceil, self.z_floor))
 
         self.init_Q = dict()
 
@@ -45,6 +37,15 @@ class Model:
         else:
             z_array = data["z"]
             return [Grid(x_array[i], y_array[i], z_array[i], is_2d) for i in range(size)]
+
+    @staticmethod
+    def grids_on_obstacles(array, grids):
+        for _, restricted_grid in enumerate(array):
+            for grid in grids:
+                if grid == restricted_grid:
+                    print("the point is located on restricted region")
+                    return True
+        return False
 
     @staticmethod
     def is_boundary_available(lower_bound, value, upper_bound):
@@ -82,29 +83,21 @@ class Model:
 
         self.init_Q[str(cell_grid)] = cell_obj
 
-    def create_initial_Q(self, threshold=1):
+    def create_initial_Q(self, is_fast=True):
         x = int(self.dimension["x"])
         y = int(self.dimension["y"])
-        z = int(self.dimension["z"])
-        print("Scenario dimension: {}, {}, {}".format(x, y, z))
 
         if self.is_2d:
+            print("Scenario dimension: {}, {}".format(x, y))
             [self.update_init_Q(row, col, 0, obstacle) for row in range(x) for col in range(y)
                 for obstacle in self.obstacle_array]
 
             return {"initQ": self.init_Q, "zCeil": None, "zFloor": None}
         else:
-            if not Model.is_boundary_available(self.z_floor, self.start_grid.z, self.z_ceil):
-                return {"initQ": self.init_Q, "zCeil": self.z_ceil, "zFloor": self.z_floor}
+            z = int(self.dimension["z"])
+            print("Scenario dimension: {}, {}, {}".format(x, y, z))
 
-            if int(self.data["size"]) >= threshold:
-                print("Deal with 3D large scenario creation.")
-                for _, obstacle_grid in enumerate(self.obstacle_array):
-                    # print(obstacle_grid)
-                    if self.start_grid == obstacle_grid:
-                        print("the start point is located on obstacle")
-                        return {"initQ": self.init_Q, "zCeil": self.z_ceil, "zFloor": self.z_floor}
-
+            if is_fast:
                 # f_value = abs(self.left_x) + abs(self.left_y) + abs(self.left_z)  # option 1
                 from math import sqrt
                 f_value = sqrt(self.dist_x ** 2 + self.dist_y ** 2 + self.dist_z ** 2)  # option 2
@@ -121,4 +114,4 @@ class Model:
                 [self.update_init_Q(row, col, iz, obstacle) for row in range(x) for col in range(y) for iz in range(z)
                     for obstacle in self.obstacle_array]
 
-            return {"initQ": self.init_Q, "zCeil": self.z_ceil, "zFloor": self.z_floor}
+            return {"initQ": self.init_Q}
