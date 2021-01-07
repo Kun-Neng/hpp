@@ -8,8 +8,6 @@ class Model:
         self.is_2d = Model.is_2d(self.dimension)
 
         self.obstacle_array = obstacle_array
-        # print(self.obstacle_array)
-        # print(len(self.obstacle_array))
 
         start = waypoint["start"]
         stop = waypoint["stop"]
@@ -29,7 +27,6 @@ class Model:
 
     @staticmethod
     def create_obstacle_array(data, is_2d):
-        # print(len(data))
         if len(data) == 0 or int(data["size"]) == 0:
             return
 
@@ -94,12 +91,10 @@ class Model:
         y = int(self.dimension["y"])
 
         if self.is_2d:
-            # print("Scenario dimension: {}, {}".format(x, y))
             [self.update_init_Q(row, col, 0, obstacle) for row in range(x) for col in range(y)
                 for obstacle in self.obstacle_array]
         else:
             z = int(self.dimension["z"])
-            # print("Scenario dimension: {}, {}, {}".format(x, y, z))
 
             if is_fast:
                 # f_value = abs(self.left_x) + abs(self.left_y) + abs(self.left_z)  # option 1

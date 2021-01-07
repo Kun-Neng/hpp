@@ -103,9 +103,7 @@ class AStar:
             for shift_row in shift_grid:
                 for shift_col in shift_grid:
                     if self.is_2d:
-                        # 不允許斜走
                         isNotDiagonal = (shift_row == 0 or shift_col == 0) and (shift_row != shift_col)
-                        # 允許斜走
                         isDiagonal = not (shift_row == 0 and shift_col == 0)
 
                         isAllowed = isDiagonal if self.allowDiagonal else isNotDiagonal
@@ -121,9 +119,7 @@ class AStar:
 
                                 dist = sqrt(shift_row ** 2 + shift_col ** 2)
                                 alt = currentObj["dist"] + dist
-                                # print('compare ' + str(alt) + ' to ' + neighbor["dist"])
                                 if alt < neighbor["dist"]:
-                                    # print('update neighbor object dist: ' + alt)
                                     neighbor["dist"] = alt
                                     dist_x = self.stop_grid.x - neighbor["row"]
                                     dist_y = self.stop_grid.y - neighbor["col"]
@@ -133,15 +129,12 @@ class AStar:
                                     self.open_set[str(neighbor_grid)] = neighbor
                     else:
                         for shift_z in shift_grid:
-                            # 不允許斜走
                             isNotDiagonal = ((shift_row == 0 or shift_col == 0) and (shift_row != shift_col)) \
                                 or (shift_row == 0 and shift_col == 0)
-                            # 允許斜走
                             isDiagonal = not (shift_row == 0 and shift_col == 0 and shift_z == 0)
 
                             isAllowed = isDiagonal if self.allowDiagonal else isNotDiagonal
                             if isAllowed:
-                                # print(str(shift_row) + ' ' + str(shift_col) + ' ' + str(shift_z))
                                 neighbor_grid = current_grid.shift(shift_row, shift_col, shift_z)
 
                                 if neighbor_grid.is_out_of_bound([self.z_floor, self.z_ceil]):
@@ -190,9 +183,7 @@ class AStar:
 
                                 dist = sqrt(shift_row ** 2 + shift_col ** 2 + shift_z ** 2)
                                 alt = currentObj["dist"] + dist
-                                # print('compare ' + str(alt) + ' to ' + neighbor["dist"])
                                 if alt < neighbor["dist"]:
-                                    # print('update neighbor object dist: ' + alt)
                                     neighbor["dist"] = alt
                                     dist_x = self.stop_grid.x - neighbor["row"]
                                     dist_y = self.stop_grid.y - neighbor["col"]

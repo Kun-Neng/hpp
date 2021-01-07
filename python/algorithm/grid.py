@@ -1,7 +1,6 @@
 from math import inf
 
 
-# https://openhome.cc/Gossip/Python/SpecialMethodNames.html
 class Grid:
     def __init__(self, x, y, z=0, is_2d=True):
         self.x = int(x)
