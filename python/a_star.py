@@ -20,11 +20,7 @@ class AStar:
 
         model = Model(dimension, self.obstacle_array, self.waypoint)
         is_fast = True
-        init_Q = model.create_initial_Q(is_fast)
-        # print(init_Q)
-        # print(len(init_Q))
-        # print(len(init_Q["initQ"]))
-        self.Q = init_Q["initQ"]
+        self.Q = model.create_initial_Q(is_fast)
 
         self.open_set = dict()
         self.open_set[str(self.start_grid)] = self.Q.get(str(self.start_grid))

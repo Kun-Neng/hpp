@@ -97,8 +97,6 @@ class Model:
             # print("Scenario dimension: {}, {}".format(x, y))
             [self.update_init_Q(row, col, 0, obstacle) for row in range(x) for col in range(y)
                 for obstacle in self.obstacle_array]
-
-            return {"initQ": self.init_Q, "zCeil": None, "zFloor": None}
         else:
             z = int(self.dimension["z"])
             # print("Scenario dimension: {}, {}, {}".format(x, y, z))
@@ -120,4 +118,4 @@ class Model:
                 [self.update_init_Q(row, col, iz, obstacle) for row in range(x) for col in range(y) for iz in range(z)
                     for obstacle in self.obstacle_array]
 
-            return {"initQ": self.init_Q}
+        return self.init_Q
