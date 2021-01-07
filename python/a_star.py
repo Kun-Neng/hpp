@@ -79,7 +79,7 @@ class AStar:
         }
 
     def calculate_path(self):
-        print("A* Path Finding (2D)") if self.is_2d else print("A* Path Finding (3D)")
+        # print("A* Path Finding (2D)") if self.is_2d else print("A* Path Finding (3D)")
         finalQ = dict()
         visitedQ = dict()
 
@@ -96,7 +96,7 @@ class AStar:
             else:
                 current_grid = Grid(currentObj["row"], currentObj["col"], currentObj["z"], self.is_2d)
             if current_grid == self.stop_grid:
-                print("Arrival!")
+                # print("Arrival!")
                 break
 
             shift_grid = [-1, 0, 1]
