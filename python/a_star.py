@@ -36,7 +36,7 @@ class AStar:
         if not self.is_2d:
             self.z_ceil = int(self.boundary["zCeil"]) if (self.boundary and "zCeil" in self.boundary) else inf
             self.z_floor = int(self.boundary["zFloor"]) if (self.boundary and "zFloor" in self.boundary) else -inf
-            print("z_ceil: {}, z_floor: {}".format(self.z_ceil, self.z_floor))
+            # print("z_ceil: {}, z_floor: {}".format(self.z_ceil, self.z_floor))
 
             if not Model.is_boundary_available(self.z_floor, self.start_grid.z, self.z_ceil):
                 print("Boundary Error")

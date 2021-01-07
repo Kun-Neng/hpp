@@ -94,14 +94,14 @@ class Model:
         y = int(self.dimension["y"])
 
         if self.is_2d:
-            print("Scenario dimension: {}, {}".format(x, y))
+            # print("Scenario dimension: {}, {}".format(x, y))
             [self.update_init_Q(row, col, 0, obstacle) for row in range(x) for col in range(y)
                 for obstacle in self.obstacle_array]
 
             return {"initQ": self.init_Q, "zCeil": None, "zFloor": None}
         else:
             z = int(self.dimension["z"])
-            print("Scenario dimension: {}, {}, {}".format(x, y, z))
+            # print("Scenario dimension: {}, {}, {}".format(x, y, z))
 
             if is_fast:
                 # f_value = abs(self.left_x) + abs(self.left_y) + abs(self.left_z)  # option 1
