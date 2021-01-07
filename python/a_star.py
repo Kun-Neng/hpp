@@ -5,34 +5,41 @@ from model import Model
 
 class AStar:
     def __init__(self, scenario):
-        self.is_2d = True if int(scenario["dimension"]["z"]) <= 0 else False
-
-        init_Q = AStar.create_init_Q(scenario)
-        # print(init_Q)
-        # print(len(init_Q))
-        # print(len(init_Q["initQ"]))
-        self.Q = init_Q["initQ"]
-        self.z_ceil = inf if init_Q["zCeil"] is None else int(init_Q["zCeil"])
-        self.z_floor = -inf if init_Q["zFloor"] is None else int(init_Q["zFloor"])
+        dimension = scenario["dimension"]
+        self.is_2d = True if ("z" not in dimension or int(dimension["z"]) <= 0) else False
 
         self.obstacle_array = Model.create_obstacle_array(scenario["data"], self.is_2d)
         self.num_obstacles = len(self.obstacle_array)
 
         self.waypoint = scenario["waypoint"]
         start = self.waypoint["start"]
-        start_grid = Grid(start["x"], start["y"], start["z"], self.is_2d)
+        self.start_grid = Grid(start["x"], start["y"], start["z"], self.is_2d)
         stop = self.waypoint["stop"]
         self.stop_grid = Grid(stop["x"], stop["y"], stop["z"], self.is_2d)
-        self.open_set = dict()
-        self.open_set[str(start_grid)] = self.Q.get(str(start_grid))
-
         self.allowDiagonal = bool(self.waypoint["allowDiagonal"]) if "allowDiagonal" in self.waypoint else False
 
-    @staticmethod
-    def create_init_Q(scenario):
-        model = Model(scenario)
-        threshold = 1  # 1000
-        return model.create_initial_Q(threshold)
+        model = Model(dimension, self.obstacle_array, self.waypoint)
+        is_fast = True
+        init_Q = model.create_initial_Q(is_fast)
+        # print(init_Q)
+        # print(len(init_Q))
+        # print(len(init_Q["initQ"]))
+        self.Q = init_Q["initQ"]
+
+        self.open_set = dict()
+        self.open_set[str(self.start_grid)] = self.Q.get(str(self.start_grid))
+
+        if Model.grids_on_obstacles(self.obstacle_array, [self.start_grid, self.stop_grid]):
+            print("Waypoint Error")
+
+        self.boundary = scenario["boundary"] if "boundary" in scenario else None
+        if not self.is_2d:
+            self.z_ceil = int(self.boundary["zCeil"]) if (self.boundary and "zCeil" in self.boundary) else inf
+            self.z_floor = int(self.boundary["zFloor"]) if (self.boundary and "zFloor" in self.boundary) else -inf
+            print("z_ceil: {}, z_floor: {}".format(self.z_ceil, self.z_floor))
+
+            if not Model.is_boundary_available(self.z_floor, self.start_grid.z, self.z_ceil):
+                print("Boundary Error")
 
     @staticmethod
     def find_the_min_f(hashmap):
@@ -131,7 +138,8 @@ class AStar:
                     else:
                         for shift_z in shift_grid:
                             # 不允許斜走
-                            isNotDiagonal = (shift_row == 0 or shift_col == 0) and (shift_row != shift_col)
+                            isNotDiagonal = ((shift_row == 0 or shift_col == 0) and (shift_row != shift_col)) \
+                                or (shift_row == 0 and shift_col == 0)
                             # 允許斜走
                             isDiagonal = not (shift_row == 0 and shift_col == 0 and shift_z == 0)
 
