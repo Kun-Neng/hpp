@@ -1,8 +1,8 @@
 import unittest
 
-from grid import Grid
-from model import Model
-from a_star import AStar
+from algorithm.grid import Grid
+from algorithm.model import Model
+from algorithm.a_star import AStar
 
 scenario = {
     # "dimension": {"x": 15, "y": 15, "z": 0},  # 2D

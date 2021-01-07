@@ -1,5 +1,5 @@
 from math import inf
-from grid import Grid
+from algorithm.grid import Grid
 
 
 class Model:

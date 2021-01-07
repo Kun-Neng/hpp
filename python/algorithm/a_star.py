@@ -1,6 +1,6 @@
 from math import inf, sqrt
-from grid import Grid
-from model import Model
+from algorithm.grid import Grid
+from algorithm.model import Model
 
 
 class AStar:

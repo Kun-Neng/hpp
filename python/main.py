@@ -1,4 +1,4 @@
-from a_star import AStar
+from algorithm.a_star import AStar
 
 scenario = {
     # "dimension": {"x": 15, "y": 15, "z": 0},  # 2D
