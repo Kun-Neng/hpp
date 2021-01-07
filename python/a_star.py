@@ -6,7 +6,7 @@ from model import Model
 class AStar:
     def __init__(self, scenario):
         dimension = scenario["dimension"]
-        self.is_2d = True if ("z" not in dimension or int(dimension["z"]) <= 0) else False
+        self.is_2d = Model.is_2d(dimension)
 
         self.obstacle_array = Model.create_obstacle_array(scenario["data"], self.is_2d)
         self.num_obstacles = len(self.obstacle_array)

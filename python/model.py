@@ -5,7 +5,7 @@ from grid import Grid
 class Model:
     def __init__(self, dimension, obstacle_array, waypoint):
         self.dimension = dimension
-        self.is_2d = True if ("z" not in dimension or int(self.dimension["z"]) <= 0) else False
+        self.is_2d = Model.is_2d(self.dimension)
 
         self.obstacle_array = obstacle_array
         # print(self.obstacle_array)
@@ -20,6 +20,12 @@ class Model:
         self.dist_z = self.stop_grid.z - self.start_grid.z
 
         self.init_Q = dict()
+
+    @staticmethod
+    def is_2d(dimension):
+        if "z" not in dimension or int(dimension["z"]) <= 0:
+            return True
+        return False
 
     @staticmethod
     def create_obstacle_array(data, is_2d):
