@@ -1,6 +1,6 @@
 node_modules
 .idea/
-python/algorithm/__pycache__/
+python/pyhpp/__pycache__/
 python/build/
 python/dist/
-python/hpp_kun_neng.egg-info/
+python/pyhpp.egg-info/

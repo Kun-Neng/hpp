@@ -1,5 +1,5 @@
 from math import inf
-from algorithm.grid import Grid
+from pyhpp.grid import Grid
 
 
 class Model:

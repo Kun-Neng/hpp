@@ -1,35 +1,13 @@
+import json
 import unittest
 
-from algorithm.grid import Grid
-from algorithm.model import Model
-from algorithm.a_star import AStar
+from pyhpp.grid import Grid
+from pyhpp.model import Model
+from pyhpp.a_star import AStar
 
-scenario = {
-    # "dimension": {"x": 15, "y": 15, "z": 0},  # 2D
-    "dimension": {"x": 10, "y": 10, "z": 10},  # 3D
-    # "data": {},
-    # "data": {"size": 0, "x": [], "y": [], "z": []},
-    "data": {
-        "size": 16,
-        "x": [4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7],
-        "y": [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-        "z": [2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
-    },
-    # "waypoint": {  # 2D
-    #     "start": {"x": 12, "y": 0, "z": 0},
-    #     "stop": {"x": 1, "y": 11, "z": 0},
-    #     "allowDiagonal": False
-    # },
-    "waypoint": {  # 3D
-        "start": {"x": 5, "y": 9, "z": 2},
-        "stop": {"x": 5, "y": 0, "z": 4},
-        "allowDiagonal": False
-    },
-    "boundary": {
-        "zCeil": 6,
-        "zFloor": 1
-    }
-}
+with open("python/tests/test_scenario_3d.json") as file:
+    scenario = json.load(file)
+    file.close()
 
 
 class AlgorithmTest(unittest.TestCase):
@@ -47,7 +25,7 @@ class AlgorithmTest(unittest.TestCase):
         obstacle_grid = Grid(data["x"][index_obstacle], data["y"][index_obstacle], data["z"][index_obstacle], False)
         test_grid = Grid(5, 9, 2, False)
         self.assertTrue(start_grid == test_grid)
-    
+
     def test_is_2d(self):
         dimension = scenario["dimension"]
         is_2d = Model.is_2d(dimension)
