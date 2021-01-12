@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="pyhpp",
-    version="0.0.1",
+    version="0.0.2",
     author="Kun-Neng Hung",
     author_email="kunneng.hung@gmail.com",
     description="Algorithms for Path Planning",
@@ -18,5 +18,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent"
     ],
-    python_requires=">=3.8"
+    python_requires=">=3.7"
 )
