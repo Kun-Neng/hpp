@@ -8,7 +8,10 @@ class AStar:
         dimension = scenario["dimension"]
         self.is_2d = Model.is_2d(dimension)
 
-        self.obstacle_array = Model.create_obstacle_array(scenario["data"], self.is_2d)
+        if "data" in scenario:
+            self.obstacle_array = Model.create_obstacle_array(scenario["data"], self.is_2d)
+        else:
+            self.obstacle_array = []
         self.num_obstacles = len(self.obstacle_array)
 
         self.waypoint = scenario["waypoint"]
