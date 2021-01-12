@@ -76,9 +76,9 @@ class AStar:
             newZArray.append(current_z)
 
         return {
-            "x": newXArray,
-            "y": newYArray,
-            "z": newZArray
+            "x": list(reversed(newXArray)),
+            "y": list(reversed(newYArray)),
+            "z": list(reversed(newZArray))
         }
 
     def calculate_path(self):

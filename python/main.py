@@ -19,11 +19,6 @@ if __name__ == "__main__":
     # [print(item) for item in final_Q.items()]
 
     path = result["path"]
-    # print("x:", path["x"])
-    # print("y:", path["y"])
-    # print("z:", path["z"])
-
-    # from start to stop
-    print("x:", list(reversed(path["x"])))
-    print("y:", list(reversed(path["y"])))
-    print("z:", list(reversed(path["z"])))
+    print("x:", path["x"])
+    print("y:", path["y"])
+    print("z:", path["z"])

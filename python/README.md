@@ -47,4 +47,4 @@ path = result["path"]
 ```
 > `visitedQ`: all the visited positions<br>
 > `finalQ`: all the positions in the A* path<br>
-> `path`: reversed A* path that is from stop to start<br>
+> `path`: the A* path that is from start to stop<br>
