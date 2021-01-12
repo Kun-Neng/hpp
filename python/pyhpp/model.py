@@ -28,7 +28,7 @@ class Model:
     @staticmethod
     def create_obstacle_array(data, is_2d):
         if len(data) == 0 or int(data["size"]) == 0:
-            return
+            return []
 
         size = int(data["size"])
 
