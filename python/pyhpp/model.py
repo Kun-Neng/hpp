@@ -60,7 +60,7 @@ class Model:
             return False
 
         if value >= upper_bound:
-            print("value >= lower_bound")
+            print("value >= upper_bound")
             return False
 
         return lower_bound + 1 < upper_bound
