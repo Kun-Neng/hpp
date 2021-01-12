@@ -11,7 +11,7 @@ setuptools.setup(
     description="Algorithms for Path Planning",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Kun-Neng/hpp",
+    url="https://github.com/Kun-Neng/hpp/tree/main/python",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
