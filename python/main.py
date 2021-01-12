@@ -2,20 +2,28 @@ import json
 from pyhpp.a_star import AStar
 
 if __name__ == "__main__":
-    with open("python/tests/test_scenario_2d.json") as file:
+    with open("python/tests/test_scenario_3d.json") as file:
         scenario = json.load(file)
         file.close()
 
     a_star = AStar(scenario)
-    final_Q = a_star.calculate_path()
-    finalQ = final_Q["finalQ"]
-    # print(finalQ)
+    result = a_star.calculate_path()
 
-    # for [key, value] in finalQ.items():
+    # for [key, value] in result.items():
     #     print(key, value)
 
-    # path = create_path_from_final_Q(finalQ, scenario)
-    path = final_Q["path"]
-    print("x:", path["x"])
-    print("y:", path["y"])
-    print("z:", path["z"])
+    visited_Q = result["visitedQ"]
+    # [print(item) for item in visited_Q.items()]
+
+    final_Q = result["finalQ"]
+    # [print(item) for item in final_Q.items()]
+
+    path = result["path"]
+    # print("x:", path["x"])
+    # print("y:", path["y"])
+    # print("z:", path["z"])
+
+    # from start to stop
+    print("x:", list(reversed(path["x"])))
+    print("y:", list(reversed(path["y"])))
+    print("z:", list(reversed(path["z"])))
