@@ -41,10 +41,10 @@ aStar = new AStar(scenario);
 ```
 result = aStar.calculatePath();
 
-# visited_Q = result.visitedQ
-# final_Q = result.finalQ
-path = result.path
+// visited_Q = result.visitedQ;
+// final_Q = result.finalQ;
+path = result.path;
 ```
 > `visitedQ`: all the visited positions<br>
 > `finalQ`: all the positions in the A* path<br>
-> `path`: the A* path that is from start to stop<br>
+> `path`: the A* path object constructed by the axis arrays from start to stop<br>
