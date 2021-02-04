@@ -1,7 +1,8 @@
-import {AStar} from './AStar';
-
-const scenario_2d = {
-    "dimension": {"x": 15, "y": 15, "z": 0},
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var AStar_1 = require("./AStar");
+var scenario_2d = {
+    "dimension": { "x": 15, "y": 15, "z": 0 },
     // "data": {},
     // "data": {"size": 0, "x": [], "y": [], "z": []},
     "data": {
@@ -11,8 +12,8 @@ const scenario_2d = {
         "z": [2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
     },
     "waypoint": {
-        "start": {"x": 12, "y": 0, "z": 0},
-        "stop": {"x": 1, "y": 11, "z": 0},
+        "start": { "x": 12, "y": 0, "z": 0 },
+        "stop": { "x": 1, "y": 11, "z": 0 },
         "allowDiagonal": false
     },
     "boundary": {
@@ -20,8 +21,7 @@ const scenario_2d = {
         "zFloor": 1
     }
 };
-
-const scenario_3d = {
+var scenario_3d = {
     "dimension": { "x": 10, "y": 10, "z": 10 },
     // "data": {},
     // "data": {"size": 0, "x": [], "y": [], "z": []},
@@ -32,8 +32,8 @@ const scenario_3d = {
         "z": [2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
     },
     "waypoint": {
-        "start": {"x": 5, "y": 9, "z": 2},
-        "stop": {"x": 5, "y": 0, "z": 4},
+        "start": { "x": 5, "y": 9, "z": 2 },
+        "stop": { "x": 5, "y": 0, "z": 4 },
         "allowDiagonal": true
     },
     "boundary": {
@@ -41,18 +41,15 @@ const scenario_3d = {
         "zFloor": 1
     }
 };
-
 // const grid1 = new Grid(1, 2, 3, false);
 // console.log(grid1.str());
 // const grid2 = new Grid(1, 2, 4, false);
 // console.log(grid1.equal(grid2));
-
-const aStar = new AStar(scenario_3d);
-const result = aStar.calculatePath();
-const elapsedMS = result.elapsedMS;
+var aStar = new AStar_1.AStar(scenario_3d);
+var result = aStar.calculatePath();
+var elapsedMS = result.elapsedMS;
 console.log(elapsedMS);
-
-const path = result.path;
+var path = result.path;
 console.log("x:", path.x);
 console.log("y:", path.y);
 console.log("z:", path.z);

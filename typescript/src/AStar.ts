@@ -1,6 +1,11 @@
 import {Grid} from './Grid';
 import {Model} from './Model';
 
+enum TIME_TAG {
+    START,
+    END
+};
+
 export class AStar {
     readonly _is2d: boolean;
     readonly _obstacleArray: Array<Grid>;
@@ -111,6 +116,8 @@ export class AStar {
     calculatePath(): any {
         const finalQ = new Map<string, any>();
         const visitedQ = new Map<string, any>();
+
+        const calculateStartTime = this.getTime(TIME_TAG.START);
 
         let size = this._openSet.size;
         while (size > 0) {
@@ -224,10 +231,38 @@ export class AStar {
             size = this._openSet.size;
         }
 
+        const calculateEndTime = this.getTime(TIME_TAG.END);
+        const elapsedTimeString = this.elapsedTimeString(calculateStartTime, calculateEndTime);
+
         return {
             "visitedQ": visitedQ,
             "finalQ": finalQ,
+            "elapsedMS": elapsedTimeString,
             "path": this.createPathFromFinalQ(finalQ)
         }
+    }
+
+    private getTimeString(ms: number): string {
+        return new Date(ms).toTimeString();
+    };
+
+    private elapsedTimeString(startTime: number, endTime: number): string {
+        const duration = endTime - startTime;
+
+        if (duration >= 60*1000) {
+            return `${duration/(60*1000)} minutes`;
+        } else if (duration >= 1000) {
+            return `${duration/1000} seconds`;
+        } else {
+            return `${duration} milliseconds`;
+        }
+    };
+
+    private getTime(tag: TIME_TAG): number {
+        const now = Date.now();
+
+        console.log(`[${this.getTimeString(now)}] path finding algorithm ${TIME_TAG[tag]}.`);
+
+        return now;
     }
 }
