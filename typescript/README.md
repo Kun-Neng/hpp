@@ -34,16 +34,16 @@ const scenario = {
 
 * Step 3: create an A* instance
 ```
-aStar = new AStar(scenario);
+const aStar = new AStar(scenario);
 ```
 
 * Step 4: calculate and get the results
 ```
-result = aStar.calculatePath();
+const result = aStar.calculatePath();
 
 // visited_Q = result.visitedQ;
 // final_Q = result.finalQ;
-path = result.path;
+const path = result.path;
 ```
 > `visitedQ`: all the visited positions<br>
 > `finalQ`: all the positions in the A* path<br>

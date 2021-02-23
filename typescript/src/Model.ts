@@ -33,7 +33,7 @@ export class Model {
             return true;
         }
 
-        if (dimension["z"] <= 0) {
+        if (dimension.z <= 0) {
             return true;
         }
 
@@ -66,7 +66,7 @@ export class Model {
         return obstacleArray;
     }
 
-    static gridsOnObstacles(array: Array<Grid>, grids: Array<Grid>) {
+    static gridsOnObstacles(array: Array<Grid>, grids: Array<Grid>): boolean {
         array.forEach(obstacle => {
             grids.forEach(grid => {
                 if (grid.equal(obstacle)) {
@@ -79,7 +79,7 @@ export class Model {
         return false;
     }
 
-    static isBoundaryAvailable(lowerBound: number, value: number, upperBound: number) {
+    static isBoundaryAvailable(lowerBound: number, value: number, upperBound: number): boolean {
         if (value <= lowerBound) {
             console.log("value <= lower_bound");
             return false;
