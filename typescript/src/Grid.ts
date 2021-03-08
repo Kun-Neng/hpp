@@ -40,7 +40,7 @@ export class Grid {
         return new Grid(this._x + x, this._y + y, this._z + z, this._is2d);
     }
 
-    isOutOfBound({boundX = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER], boundY = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER], boundZ = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER]}: {boundZ: number[], boundX?: number[], boundY?: number[]}): boolean {
+    isOutOfBound({boundZ = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER], boundX = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER], boundY = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER]}: {boundZ: number[], boundX?: number[], boundY?: number[]}): boolean {
         return this._x <= boundX[0] || this._x >= boundX[1] || this._y <= boundY[0] || this._y >= boundY[1] || this._z <= boundZ[0] || this._z >= boundZ[1];
     }
 }

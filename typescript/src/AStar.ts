@@ -237,7 +237,7 @@ export class AStar {
         return {
             "visitedQ": visitedQ,
             "finalQ": finalQ,
-            "elapsedMS": elapsedTimeString,
+            "elapsedMS": calculateEndTime - calculateStartTime,
             "path": this.createPathFromFinalQ(finalQ)
         }
     }
