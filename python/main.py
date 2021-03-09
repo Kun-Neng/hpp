@@ -2,7 +2,7 @@ import json
 from pyhpp.a_star import AStar
 
 if __name__ == "__main__":
-    with open("python/tests/test_scenario_3d.json") as file:
+    with open("tests/test_scenario_3d.json") as file:
         scenario = json.load(file)
         file.close()
 
@@ -19,6 +19,6 @@ if __name__ == "__main__":
     # [print(item) for item in final_Q.items()]
 
     path = result["path"]
-    print("x:", path["x"])
-    print("y:", path["y"])
-    print("z:", path["z"])
+    print(f"x: {path['x']}")
+    print(f"y: {path['y']}")
+    print(f"z: {path['z']}")

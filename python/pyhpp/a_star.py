@@ -1,3 +1,4 @@
+import time
 from math import inf, sqrt
 from pyhpp.grid import Grid
 from pyhpp.model import Model
@@ -85,6 +86,8 @@ class AStar:
         # print("A* Path Finding (2D)") if self.is_2d else print("A* Path Finding (3D)")
         finalQ = dict()
         visitedQ = dict()
+
+        calculate_start_time = time.time()
 
         size = len(self.open_set)
         while size > 0:
@@ -198,8 +201,11 @@ class AStar:
 
             size = len(self.open_set)
 
+        calculate_end_time = time.time()
+        
         return {
             "visitedQ": visitedQ,
             "finalQ": finalQ,
+            "elapsedMS": 1000.0 * (calculate_end_time - calculate_start_time),
             "path": self.create_path_from_final_Q(finalQ)
         }
