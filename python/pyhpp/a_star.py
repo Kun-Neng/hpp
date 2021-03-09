@@ -7,7 +7,7 @@ from pyhpp.model import Model
 class AStar:
     def __init__(self, scenario):
         dimension = scenario["dimension"]
-        self.is_2d = Model.is_2d(dimension)
+        self.is_2d = Model.is_two_dimensional(dimension)
 
         if "data" in scenario:
             self.obstacle_array = Model.create_obstacle_array(scenario["data"], self.is_2d)

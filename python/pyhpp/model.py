@@ -5,14 +5,14 @@ from pyhpp.grid import Grid
 class Model:
     def __init__(self, dimension, obstacle_array, waypoint):
         self.dimension = dimension
-        self.is2d = Model.is_2d(self.dimension)
+        self.is_2d = Model.is_two_dimensional(self.dimension)
 
         self.obstacle_array = obstacle_array
 
         start = waypoint["start"]
         stop = waypoint["stop"]
-        self.start_grid = Grid(start["x"], start["y"], start["z"], self.is2d)
-        self.stop_grid = Grid(stop["x"], stop["y"], stop["z"], self.is2d)
+        self.start_grid = Grid(start["x"], start["y"], start["z"], self.is_2d)
+        self.stop_grid = Grid(stop["x"], stop["y"], stop["z"], self.is_2d)
         self.dist_x = self.stop_grid.x - self.start_grid.x
         self.dist_y = self.stop_grid.y - self.start_grid.y
         self.dist_z = self.stop_grid.z - self.start_grid.z
@@ -20,7 +20,7 @@ class Model:
         self.init_Q = dict()
 
     @staticmethod
-    def is_2d(dimension):
+    def is_two_dimensional(dimension):
         if "z" not in dimension or int(dimension["z"]) <= 0:
             return True
         return False
@@ -66,7 +66,7 @@ class Model:
         return lower_bound + 1 < upper_bound
 
     def update_init_Q(self, row, col, z, obstacle=None):
-        cell_grid = Grid(row, col, z, self.is2d)
+        cell_grid = Grid(row, col, z, self.is_2d)
         if cell_grid == obstacle:
             return None
 
@@ -81,7 +81,7 @@ class Model:
 
         if cell_grid == self.start_grid:
             cell_obj["dist"] = 0
-            cell_obj["f"] = cell_obj["dist"] + abs(self.dist_x) + abs(self.dist_y) if self.is2d \
+            cell_obj["f"] = cell_obj["dist"] + abs(self.dist_x) + abs(self.dist_y) if self.is_2d \
                 else cell_obj["dist"] + abs(self.dist_x) + abs(self.dist_y) + abs(self.dist_z)
 
         self.init_Q[str(cell_grid)] = cell_obj
@@ -90,7 +90,7 @@ class Model:
         x = int(self.dimension["x"])
         y = int(self.dimension["y"])
 
-        if self.is2d:
+        if self.is_2d:
             [self.update_init_Q(row, col, 0, obstacle) for row in range(x) for col in range(y)
                 for obstacle in self.obstacle_array]
         else:
