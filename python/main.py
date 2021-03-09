@@ -18,6 +18,9 @@ if __name__ == "__main__":
     final_Q = result["finalQ"]
     # [print(item) for item in final_Q.items()]
 
+    elapsed_time = result["elapsedMS"]
+    print(f"elapsedMS: {elapsed_time}")
+
     path = result["path"]
     print(f"x: {path['x']}")
     print(f"y: {path['y']}")
