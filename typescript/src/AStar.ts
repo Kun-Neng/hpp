@@ -232,7 +232,7 @@ export class AStar {
         }
 
         const calculateEndTime = this.getTime(TIME_TAG.END);
-        const elapsedTimeString = this.elapsedTimeString(calculateStartTime, calculateEndTime);
+        // const elapsedTimeString = this.elapsedTimeString(calculateStartTime, calculateEndTime);
 
         return {
             "visitedQ": visitedQ,
