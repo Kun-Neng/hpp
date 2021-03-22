@@ -93,11 +93,8 @@ export class Model {
         return (lowerBound + 1 < upperBound);
     }
 
-    updateInitQ(row: number, col: number, z: number, obstacle: Grid): void {
+    updateInitQ(row: number, col: number, z: number): void {
         const cellGrid = new Grid(row, col, z, this._is2d);
-        if (cellGrid.equal(obstacle)) {
-            return;
-        }
 
         let cellObj = {
             row,
@@ -123,9 +120,13 @@ export class Model {
         if (this._is2d) {
             for (let row = 0; row < x; row++) {
                 for (let col = 0; col < y; col++) {
-                    this._obstacleArray.forEach((obstacle: Grid) => {
-                        this.updateInitQ(row, col, 0, obstacle);
-                    });
+                    if (this._obstacleArray.findIndex((obstacle: Grid) => {
+                        return (obstacle.x === row) && (obstacle.y === col);
+                    }) !== -1) {
+                        continue;
+                    } else {
+                        this.updateInitQ(row, col, 0);
+                    }
                 }
             }
         } else {
@@ -146,9 +147,13 @@ export class Model {
                 for (let row = 0; row < x; row++) {
                     for (let col = 0; col < y; col++) {
                         for (let iz = 0; iz < z; iz++) {
-                            this._obstacleArray.forEach((obstacle: Grid) => {
-                                this.updateInitQ(row, col, iz, obstacle);
-                            });
+                            if (this._obstacleArray.findIndex((obstacle: Grid) => {
+                                return (obstacle.x === row) && (obstacle.y === col) && (obstacle.z === iz);
+                            }) !== -1) {
+                                continue;
+                            } else {
+                                this.updateInitQ(row, col, iz);
+                            }
                         }
                     }
                 }
