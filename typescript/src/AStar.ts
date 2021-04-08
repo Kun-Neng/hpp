@@ -18,6 +18,9 @@ export class AStar {
     readonly _zCeil: number;
     readonly _zFloor: number;
 
+    private _lastGridKey: string;
+    private _message: string;
+
     constructor(scenario: any) {
         const dimension = scenario.dimension;
         this._is2d = Model.is2d(dimension);
@@ -41,6 +44,7 @@ export class AStar {
         const stop = waypoint.stop;
         this._startGrid = new Grid(start.x, start.y, start.z, this._is2d);
         this._stopGrid = new Grid(stop.x, stop.y, stop.z, this._is2d);
+        this._lastGridKey = this._stopGrid.str();
         this._allowDiagonal = waypoint.hasOwnProperty("allowDiagonal") ? Boolean(waypoint.allowDiagonal) : false;
 
         const model = new Model(dimension, this._obstacleArray, waypoint);
@@ -52,6 +56,7 @@ export class AStar {
 
         if (Model.gridsOnObstacles(this._obstacleArray, [this._startGrid, this._stopGrid])) {
             console.log("Waypoint Error");
+            this._message = "Waypoint Error.";
         }
 
         const boundary = scenario.hasOwnProperty("boundary") ? scenario.boundary : {};
@@ -61,11 +66,14 @@ export class AStar {
 
             if (!Model.isBoundaryAvailable(this._zFloor, this._startGrid.z, this._zCeil)) {
                 console.log("Boundary Error");
+                this._message = "Boundary Error.";
             }
         } else {
             this._zCeil = Number.MAX_SAFE_INTEGER;
             this._zFloor = Number.MIN_SAFE_INTEGER;
         }
+
+        this._message = "No Results Yet.";
     }
 
     static findTheMinF(hashmap: Map<string, any>): any {
@@ -89,6 +97,9 @@ export class AStar {
 
     createPathFromFinalQ(finalQ: Map<string, any>): any {
         let finalObject = finalQ.get(this._stopGrid.str());
+        if (!finalObject) {
+            finalObject = finalQ.get(this._lastGridKey);
+        }
 
         const newXArray: number[] = [Number(finalObject.row)];
         const newYArray: number[] = [Number(finalObject.col)];
@@ -125,6 +136,7 @@ export class AStar {
             const objKey = obj.key;
             const currentObj = obj.value;
             finalQ.set(objKey, currentObj);
+            this._lastGridKey = objKey;
             this._openSet.delete(objKey);
 
             let currentGrid;
@@ -135,6 +147,7 @@ export class AStar {
             }
             if (currentGrid.equal(this._stopGrid)) {
                 console.log("Arrival!");
+                this._message = "Arrival! 🚀";
                 break;
             }
 
@@ -238,7 +251,8 @@ export class AStar {
             "visitedQ": visitedQ,
             "finalQ": finalQ,
             "elapsedMS": calculateEndTime - calculateStartTime,
-            "path": this.createPathFromFinalQ(finalQ)
+            "path": this.createPathFromFinalQ(finalQ),
+            "message": this._message
         }
     }
 

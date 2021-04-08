@@ -69,6 +69,8 @@ const scenario_3d = {
     }
 };
 
+// import * as scenario_file from './__tests__/test_no_results_yet.json';
+
 // const grid1 = new Grid(1, 2, 3, false);
 // console.log(grid1.str());
 // const grid2 = new Grid(1, 2, 4, false);
@@ -77,6 +79,7 @@ const scenario_3d = {
 const aStar = new AStar(scenario_3d);
 const result = aStar.calculatePath();
 const elapsedMS = result.elapsedMS;
+console.log(`message: ${result.message}`);
 console.log(`elapsedMS: ${elapsedMS}ms`);
 
 const path = result.path;
