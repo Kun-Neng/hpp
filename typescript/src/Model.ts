@@ -72,15 +72,25 @@ export class Model {
     }
 
     static gridsOnObstacles(array: Array<Grid>, grids: Array<Grid>): boolean {
-        array.forEach(obstacle => {
-            grids.forEach(grid => {
-                if (grid.equal(obstacle)) {
-                    console.log("the point is located on restricted region");
-                    return true;
-                }
+        const BreakException = {};
+        try {
+            array.forEach(obstacle => {
+                grids.forEach(grid => {
+                    if (grid.equal(obstacle)) {
+                        console.log(`the point ${grid.str()} is located on the obstacle.`);
+                        throw BreakException;
+                    }
+                });
             });
-        });
+        } catch (e) {
+            if (e !== BreakException) {
+                throw e;
+            }
 
+            return true;
+        }
+
+        // console.log(`no point is located on the obstacle.`);
         return false;
     }
 
@@ -96,26 +106,6 @@ export class Model {
         }
 
         return (lowerBound + 1 < upperBound);
-    }
-
-    updateInitQ(row: number, col: number, z: number): void {
-        const cellGrid = new Grid(row, col, z, this._is2d);
-
-        let cellObj = {
-            row,
-            col,
-            z,
-            prev: undefined,
-            dist: Number.MAX_SAFE_INTEGER,
-            f: Number.MAX_SAFE_INTEGER
-        };
-
-        if (cellGrid.equal(this._startGrid)) {
-            cellObj.dist = 0;
-            cellObj.f = this._is2d ? cellObj.dist + Math.abs(this._distX) + Math.abs(this._distY) : cellObj.dist + Math.abs(this._distX) + Math.abs(this._distY) + Math.abs(this._distZ);
-        }
-
-        this._initQ.set(cellGrid.str(), cellObj);
     }
 
     createInitialQ(isFast: boolean): Map<string, any> {
@@ -166,5 +156,25 @@ export class Model {
         }
 
         return this._initQ;
+    }
+
+    private updateInitQ(row: number, col: number, z: number): void {
+        const cellGrid = new Grid(row, col, z, this._is2d);
+
+        let cellObj = {
+            row,
+            col,
+            z,
+            prev: undefined,
+            dist: Number.MAX_SAFE_INTEGER,
+            f: Number.MAX_SAFE_INTEGER
+        };
+
+        if (cellGrid.equal(this._startGrid)) {
+            cellObj.dist = 0;
+            cellObj.f = this._is2d ? cellObj.dist + Math.abs(this._distX) + Math.abs(this._distY) : cellObj.dist + Math.abs(this._distX) + Math.abs(this._distY) + Math.abs(this._distZ);
+        }
+
+        this._initQ.set(cellGrid.str(), cellObj);
     }
 }
