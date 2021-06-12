@@ -5,7 +5,7 @@
   "main": "lib/AStar.js",
   "types": "lib/AStar.d.ts",
   "scripts": {
-    "test": "jest --config jestconfig.json",
+    "test": "jest --config jestconfig.json --coverage",
     "build": "npx tsc",
     "prepare": "npm run build",
     "prepublishOnly": "npm test",

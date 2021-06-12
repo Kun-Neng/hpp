@@ -1,3 +1,6 @@
+import {IDimension} from './interface/IDimension';
+import {IObstacles} from './interface/IObstacles';
+import {IWaypoints} from './interface/IWaypoints';
 import {Grid} from './Grid';
 import {Model} from './Model';
 
@@ -21,23 +24,22 @@ export class AStar {
     private _lastGridKey: string;
     private _message: string;
 
-    constructor(scenario: any) {
+    constructor(scenario: { dimension: IDimension, waypoint: IWaypoints, data?: IObstacles, boundary?: { zCeil: number, zFloor: number } }) {
         const dimension = scenario.dimension;
         this._is2d = Model.is2d(dimension);
-
-        if (scenario.hasOwnProperty("data")) {
-            this._obstacleArray = Model.createObstacleArray(scenario.data, this._is2d);
-        } else {
-            this._obstacleArray = [];
-        }
+        this._obstacleArray = scenario.data ? Model.createObstacleArray(scenario.data, this._is2d) : [];
         this._numObstacles = this._obstacleArray.length;
 
-        const waypoint = scenario.hasOwnProperty("waypoint") ? scenario.waypoint : {};
+        const waypoint = scenario.waypoint;
         // console.log(waypoint);
-        // console.log(Object.keys(waypoint).length);
 
+        if (!waypoint) {
+            throw new Error('[Waypoint Error] waypoint is undefined.');
+        }
+
+        // console.log(Object.keys(waypoint).length);
         if (Object.keys(waypoint).length < 2 || !waypoint.hasOwnProperty("start") || !waypoint.hasOwnProperty("stop")) {
-            throw new Error('[Waypoint Error] invalid waypoint format');
+            throw new Error('[Waypoint Error] invalid waypoint format.');
         }
 
         const start = waypoint.start;
@@ -45,7 +47,7 @@ export class AStar {
         this._startGrid = new Grid(start.x, start.y, start.z, this._is2d);
         this._stopGrid = new Grid(stop.x, stop.y, stop.z, this._is2d);
         this._lastGridKey = this._stopGrid.str();
-        this._allowDiagonal = waypoint.hasOwnProperty("allowDiagonal") ? Boolean(waypoint.allowDiagonal) : false;
+        this._allowDiagonal = waypoint.allowDiagonal ?? false;
 
         const model = new Model(dimension, this._obstacleArray, waypoint);
         const isFast = true
@@ -60,19 +62,20 @@ export class AStar {
             this._message = message;
         }
 
-        const boundary = scenario.hasOwnProperty("boundary") ? scenario.boundary : {};
+        this._zCeil = Number.MAX_SAFE_INTEGER;
+        this._zFloor = Number.MIN_SAFE_INTEGER;
+        const boundary = scenario.boundary;
         if (!this._is2d) {
-            this._zCeil = (boundary && boundary.hasOwnProperty("zCeil")) ? Number(boundary.zCeil) : Number.MAX_SAFE_INTEGER;
-            this._zFloor = (boundary && boundary.hasOwnProperty("zFloor")) ? Number(boundary.zFloor) : Number.MIN_SAFE_INTEGER;
+            if (boundary) {
+                this._zCeil = boundary.zCeil ?? Number.MAX_SAFE_INTEGER;
+                this._zFloor = boundary.zFloor ?? Number.MIN_SAFE_INTEGER;
 
-            if (!Model.isBoundaryAvailable(this._zFloor, this._startGrid.z, this._zCeil)) {
-                const message = "[Boundary Error] start position is out of boundary.";
-                console.log(message);
-                this._message = message;
+                if (!Model.isBoundaryAvailable(this._zFloor, this._startGrid.z, this._zCeil)) {
+                    const message = "[Boundary Error] start position is out of boundary.";
+                    console.log(message);
+                    this._message = message;
+                }
             }
-        } else {
-            this._zCeil = Number.MAX_SAFE_INTEGER;
-            this._zFloor = Number.MIN_SAFE_INTEGER;
         }
 
         this._message = "[Ready] No Results Yet.";
@@ -95,7 +98,7 @@ export class AStar {
     }
 
     createPathFromFinalQ(finalQ: Map<string, any>): any {
-        let finalObject = finalQ.get(this._stopGrid.str()) ? finalQ.get(this._stopGrid.str()) : finalQ.get(this._lastGridKey);
+        let finalObject = finalQ.get(this._stopGrid.str()) ?? finalQ.get(this._lastGridKey);
 
         const newXArray: number[] = [Number(finalObject.row)];
         const newYArray: number[] = [Number(finalObject.col)];
@@ -259,17 +262,16 @@ export class AStar {
         return new Date(ms).toTimeString();
     };
 
-    private elapsedTimeString(startTime: number, endTime: number): string {
-        const duration = endTime - startTime;
-
-        if (duration >= 60*1000) {
-            return `${duration/(60*1000)} minutes`;
-        } else if (duration >= 1000) {
-            return `${duration/1000} seconds`;
-        } else {
-            return `${duration} milliseconds`;
-        }
-    };
+    // private elapsedTimeString(startTime: number, endTime: number): string {
+    //     const duration = endTime - startTime;
+    //     if (duration >= 60*1000) {
+    //         return `${duration/(60*1000)} minutes`;
+    //     } else if (duration >= 1000) {
+    //         return `${duration/1000} seconds`;
+    //     } else {
+    //         return `${duration} milliseconds`;
+    //     }
+    // };
 
     private getTime(tag: TIME_TAG): number {
         const now = Date.now();
