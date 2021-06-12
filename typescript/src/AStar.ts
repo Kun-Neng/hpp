@@ -37,7 +37,7 @@ export class AStar {
         // console.log(Object.keys(waypoint).length);
 
         if (Object.keys(waypoint).length < 2 || !waypoint.hasOwnProperty("start") || !waypoint.hasOwnProperty("stop")) {
-            throw new Error('Invalid waypoint!');
+            throw new Error('[Waypoint Error] invalid waypoint format');
         }
 
         const start = waypoint.start;
@@ -55,8 +55,9 @@ export class AStar {
         this._openSet.set(this._startGrid.str(), this._Q.get(this._startGrid.str()));
 
         if (Model.gridsOnObstacles(this._obstacleArray, [this._startGrid, this._stopGrid])) {
-            console.log("Waypoint Error");
-            this._message = "Waypoint Error.";
+            const message = "[Waypoint Error] start position or stop position is on the obstacle.";
+            console.log(message);
+            this._message = message;
         }
 
         const boundary = scenario.hasOwnProperty("boundary") ? scenario.boundary : {};
@@ -65,41 +66,36 @@ export class AStar {
             this._zFloor = (boundary && boundary.hasOwnProperty("zFloor")) ? Number(boundary.zFloor) : Number.MIN_SAFE_INTEGER;
 
             if (!Model.isBoundaryAvailable(this._zFloor, this._startGrid.z, this._zCeil)) {
-                console.log("Boundary Error");
-                this._message = "Boundary Error.";
+                const message = "[Boundary Error] start position is out of boundary.";
+                console.log(message);
+                this._message = message;
             }
         } else {
             this._zCeil = Number.MAX_SAFE_INTEGER;
             this._zFloor = Number.MIN_SAFE_INTEGER;
         }
 
-        this._message = "No Results Yet.";
+        this._message = "[Ready] No Results Yet.";
     }
 
-    static findTheMinF(hashmap: Map<string, any>): any {
-        let objKey = undefined;
-        let objValue = undefined;
+    static findTheMinF(hashmap: Map<string, any>): { key: string | unknown, value: any } {
+        let key = undefined;
+        let value = undefined;
         let minF = Number.MAX_SAFE_INTEGER;
-        hashmap.forEach((obj: any, key: string) => {
-            // console.log(key + ':' + obj.f);
-            if (obj.f < minF) {
-                objKey = key;
-                objValue = obj;
-                minF = obj.f;
+        hashmap.forEach((objInHashmap: any, keyInHashmap: string) => {
+            // console.log(keyInHashmap + ':' + objInHashmap.f);
+            if (objInHashmap.f < minF) {
+                key = keyInHashmap;
+                value = objInHashmap;
+                minF = objInHashmap.f;
             }
         });
 
-        return {
-            "key": objKey,
-            "value": objValue
-        }
+        return { key, value };
     }
 
     createPathFromFinalQ(finalQ: Map<string, any>): any {
-        let finalObject = finalQ.get(this._stopGrid.str());
-        if (!finalObject) {
-            finalObject = finalQ.get(this._lastGridKey);
-        }
+        let finalObject = finalQ.get(this._stopGrid.str()) ? finalQ.get(this._stopGrid.str()) : finalQ.get(this._lastGridKey);
 
         const newXArray: number[] = [Number(finalObject.row)];
         const newYArray: number[] = [Number(finalObject.col)];
@@ -135,9 +131,11 @@ export class AStar {
             const obj = AStar.findTheMinF(this._openSet);
             const objKey = obj.key;
             const currentObj = obj.value;
-            finalQ.set(objKey, currentObj);
-            this._lastGridKey = objKey;
-            this._openSet.delete(objKey);
+            if (typeof objKey === 'string') {
+                finalQ.set(objKey, currentObj);
+                this._lastGridKey = objKey;
+                this._openSet.delete(objKey);
+            }
 
             let currentGrid;
             if (this._is2d) {
@@ -146,8 +144,9 @@ export class AStar {
                 currentGrid = new Grid(currentObj.row, currentObj.col, currentObj.z, this._is2d);
             }
             if (currentGrid.equal(this._stopGrid)) {
-                console.log("Arrival!");
-                this._message = "Arrival! 🚀";
+                const message = "[Done] Arrival! 🚀";
+                console.log(message);
+                this._message = message;
                 break;
             }
 
@@ -248,9 +247,9 @@ export class AStar {
         // const elapsedTimeString = this.elapsedTimeString(calculateStartTime, calculateEndTime);
 
         return {
-            "visitedQ": visitedQ,
-            "finalQ": finalQ,
-            "elapsedMS": calculateEndTime - calculateStartTime,
+            "visited_Q": visitedQ,
+            "final_Q": finalQ,
+            "elapsed_ms": calculateEndTime - calculateStartTime,
             "path": this.createPathFromFinalQ(finalQ),
             "message": this._message
         }
