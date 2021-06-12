@@ -1,7 +1,10 @@
+import {IDimension} from './interface/IDimension';
+import {IObstacles} from './interface/IObstacles';
+import {IWaypoints} from './interface/IWaypoints';
 import {Grid} from './Grid';
 
 export class Model {
-    readonly _dimension: any;
+    readonly _dimension: IDimension;
     readonly _is2d: boolean;
     readonly _obstacleArray: Array<Grid>;
     readonly _startGrid: Grid;
@@ -11,7 +14,7 @@ export class Model {
     readonly _distZ: number;
     private _initQ: Map<string, any>;
 
-    constructor(dimension: any, obstacleArray: Array<Grid>, waypoint: any) {
+    constructor(dimension: IDimension, obstacleArray: Array<Grid>, waypoint: IWaypoints) {
         this._dimension = dimension;
         this._is2d = Model.is2d(this._dimension);
 
@@ -28,8 +31,8 @@ export class Model {
         this._initQ = new Map<string, any>();
     }
 
-    static is2d(dimension: any): boolean {
-        if (!dimension.hasOwnProperty("z")) {
+    static is2d(dimension: IDimension): boolean {
+        if (!dimension.z) {
             return true;
         }
 
@@ -40,7 +43,7 @@ export class Model {
         return false;
     }
 
-    static createObstacleArray(data: any, is2d: boolean): Array<Grid> {
+    static createObstacleArray(data: IObstacles, is2d: boolean): Array<Grid> {
         const obstacleArray = new Array<Grid>();
 
         if (Object.keys(data).length === 0 || data.size === 0) {
@@ -58,8 +61,10 @@ export class Model {
             }
         } else {
             const zArray = data.z;
-            for (let i = 0; i < size; i++) {
-                obstacleArray.push(new Grid(xArray[i], yArray[i], zArray[i], is2d));
+            if (zArray) {
+                for (let i = 0; i < size; i++) {
+                    obstacleArray.push(new Grid(xArray[i], yArray[i], zArray[i], is2d));
+                }
             }
         }
 

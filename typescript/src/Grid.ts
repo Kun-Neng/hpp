@@ -4,7 +4,7 @@ export class Grid {
     private _z: number;
     private _is2d: boolean;
 
-    constructor(x: number, y: number, z=0, is2d=true) {
+    constructor(x: number, y: number, z = 0, is2d = true) {
         this._x = x;
         this._y = y;
         this._z = z;

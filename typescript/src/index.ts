@@ -80,7 +80,7 @@ const aStar = new AStar(scenario_3d);
 const result = aStar.calculatePath();
 const elapsedMS = result.elapsedMS;
 console.log(`message: ${result.message}`);
-console.log(`elapsedMS: ${elapsedMS}ms`);
+console.log(`elapsed_ms: ${elapsedMS} ms`);
 
 const path = result.path;
 console.log("x:", path.x);
