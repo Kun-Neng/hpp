@@ -6,7 +6,7 @@ def test_is_2d():
         "dimension": {"x": 10, "y": 10, "z": 10}
     }
     dimension = scenario["dimension"]
-    is_2d = Model.is_2d(dimension)
+    is_2d = Model.is_two_dimensional(dimension)
     assert is_2d is False
 
 

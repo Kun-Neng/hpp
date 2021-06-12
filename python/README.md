@@ -41,10 +41,20 @@ a_star = AStar(scenario)
 ```
 result = a_star.calculate_path()
 
-# visited_Q = result["visitedQ"]
-# final_Q = result["finalQ"]
+# visited_Q = result["visited_Q"]
+# final_Q = result["final_Q"]
 path = result["path"]
 ```
-> `visitedQ`: all the visited positions<br>
-> `finalQ`: all the positions in the A* path<br>
-> `path`: the A* path that is from start to stop<br>
+> `visited_Q`: all the visited positions<br>
+> `final_Q`: all the positions in the A* path<br>
+> `path`: the A* path that is from start to stop
+
+* Useful information:
+```
+message = result["message"]
+```
+> `message`: the information about path planning
+```
+elapsed_time = result["elapsed_ms"]
+```
+> `elapsed_ms`: the running milliseconds of path planning

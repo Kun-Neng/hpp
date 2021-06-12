@@ -12,14 +12,16 @@ if __name__ == "__main__":
     # for [key, value] in result.items():
     #     print(key, value)
 
-    visited_Q = result["visitedQ"]
+    visited_Q = result["visited_Q"]
     # [print(item) for item in visited_Q.items()]
 
-    final_Q = result["finalQ"]
+    final_Q = result["final_Q"]
     # [print(item) for item in final_Q.items()]
 
-    elapsed_time = result["elapsedMS"]
-    print(f"elapsedMS: {elapsed_time}")
+    message = result["message"]
+    elapsed_time = result["elapsed_ms"]
+    print(f"message: {message}")
+    print(f"elapsed_ms: {elapsed_time} ms")
 
     path = result["path"]
     print(f"x: {path['x']}")
