@@ -48,3 +48,13 @@ const path = result.path;
 > `visitedQ`: all the visited positions<br>
 > `finalQ`: all the positions in the A* path<br>
 > `path`: the A* path object constructed by the axis arrays from start to stop<br>
+
+* Useful information:
+```
+message = result.message
+```
+> `message`: the information about path planning
+```
+elapsed_time = result.elapsedMS
+```
+> `elapsed_ms`: the running milliseconds of path planning
