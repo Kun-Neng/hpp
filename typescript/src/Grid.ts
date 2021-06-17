@@ -44,11 +44,18 @@ export class Grid {
         }
     }
 
-    isOutOfBound({boundZ = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER], boundX = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER], boundY = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER]}: {boundZ: number[], boundX?: number[], boundY?: number[]}): boolean {
+    isOutOfBound({boundX = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER], boundY = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER], boundZ = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER]}: {boundX?: number[], boundY?: number[], boundZ?: number[]}): boolean {
+        const minX = Math.min(...boundX);
+        const maxX = Math.max(...boundX);
+        const minY = Math.min(...boundY);
+        const maxY = Math.max(...boundY);
+
         if (this._is2d) {
-            return this._x <= boundX[0] || this._x >= boundX[1] || this._y <= boundY[0] || this._y >= boundY[1];
+            return this._x <= minX || this._x >= maxX || this._y <= minY || this._y >= maxY;
         } else {
-            return this._x <= boundX[0] || this._x >= boundX[1] || this._y <= boundY[0] || this._y >= boundY[1] || this._z <= boundZ[0] || this._z >= boundZ[1];
+            const minZ = Math.min(...boundZ);
+            const maxZ = Math.max(...boundZ);
+            return this._x <= minX || this._x >= maxX || this._y <= minY || this._y >= maxY || this._z <= minZ || this._z >= maxZ;
         }
     }
 }

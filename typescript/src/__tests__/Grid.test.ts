@@ -48,13 +48,25 @@ test('test_shift', () => {
 
 test('test_is_out_of_bound', () => {
     const grid2D = new Grid(1, 2);
+    expect(grid2D.isOutOfBound({})).toBe(false);
     expect(grid2D.isOutOfBound({boundZ: [-10, -5]})).toBe(false);
     expect(grid2D.isOutOfBound({boundZ: [-1, 1]})).toBe(false);
-    expect(grid2D.isOutOfBound({boundZ: [-1, 1], boundY: [-1, 1]})).toBe(true);
+    expect(grid2D.isOutOfBound({boundZ: [-1, 1], boundX: [-1, 1]})).toBe(true);
+    expect(grid2D.isOutOfBound({boundZ: [-1, 1], boundX: [-2, 2]})).toBe(false);
+    expect(grid2D.isOutOfBound({boundZ: [-1, 1], boundY: [-2, 2]})).toBe(true);
+    expect(grid2D.isOutOfBound({boundZ: [-1, 1], boundY: [-3, 3]})).toBe(false);
+    expect(grid2D.isOutOfBound({boundZ: [-1, 1], boundX: [-1, 1], boundY: [-2, 2]})).toBe(true);
+    expect(grid2D.isOutOfBound({boundZ: [-1, 1], boundX: [-2, 2], boundY: [-3, 3]})).toBe(false);
 
     const grid3D1 = new Grid(1, 2, 0);
     expect(grid3D1.isOutOfBound({boundZ: [-10, -5]})).toBe(true);
     expect(grid3D1.isOutOfBound({boundZ: [-1, 1]})).toBe(false);
+    expect(grid3D1.isOutOfBound({boundZ: [-1, 1], boundX: [-1, 1]})).toBe(true);
+    expect(grid3D1.isOutOfBound({boundZ: [-1, 1], boundX: [-2, 2]})).toBe(false);
+    expect(grid3D1.isOutOfBound({boundZ: [-1, 1], boundY: [-2, 2]})).toBe(true);
+    expect(grid3D1.isOutOfBound({boundZ: [-1, 1], boundY: [-3, 3]})).toBe(false);
+    expect(grid3D1.isOutOfBound({boundZ: [-1, 1], boundX: [-2, 2], boundY: [-2, 2]})).toBe(true);
+    expect(grid3D1.isOutOfBound({boundZ: [-1, 1], boundX: [-2, 2], boundY: [-3, 3]})).toBe(false);
 });
 
 test('test_object_collision', () => {
