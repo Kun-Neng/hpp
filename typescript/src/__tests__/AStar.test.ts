@@ -23,8 +23,7 @@ const scenario = {
 };
 
 test('test_find_the_min_F', () => {
-    const is2d = Model.is2d(scenario.dimension);
-    const obstacleArray = scenario.data ? Model.createObstacleArray(scenario.data, is2d) : [];
+    const obstacleArray = scenario.data ? Model.createObstacleArray(scenario.data) : [];
     const model = new Model(scenario.dimension, obstacleArray, scenario.waypoint);
     const isFast = true;
     const Q = model.createInitialQ(isFast);

@@ -27,7 +27,7 @@ export class AStar {
     constructor(scenario: { dimension: IDimension, waypoint: IWaypoints, data?: IObstacles, boundary?: { zCeil: number, zFloor: number } }) {
         const dimension = scenario.dimension;
         this._is2d = Model.is2d(dimension);
-        this._obstacleArray = scenario.data ? Model.createObstacleArray(scenario.data, this._is2d) : [];
+        this._obstacleArray = scenario.data ? Model.createObstacleArray(scenario.data) : [];
         this._numObstacles = this._obstacleArray.length;
 
         const waypoint = scenario.waypoint;
@@ -50,8 +50,7 @@ export class AStar {
         this._allowDiagonal = waypoint.allowDiagonal ?? false;
 
         const model = new Model(dimension, this._obstacleArray, waypoint);
-        const isFast = true
-        this._Q = model.createInitialQ(isFast);
+        this._Q = model.createInitialQ();
 
         this._openSet = new Map<string, any>();
         this._openSet.set(this._startGrid.str(), this._Q.get(this._startGrid.str()));

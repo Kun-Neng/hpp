@@ -2,20 +2,39 @@ import {Grid} from '../Grid';
 import {Model} from '../Model';
 
 test('test_is_2d', () => {
-    const dimension = {"x": 10, "y": 10, "z": 10};
-    expect(Model.is2d(dimension)).toBe(false);
+    const dimension2D1 = {"x": 10, "y": 10};
+    expect(Model.is2d(dimension2D1)).toBe(true);
+
+    const dimension2D2 = {"x": 10, "y": 10, "z": 0};
+    expect(Model.is2d(dimension2D2)).toBe(true);
+
+    const dimension2D3 = {"x": 10, "y": 10, "z": -5};
+    expect(Model.is2d(dimension2D3)).toBe(true);
+
+    const dimension3D = {"x": 10, "y": 10, "z": 10};
+    expect(Model.is2d(dimension3D)).toBe(false);
 });
 
 test('test_check_num_obstacles', () => {
+    const obstacleArray = Model.createObstacleArray();
+    expect(obstacleArray.length).toBe(0);
+
+    const scenario_empty_data = {
+        "size": 0,
+        "x": [1, 2, 3],
+        "y": [1, 2, 3]
+    };
+    const obstacleEmptyArray = Model.createObstacleArray(scenario_empty_data);
+    expect(obstacleEmptyArray.length).toBe(0);
+
     const scenario_2d_data = {
         "size": 16,
         "x": [4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7],
         "y": [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
         // "z": [2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
     };
-    const obstacle2dArray = Model.createObstacleArray(scenario_2d_data, true);
-    const num2dObstacles = obstacle2dArray.length;
-    expect(num2dObstacles).toBe(scenario_2d_data.size);
+    const obstacle2DArray = Model.createObstacleArray(scenario_2d_data);
+    expect(obstacle2DArray.length).toBe(scenario_2d_data.size);
     
     const scenario_3d_data = {
         "size": 16,
@@ -23,32 +42,30 @@ test('test_check_num_obstacles', () => {
         "y": [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
         "z": [2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
     };
-    const obstacle3dArray = Model.createObstacleArray(scenario_3d_data, false);
-    const num3dObstacles = obstacle3dArray.length;
-    expect(num3dObstacles).toBe(scenario_3d_data.size);
+    const obstacle3DArray = Model.createObstacleArray(scenario_3d_data);
+    expect(obstacle3DArray.length).toBe(scenario_3d_data.size);
 });
 
 test('test_grids_on_obstacles', () => {
-    const is2d = false;
     const scenario_3d_data = {
         "size": 16,
         "x": [4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7],
         "y": [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
         "z": [2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
     };
-    const obstacle3dArray = Model.createObstacleArray(scenario_3d_data, is2d);
+    const obstacle3dArray = Model.createObstacleArray(scenario_3d_data);
 
-    const testWaypointArray1 = [
+    const testGoodWaypointArray = [
         new Grid(5, 9, 2),
         new Grid(5, 0, 4)
     ];
-    expect(Model.gridsOnObstacles(obstacle3dArray, testWaypointArray1)).toBe(false);
+    expect(Model.gridsOnObstacles(obstacle3dArray, testGoodWaypointArray)).toBe(false);
 
-    const testWaypointArray2 = [
+    const testErrorWaypointArray = [
         new Grid(5, 9, 2),
         new Grid(6, 6, 5)
     ];
-    expect(Model.gridsOnObstacles(obstacle3dArray, testWaypointArray2)).toBe(true);
+    expect(Model.gridsOnObstacles(obstacle3dArray, testErrorWaypointArray)).toBe(true);
 });
 
 test('test_boundary', () => {
@@ -67,9 +84,37 @@ test('test_boundary', () => {
     const zCeil = Number(scenario.boundary.zCeil);
     const zFloor = Number(scenario.boundary.zFloor);
     expect(Model.isBoundaryAvailable(zFloor, zStart, zCeil)).toBe(true);
+
+    expect(Model.isBoundaryAvailable(zFloor, 0, zCeil)).toBe(false);
+    expect(Model.isBoundaryAvailable(zFloor, 6, zCeil)).toBe(false);
 });
 
 test('test_create_initial_Q', () => {
+    const scenario_2d = {
+        "dimension": {"x": 15, "y": 15},
+        "waypoint": {
+            "start": {"x": 12, "y": 0},
+            "stop": {"x": 1, "y": 11},
+            "allowDiagonal": false
+        },
+        "data": {
+            "size": 28,
+            "x": [ 2,  2,  2,  2,  2,  2,  2,  2,
+                   3,  4,  5,  6,  7,  8,  9, 10, 11, 12,
+                  12, 12, 12, 12, 12, 12, 12, 12, 12, 12],
+            "y": [ 5,  6,  7,  8,  9, 10, 11, 12,
+                  12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+                   2,  3,  4,  5,  6,  7,  8,  9, 10, 11]
+        }
+    };
+
+    const obstacle2DArray = Model.createObstacleArray(scenario_2d.data);
+    const model2D = new Model(scenario_2d.dimension, obstacle2DArray, scenario_2d.waypoint);
+    const Q2D = model2D.createInitialQ();
+    
+    const numberObstacleGrids2D = (scenario_2d.dimension.x * scenario_2d.dimension.y) - scenario_2d.data.size;
+    expect(Q2D.size).toBe(numberObstacleGrids2D);
+
     const scenario_3d = {
         "dimension": { "x": 10, "y": 10, "z": 10 },
         "waypoint": {
@@ -85,12 +130,11 @@ test('test_create_initial_Q', () => {
         }
     };
 
-    const obstacleArray = scenario_3d.data ? Model.createObstacleArray(scenario_3d.data, false) : [];
-    const model = new Model(scenario_3d.dimension, obstacleArray, scenario_3d.waypoint);
+    const obstacle3DArray = Model.createObstacleArray(scenario_3d.data);
+    const model3D = new Model(scenario_3d.dimension, obstacle3DArray, scenario_3d.waypoint);
     const isFast = false
-    const Q = model.createInitialQ(isFast);
+    const Q3D = model3D.createInitialQ(isFast);
     
-    const size = Q.size;
-    const numberObstacleGrids = (scenario_3d.dimension.x * scenario_3d.dimension.y * scenario_3d.dimension.z) - scenario_3d.data.size;
-    expect(size).toBe(numberObstacleGrids);
+    const numberObstacleGrids3D = (scenario_3d.dimension.x * scenario_3d.dimension.y * scenario_3d.dimension.z) - scenario_3d.data.size;
+    expect(Q3D.size).toBe(numberObstacleGrids3D);
 });

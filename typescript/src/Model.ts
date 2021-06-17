@@ -43,10 +43,13 @@ export class Model {
         return false;
     }
 
-    static createObstacleArray(data: IObstacles, is2d: boolean): Array<Grid> {
+    static createObstacleArray(data?: IObstacles): Array<Grid> {
         const obstacleArray = new Array<Grid>();
+        if (!data) {
+            return obstacleArray;
+        }
 
-        if (Object.keys(data).length === 0 || data.size === 0) {
+        if (data.size === 0) {
             return obstacleArray;
         }
 
@@ -55,7 +58,7 @@ export class Model {
         const xArray = data.x;
         const yArray = data.y;
 
-        if (is2d) {
+        if (!data.z) {
             for (let i = 0; i < size; i++) {
                 obstacleArray.push(new Grid(xArray[i], yArray[i]));
             }
@@ -108,7 +111,7 @@ export class Model {
         return (lowerBound + 1 < upperBound);
     }
 
-    createInitialQ(isFast: boolean): Map<string, any> {
+    createInitialQ(isFast: boolean = true): Map<string, any> {
         const x = Number(this._dimension.x);
         const y = Number(this._dimension.y);
 
