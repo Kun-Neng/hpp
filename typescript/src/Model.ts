@@ -64,10 +64,8 @@ export class Model {
             }
         } else {
             const zArray = data.z;
-            if (zArray) {
-                for (let i = 0; i < size; i++) {
-                    obstacleArray.push(new Grid(xArray[i], yArray[i], zArray[i]));
-                }
+            for (let i = 0; i < size; i++) {
+                obstacleArray.push(new Grid(xArray[i], yArray[i], zArray[i]));
             }
         }
 
@@ -86,9 +84,9 @@ export class Model {
                 });
             });
         } catch (e) {
-            if (e !== BreakException) {
-                throw e;
-            }
+            // if (e !== BreakException) {
+            //     throw e;
+            // }
 
             return true;
         }
