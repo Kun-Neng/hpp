@@ -24,24 +24,14 @@ export class AStar {
     private _lastGridKey: string;
     private _message: string;
 
-    constructor(scenario: { dimension: IDimension, waypoint: IWaypoints, data?: IObstacles, boundary?: { zCeil: number, zFloor: number } }) {
+    constructor(scenario: { dimension: IDimension, waypoint: IWaypoints, data?: IObstacles, boundary?: { zCeil?: number, zFloor?: number } }) {
         const dimension = scenario.dimension;
         this._is2d = Model.is2d(dimension);
-        this._obstacleArray = scenario.data ? Model.createObstacleArray(scenario.data) : [];
+        this._obstacleArray = Model.createObstacleArray(scenario.data);
         this._numObstacles = this._obstacleArray.length;
 
         const waypoint = scenario.waypoint;
         // console.log(waypoint);
-
-        if (!waypoint) {
-            throw new Error('[Waypoint Error] waypoint is undefined.');
-        }
-
-        // console.log(Object.keys(waypoint).length);
-        if (Object.keys(waypoint).length < 2 || !waypoint.hasOwnProperty("start") || !waypoint.hasOwnProperty("stop")) {
-            throw new Error('[Waypoint Error] invalid waypoint format.');
-        }
-
         const start = waypoint.start;
         const stop = waypoint.stop;
         this._startGrid = new Grid(start.x, start.y, start.z);
@@ -56,7 +46,7 @@ export class AStar {
         this._openSet.set(this._startGrid.str(), this._Q.get(this._startGrid.str()));
 
         if (Model.gridsOnObstacles(this._obstacleArray, [this._startGrid, this._stopGrid])) {
-            const message = "[Waypoint Error] start position or stop position is on the obstacle.";
+            const message = "[Waypoint Error] start position or stop position is on some obstacle.";
             console.log(message);
             this._message = message;
         }
@@ -77,12 +67,12 @@ export class AStar {
             }
         }
 
-        this._message = "[Ready] No Results Yet.";
+        this._message = "[Ready] No Results.";
     }
 
-    static findTheMinF(hashmap: Map<string, any>): { key: string | unknown, value: any } {
-        let key = undefined;
-        let value = undefined;
+    static findTheMinF(hashmap: Map<string, any>): { key: string, value: any } {
+        let key = '';
+        let value = {};
         let minF = Number.MAX_SAFE_INTEGER;
         hashmap.forEach((objInHashmap: any, keyInHashmap: string) => {
             // console.log(keyInHashmap + ':' + objInHashmap.f);
@@ -101,7 +91,7 @@ export class AStar {
 
         const newXArray: number[] = [Number(finalObject.row)];
         const newYArray: number[] = [Number(finalObject.col)];
-        const newZArray: number[] = this._is2d ? [0] : [Number(finalObject.z)];
+        const newZArray: number[] = this._is2d ? [] : [Number(finalObject.z)];
 
         while (finalObject.prev) {
             finalObject = finalQ.get(finalObject.prev);
@@ -112,7 +102,10 @@ export class AStar {
 
             newXArray.push(currentRow);
             newYArray.push(currentCol);
-            newZArray.push(currentZ);
+
+            if (!this._is2d) {
+                newZArray.push(currentZ);
+            }
         }
 
         return {
@@ -133,11 +126,9 @@ export class AStar {
             const obj = AStar.findTheMinF(this._openSet);
             const objKey = obj.key;
             const currentObj = obj.value;
-            if (typeof objKey === 'string') {
-                finalQ.set(objKey, currentObj);
-                this._lastGridKey = objKey;
-                this._openSet.delete(objKey);
-            }
+            finalQ.set(objKey, currentObj);
+            this._lastGridKey = objKey;
+            this._openSet.delete(objKey);
 
             let currentGrid;
             if (this._is2d) {

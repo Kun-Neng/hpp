@@ -7,5 +7,4 @@ python/dist/
 python/pyhpp.egg-info/
 typescript/coverage/
 typescript/lib/
-typescript/src/__tests__/
 typescript/src/index.*
