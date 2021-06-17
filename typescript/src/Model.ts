@@ -123,7 +123,7 @@ export class Model {
                     }) !== -1) {
                         continue;
                     } else {
-                        this.updateInitQ(row, col, 0);
+                        this.updateInitQ(row, col);
                     }
                 }
             }
@@ -161,8 +161,8 @@ export class Model {
         return this._initQ;
     }
 
-    private updateInitQ(row: number, col: number, z: number): void {
-        const cellGrid = new Grid(row, col, z);
+    private updateInitQ(row: number, col: number, z?: number | undefined): void {
+        const cellGrid = typeof z === 'number' ? new Grid(row, col, z) : new Grid(row, col);
 
         let cellObj = {
             row,
