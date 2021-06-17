@@ -22,8 +22,8 @@ export class Model {
 
         const start = waypoint.start;
         const stop = waypoint.stop;
-        this._startGrid = new Grid(start.x, start.y, start.z, this._is2d);
-        this._stopGrid = new Grid(stop.x, stop.y, stop.z, this._is2d);
+        this._startGrid = new Grid(start.x, start.y, start.z);
+        this._stopGrid = new Grid(stop.x, stop.y, stop.z);
         this._distX = this._stopGrid.x - this._startGrid.x;
         this._distY = this._stopGrid.y - this._startGrid.y;
         this._distZ = this._stopGrid.z - this._startGrid.z;
@@ -63,7 +63,7 @@ export class Model {
             const zArray = data.z;
             if (zArray) {
                 for (let i = 0; i < size; i++) {
-                    obstacleArray.push(new Grid(xArray[i], yArray[i], zArray[i], is2d));
+                    obstacleArray.push(new Grid(xArray[i], yArray[i], zArray[i]));
                 }
             }
         }
@@ -159,7 +159,7 @@ export class Model {
     }
 
     private updateInitQ(row: number, col: number, z: number): void {
-        const cellGrid = new Grid(row, col, z, this._is2d);
+        const cellGrid = new Grid(row, col, z);
 
         let cellObj = {
             row,

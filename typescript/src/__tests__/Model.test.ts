@@ -39,14 +39,14 @@ test('test_grids_on_obstacles', () => {
     const obstacle3dArray = Model.createObstacleArray(scenario_3d_data, is2d);
 
     const testWaypointArray1 = [
-        new Grid(5, 9, 2, is2d),
-        new Grid(5, 0, 4, is2d)
+        new Grid(5, 9, 2),
+        new Grid(5, 0, 4)
     ];
     expect(Model.gridsOnObstacles(obstacle3dArray, testWaypointArray1)).toBe(false);
 
     const testWaypointArray2 = [
-        new Grid(5, 9, 2, is2d),
-        new Grid(6, 6, 5, is2d)
+        new Grid(5, 9, 2),
+        new Grid(6, 6, 5)
     ];
     expect(Model.gridsOnObstacles(obstacle3dArray, testWaypointArray2)).toBe(true);
 });

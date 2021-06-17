@@ -44,8 +44,8 @@ export class AStar {
 
         const start = waypoint.start;
         const stop = waypoint.stop;
-        this._startGrid = new Grid(start.x, start.y, start.z, this._is2d);
-        this._stopGrid = new Grid(stop.x, stop.y, stop.z, this._is2d);
+        this._startGrid = new Grid(start.x, start.y, start.z);
+        this._stopGrid = new Grid(stop.x, stop.y, stop.z);
         this._lastGridKey = this._stopGrid.str();
         this._allowDiagonal = waypoint.allowDiagonal ?? false;
 
@@ -144,7 +144,7 @@ export class AStar {
             if (this._is2d) {
                 currentGrid = new Grid(currentObj.row, currentObj.col);
             } else {
-                currentGrid = new Grid(currentObj.row, currentObj.col, currentObj.z, this._is2d);
+                currentGrid = new Grid(currentObj.row, currentObj.col, currentObj.z);
             }
             if (currentGrid.equal(this._stopGrid)) {
                 const message = "[Done] Arrival! 🚀";

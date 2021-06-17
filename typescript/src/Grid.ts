@@ -4,11 +4,11 @@ export class Grid {
     private _z: number;
     private _is2d: boolean;
 
-    constructor(x: number, y: number, z = 0, is2d = true) {
+    constructor(x: number, y: number, z?: number | undefined) {
         this._x = x;
         this._y = y;
-        this._z = z;
-        this._is2d = is2d;
+        this._z = typeof z === 'number' ? z : 0;
+        this._is2d = typeof z === 'number' ? false : true;
     }
 
     get x(): number {
@@ -33,14 +33,22 @@ export class Grid {
     }
 
     equal(other: Grid): boolean {
-        return this._is2d ? this._x === other.x && this._y === other.y : this._x === other.x && this._y === other.y && this._z === other.z;
+        return this.str() === other.str();
     }
 
-    shift(x: number, y: number, z=0): Grid {
-        return new Grid(this._x + x, this._y + y, this._z + z, this._is2d);
+    shift(x: number, y: number, z: number = 0): Grid {
+        if (this._is2d) {
+            return new Grid(this._x + x, this._y + y);
+        } else {
+            return new Grid(this._x + x, this._y + y, this._z + z);
+        }
     }
 
     isOutOfBound({boundZ = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER], boundX = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER], boundY = [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER]}: {boundZ: number[], boundX?: number[], boundY?: number[]}): boolean {
-        return this._x <= boundX[0] || this._x >= boundX[1] || this._y <= boundY[0] || this._y >= boundY[1] || this._z <= boundZ[0] || this._z >= boundZ[1];
+        if (this._is2d) {
+            return this._x <= boundX[0] || this._x >= boundX[1] || this._y <= boundY[0] || this._y >= boundY[1];
+        } else {
+            return this._x <= boundX[0] || this._x >= boundX[1] || this._y <= boundY[0] || this._y >= boundY[1] || this._z <= boundZ[0] || this._z >= boundZ[1];
+        }
     }
 }
