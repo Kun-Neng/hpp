@@ -16,8 +16,8 @@ export class AStar {
     readonly _startGrid: Grid;
     readonly _stopGrid: Grid;
     readonly _allowDiagonal: boolean;
-    readonly _openSet: Map<string, any>;
-    readonly _Q: Map<string, any>;
+    readonly _openSet: Map<string, Grid>;
+    readonly _Q: Map<string, Grid>;
     readonly _zCeil: number;
     readonly _zFloor: number;
 
@@ -32,18 +32,21 @@ export class AStar {
 
         const waypoint = scenario.waypoint;
         // console.log(waypoint);
-        const start = waypoint.start;
-        const stop = waypoint.stop;
-        this._startGrid = new Grid(start.x, start.y, start.z);
-        this._stopGrid = new Grid(stop.x, stop.y, stop.z);
-        this._lastGridKey = this._stopGrid.str();
-        this._allowDiagonal = waypoint.allowDiagonal ?? false;
 
         const model = new Model(dimension, this._obstacleArray, waypoint);
         this._Q = model.createInitialQ();
 
-        this._openSet = new Map<string, any>();
-        this._openSet.set(this._startGrid.str(), this._Q.get(this._startGrid.str()));
+        const start = waypoint.start;
+        const stop = waypoint.stop;
+        this._startGrid = this._is2d ?
+            new Grid(start.x, start.y).setAsStartGrid() :
+            new Grid(start.x, start.y, start.z).setAsStartGrid();
+        this._stopGrid = new Grid(stop.x, stop.y, stop.z);
+        this._lastGridKey = this._stopGrid.str();
+        this._allowDiagonal = waypoint.allowDiagonal ?? false;
+
+        this._openSet = new Map<string, Grid>();
+        this._openSet.set(this._startGrid.str(), this._startGrid);
 
         if (Model.gridsOnObstacles(this._obstacleArray, [this._startGrid, this._stopGrid])) {
             const message = "[Waypoint Error] start position or stop position is on some obstacle.";
@@ -56,8 +59,8 @@ export class AStar {
         const boundary = scenario.boundary;
         if (!this._is2d) {
             if (boundary) {
-                this._zCeil = boundary.zCeil ?? Number.MAX_SAFE_INTEGER;
-                this._zFloor = boundary.zFloor ?? Number.MIN_SAFE_INTEGER;
+                this._zCeil = boundary.zCeil ?? this._zCeil;
+                this._zFloor = boundary.zFloor ?? this._zFloor;
 
                 if (!Model.isBoundaryAvailable(this._zFloor, this._startGrid.z, this._zCeil)) {
                     const message = "[Boundary Error] start position is out of boundary.";
@@ -70,13 +73,13 @@ export class AStar {
         this._message = "[Ready] No Results.";
     }
 
-    static findTheMinF(hashmap: Map<string, any>): { key: string, value: any } {
+    static findTheMinF(hashmap: Map<string, Grid>): { key: string, value: Grid } {
         let key = '';
-        let value = {};
+        let value: any;
         let minF = Number.MAX_SAFE_INTEGER;
-        hashmap.forEach((objInHashmap: any, keyInHashmap: string) => {
+        hashmap.forEach((objInHashmap: Grid, keyInHashmap: string) => {
             // console.log(keyInHashmap + ':' + objInHashmap.f);
-            if (objInHashmap.f < minF) {
+            if (objInHashmap.f <= minF) {
                 key = keyInHashmap;
                 value = objInHashmap;
                 minF = objInHashmap.f;
@@ -86,19 +89,22 @@ export class AStar {
         return { key, value };
     }
 
-    createPathFromFinalQ(finalQ: Map<string, any>): any {
-        let finalObject = finalQ.get(this._stopGrid.str()) ?? finalQ.get(this._lastGridKey);
+    createPathFromFinalQ(finalQ: Map<string, Grid>): { x: number[], y: number[], z: number[] } {
+        let finalGrid = finalQ.get(this._stopGrid.str()) ?? finalQ.get(this._lastGridKey);
 
-        const newXArray: number[] = [Number(finalObject.row)];
-        const newYArray: number[] = [Number(finalObject.col)];
-        const newZArray: number[] = this._is2d ? [] : [Number(finalObject.z)];
+        if (!finalGrid) {
+            finalGrid = this._startGrid;
+        }
 
-        while (finalObject.prev) {
-            finalObject = finalQ.get(finalObject.prev);
+        const newXArray: number[] = [Number(finalGrid.x)];
+        const newYArray: number[] = [Number(finalGrid.y)];
+        const newZArray: number[] = this._is2d ? [] : [Number(finalGrid.z)];
 
-            const currentRow = Number(finalObject.row);
-            const currentCol = Number(finalObject.col);
-            const currentZ = this._is2d ? 0 : Number(finalObject.z);
+        while (finalGrid && finalGrid.prev) {
+            finalGrid = finalQ.get(finalGrid.prev.str()) as Grid;
+            const currentRow = Number(finalGrid.x);
+            const currentCol = Number(finalGrid.y);
+            const currentZ = this._is2d ? 0 : Number(finalGrid.z);
 
             newXArray.push(currentRow);
             newYArray.push(currentCol);
@@ -116,8 +122,8 @@ export class AStar {
     }
 
     calculatePath(): any {
-        const finalQ = new Map<string, any>();
-        const visitedQ = new Map<string, any>();
+        const finalQ = new Map<string, Grid>();
+        const visitedQ = new Map<string, Grid>();
 
         const calculateStartTime = this.getTime(TIME_TAG.START);
 
@@ -125,17 +131,11 @@ export class AStar {
         while (size > 0) {
             const obj = AStar.findTheMinF(this._openSet);
             const objKey = obj.key;
-            const currentObj = obj.value;
-            finalQ.set(objKey, currentObj);
+            const currentGrid = obj.value;
+            finalQ.set(objKey, currentGrid);
             this._lastGridKey = objKey;
             this._openSet.delete(objKey);
 
-            let currentGrid;
-            if (this._is2d) {
-                currentGrid = new Grid(currentObj.row, currentObj.col);
-            } else {
-                currentGrid = new Grid(currentObj.row, currentObj.col, currentObj.z);
-            }
             if (currentGrid.equal(this._stopGrid)) {
                 const message = "[Done] Arrival! 🚀";
                 console.log(message);
@@ -162,14 +162,12 @@ export class AStar {
                                 }
 
                                 const dist = Math.sqrt(shiftRow * shiftRow + shiftCol * shiftCol);
-                                const alt = currentObj.dist + dist;
+                                const alt = currentGrid.dist + dist;
                                 if (alt < neighbor.dist) {
                                     neighbor.dist = alt;
-                                    const distX = this._stopGrid.x - neighbor.row;
-                                    const distY = this._stopGrid.y - neighbor.col;
-                                    neighbor.f = alt + Math.abs(distX) + Math.abs(distY);
+                                    neighbor.f = alt + neighbor.distanceTo(this._stopGrid);
                                     // neighbor.f = alt + Math.sqrt(distX * distX + distY * distY);
-                                    neighbor.prev = currentGrid.str();
+                                    neighbor.prev = currentGrid;
                                     this._openSet.set(neighborGrid.str(), neighbor);
                                 }
                             }
@@ -200,30 +198,19 @@ export class AStar {
                                 if (!finalQ.has(neighborGrid.str())) {
                                     let neighborObj = visitedQ.get(neighborGrid.str());
                                     if (!neighborObj) {
-                                        neighborObj = {
-                                            row: neighborGrid.x,
-                                            col: neighborGrid.y,
-                                            z: neighborGrid.z,
-                                            prev: undefined,
-                                            dist: Number.MAX_SAFE_INTEGER,
-                                            f: Number.MAX_SAFE_INTEGER
-                                        };
+                                        neighborObj = new Grid(neighborGrid.x, neighborGrid.y, neighborGrid.z);
                                         visitedQ.set(neighborGrid.str(), neighborObj);
                                     }
 
                                     const dist = Math.sqrt(shiftRow * shiftRow + shiftCol * shiftCol + shiftZ * shiftZ);
-                                    const alt = currentObj.dist + dist;
+                                    const alt = currentGrid.dist + dist;
                                     if (!this._openSet.has(neighborGrid.str())) {
                                         this._openSet.set(neighborGrid.str(), neighborObj);
                                     }
                                     if (alt < neighborObj.dist) {
                                         neighborObj.dist = alt;
-                                        // neighborObj.f = alt + Math.abs(this._stopGrid.x - neighborObj.row) + Math.abs(this._stopGrid.y - neighborObj.col) + Math.abs(this._stopGrid.z - neighborObj.z);
-                                        let leftX = this._stopGrid.x - neighborObj.row;
-                                        let leftY = this._stopGrid.y - neighborObj.col;
-                                        let leftZ = this._stopGrid.z - neighborObj.z;
-                                        neighborObj.f = alt + Math.sqrt(leftX * leftX + leftY * leftY + leftZ * leftZ);
-                                        neighborObj.prev = currentGrid.str();
+                                        neighborObj.f = alt + neighborObj.distanceTo(this._stopGrid);
+                                        neighborObj.prev = currentGrid;
                                         this._openSet.set(neighborGrid.str(), neighborObj);
                                     }
                                 }
@@ -237,7 +224,6 @@ export class AStar {
         }
 
         const calculateEndTime = this.getTime(TIME_TAG.END);
-        // const elapsedTimeString = this.elapsedTimeString(calculateStartTime, calculateEndTime);
 
         return {
             "visited_Q": visitedQ,
@@ -251,17 +237,6 @@ export class AStar {
     private getTimeString(ms: number): string {
         return new Date(ms).toTimeString();
     };
-
-    // private elapsedTimeString(startTime: number, endTime: number): string {
-    //     const duration = endTime - startTime;
-    //     if (duration >= 60*1000) {
-    //         return `${duration/(60*1000)} minutes`;
-    //     } else if (duration >= 1000) {
-    //         return `${duration/1000} seconds`;
-    //     } else {
-    //         return `${duration} milliseconds`;
-    //     }
-    // };
 
     private getTime(tag: TIME_TAG): number {
         const now = Date.now();
