@@ -1,3 +1,4 @@
+import {Grid} from '../Grid';
 import {Model} from '../Model';
 import {AStar} from '../AStar';
 
@@ -73,6 +74,39 @@ const scenarioWithoutBoundary = {
         "start": {"x": 5, "y": 9, "z": 2},
         "stop": {"x": 5, "y": 0, "z": 4},
         "allowDiagonal": false
+    }
+};
+
+const scenario_no_results = {
+    "dimension": {"x": 10, "y": 10, "z": 10},
+    "empty_data": {},
+    "no_data": {"size": 0, "x": [], "y": [], "z": []},
+    "data": {
+        "size": 48,
+        "x": [
+            4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7,
+            4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7,
+            4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7
+        ],
+        "y": [
+            7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+            10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+            8, 8, 8, 8, 9, 9, 9, 9, 8, 8, 8, 8, 9, 9, 9, 9
+        ],
+        "z": [
+            2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
+            2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
+            2, 3, 4, 5, 2, 3, 4, 5, 2, 3, 4, 5, 2, 3, 4, 5
+        ]
+    },
+    "waypoint": {
+        "start": {"x": 5, "y": 9, "z": 2},
+        "stop": {"x": 5, "y": 0, "z": 4},
+        "allowDiagonal": false
+    },
+    "boundary": {
+        "zCeil": 6,
+        "zFloor": 1
     }
 };
 
@@ -178,6 +212,15 @@ test('test_find_the_min_F', () => {
     expect(minGrid3D.value.dist).toBe(0);
 });
 
+test('test_create_path_from_finalQ', () => {
+    const aStarNoResult2D = new AStar(scenario_2d_no_results);
+    const hashmap2D = new Map([['6,6', new Grid(6, 6)]]);
+    const result2D = aStarNoResult2D.createPathFromFinalQ(hashmap2D);
+    expect(result2D.x[0]).toBe(12);
+    expect(result2D.y[0]).toBe(0);
+    expect(result2D.z.length).toBe(0);
+});
+
 test('test_calculate_path', () => {
     /**
      * Case 1: No results
@@ -185,6 +228,10 @@ test('test_calculate_path', () => {
     const aStarNoResult2D = new AStar(scenario_2d_no_results);
     const noResult2D = aStarNoResult2D.calculatePath();
     expect(noResult2D.message).toBe('[Ready] No Results.');
+
+    const aStarNoResult3D = new AStar(scenario_no_results);
+    const noResult3D = aStarNoResult3D.calculatePath();
+    expect(noResult3D.message).toBe('[Ready] No Results.');
 
     /**
      * Case 2: Arrival
@@ -207,6 +254,11 @@ test('test_calculate_path', () => {
     const aStar2DDiagonal = new AStar(scenario_2d_allow_diagonal);
     const result2DDiagonal = aStar2DDiagonal.calculatePath();
     expect(result2DDiagonal.message).toBe('[Done] Arrival! 🚀');
+    
+    expect(result2DDiagonal.path.x[result2DDiagonal.path.x.length - 1])
+        .toBe(scenario_2d_allow_diagonal.waypoint.stop.x);
+    expect(result2DDiagonal.path.y[result2DDiagonal.path.y.length - 1])
+        .toBe(scenario_2d_allow_diagonal.waypoint.stop.y);
 
     const scenario_3d_allow_diagonal = {
         ...scenario, waypoint: {
@@ -218,4 +270,11 @@ test('test_calculate_path', () => {
     const aStar3DDiagonal = new AStar(scenario_3d_allow_diagonal);
     const result3DDiagonal = aStar3DDiagonal.calculatePath();
     expect(result3DDiagonal.message).toBe('[Done] Arrival! 🚀');
+
+    expect(result3DDiagonal.path.x[result3DDiagonal.path.x.length - 1])
+        .toBe(scenario_3d_allow_diagonal.waypoint.stop.x);
+    expect(result3DDiagonal.path.y[result3DDiagonal.path.y.length - 1])
+        .toBe(scenario_3d_allow_diagonal.waypoint.stop.y);
+    expect(result3DDiagonal.path.z[result3DDiagonal.path.z.length - 1])
+        .toBe(scenario_3d_allow_diagonal.waypoint.stop.z);
 });
