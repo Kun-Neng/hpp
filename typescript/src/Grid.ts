@@ -4,11 +4,19 @@ export class Grid {
     private _z: number;
     private _is2d: boolean;
 
+    private _prev: Grid | undefined;
+    private _dist: number;
+    private _f: number;
+
     constructor(x: number, y: number, z?: number | undefined) {
         this._x = x;
         this._y = y;
         this._z = typeof z === 'number' ? z : 0;
         this._is2d = typeof z === 'number' ? false : true;
+
+        this._prev = undefined;
+        this._dist = Number.MAX_SAFE_INTEGER;
+        this._f = Number.MAX_SAFE_INTEGER;
     }
 
     get x(): number {
@@ -27,6 +35,33 @@ export class Grid {
         return this._is2d;
     }
 
+    public get prev(): Grid | undefined {
+        return this._prev;
+    }
+    public set prev(value: Grid | undefined) {
+        this._prev = value;
+    }
+
+    public get dist(): number {
+        return this._dist;
+    }
+    public set dist(value: number) {
+        this._dist = value;
+    }
+
+    public get f(): number {
+        return this._f;
+    }
+    public set f(value: number) {
+        this._f = value;
+    }
+
+    setAsStartGrid(): Grid {
+        this._dist = 0;
+
+        return this;
+    }
+
     str(): string {
         return this._is2d ? `${this._x},${this._y}` :
             `${this._x},${this._y},${this._z}`;
@@ -41,6 +76,18 @@ export class Grid {
             return new Grid(this._x + x, this._y + y);
         } else {
             return new Grid(this._x + x, this._y + y, this._z + z);
+        }
+    }
+
+    distanceTo(destGrid: Grid): number {
+        const distX = destGrid.x - this._x;
+        const distY = destGrid.y - this._y;
+
+        if (this._is2d) {
+            return Math.abs(distX) + Math.abs(distY);
+        } else {
+            const distZ = destGrid.z - this._z;
+            return Math.sqrt(distX * distX + distY * distY + distZ * distZ);
         }
     }
 
