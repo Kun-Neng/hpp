@@ -12,7 +12,7 @@ export class Model {
     readonly _distX: number;
     readonly _distY: number;
     readonly _distZ: number;
-    private _initQ: Map<string, any>;
+    private _initQ: Map<string, Grid>;
 
     constructor(dimension: IDimension, obstacleArray: Array<Grid>, waypoint: IWaypoints) {
         this._dimension = dimension;
@@ -22,13 +22,13 @@ export class Model {
 
         const start = waypoint.start;
         const stop = waypoint.stop;
-        this._startGrid = new Grid(start.x, start.y, start.z);
+        this._startGrid = new Grid(start.x, start.y, start.z).setAsStartGrid();
         this._stopGrid = new Grid(stop.x, stop.y, stop.z);
         this._distX = this._stopGrid.x - this._startGrid.x;
         this._distY = this._stopGrid.y - this._startGrid.y;
         this._distZ = this._stopGrid.z - this._startGrid.z;
 
-        this._initQ = new Map<string, any>();
+        this._initQ = new Map<string, Grid>();
     }
 
     static is2d(dimension: IDimension): boolean {
@@ -109,7 +109,7 @@ export class Model {
         return (lowerBound + 1 < upperBound);
     }
 
-    createInitialQ(isFast: boolean = true): Map<string, any> {
+    createInitialQ(isFast: boolean = true): Map<string, Grid> {
         const x = Number(this._dimension.x);
         const y = Number(this._dimension.y);
 
@@ -130,15 +130,8 @@ export class Model {
 
             if (isFast) {
                 const fValue = Math.sqrt(this._distX * this._distX + this._distY * this._distY + this._distZ * this._distZ);
-
-                this._initQ.set(this._startGrid.str(), {
-                    row: this._startGrid.x,
-                    col: this._startGrid.y,
-                    z: this._startGrid.z,
-                    prev: undefined,
-                    dist: 0,
-                    f: fValue
-                });
+                this._startGrid.f = fValue;
+                this._initQ.set(this._startGrid.str(), this._startGrid);
             } else {
                 for (let row = 0; row < x; row++) {
                     for (let col = 0; col < y; col++) {
@@ -162,20 +155,11 @@ export class Model {
     private updateInitQ(row: number, col: number, z?: number | undefined): void {
         const cellGrid = typeof z === 'number' ? new Grid(row, col, z) : new Grid(row, col);
 
-        let cellObj = {
-            row,
-            col,
-            z,
-            prev: undefined,
-            dist: Number.MAX_SAFE_INTEGER,
-            f: Number.MAX_SAFE_INTEGER
-        };
-
         if (cellGrid.equal(this._startGrid)) {
-            cellObj.dist = 0;
-            cellObj.f = this._is2d ? cellObj.dist + Math.abs(this._distX) + Math.abs(this._distY) : cellObj.dist + Math.abs(this._distX) + Math.abs(this._distY) + Math.abs(this._distZ);
+            cellGrid.dist = 0;
+            cellGrid.f = this._is2d ? cellGrid.dist + Math.abs(this._distX) + Math.abs(this._distY) : cellGrid.dist + Math.abs(this._distX) + Math.abs(this._distY) + Math.abs(this._distZ);
         }
 
-        this._initQ.set(cellGrid.str(), cellObj);
+        this._initQ.set(cellGrid.str(), cellGrid);
     }
 }
