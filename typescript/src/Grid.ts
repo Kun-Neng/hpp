@@ -80,11 +80,11 @@ export class Grid {
     }
 
     distanceTo(destGrid: Grid): number {
-        const distX = destGrid.x - this._x;
-        const distY = destGrid.y - this._y;
+        const distX = Math.abs(destGrid.x - this._x);
+        const distY = Math.abs(destGrid.y - this._y);
 
         if (this._is2d) {
-            return Math.abs(distX) + Math.abs(distY);
+            return Math.sqrt(distX * distX + distY * distY);
         } else {
             const distZ = destGrid.z - this._z;
             return Math.sqrt(distX * distX + distY * distY + distZ * distZ);
