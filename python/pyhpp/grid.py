@@ -1,32 +1,51 @@
 from math import inf
+from math import sqrt
 
 
 class Grid:
-    def __init__(self, x, y, z=0, is_2d=True):
+    def __init__(self, x, y, z = None):
         self.x = int(x)
         self.y = int(y)
-        self.z = int(z)
-        self.is_2d = bool(is_2d)
+        self.z = None if z is None else int(z)
+        self.is_2d = True if z is None else False
+
+        self.prev = None
+        self.dist = inf
+        self.f = inf
 
     def __str__(self):
         return str(self.x) + ',' + str(self.y) if self.is_2d \
             else str(self.x) + ',' + str(self.y) + ',' + str(self.z)
 
     def __eq__(self, other):
-        return (self.x == other.x) and (self.y == other.y) if self.is_2d \
-            else (self.x == other.x) and (self.y == other.y) and (self.z == other.z)
+        return str(self) == str(other)
 
-    def shift(self, x, y, z=0):
-        return Grid(self.x + int(x), self.y + int(y), self.z + int(z), self.is_2d)
+    def set_as_start_grid(self):
+        self.dist = 0
+    
+    def shift(self, x, y, z = 0):
+        return Grid(self.x + int(x), self.y + int(y)) if self.is_2d \
+            else Grid(self.x + int(x), self.y + int(y), self.z + int(z))
 
-    def is_out_of_bound(self, bound_z=None, bound_x=None, bound_y=None):
-        if bound_z is None:
-            bound_z = [-inf, inf]
-        if bound_x is None:
-            bound_x = [-inf, inf]
-        if bound_y is None:
-            bound_y = [-inf, inf]
+    def distance_to(self, destGrid) -> float:
+        dist_X = abs(destGrid.x - self.x)
+        dist_Y = abs(destGrid.y - self.y)
 
-        return self.z <= bound_z[0] or self.z >= bound_z[1] or \
-            self.x <= bound_x[0] or self.x >= bound_x[1] or \
-            self.y <= bound_y[0] or self.y >= bound_y[1]
+        if self.is_2d:
+            return sqrt(dist_X * dist_X + dist_Y * dist_Y)
+        else:
+            dist_Z = abs(destGrid.z - self.z)
+            return sqrt(dist_X * dist_X + dist_Y * dist_Y + dist_Z * dist_Z)
+    
+    def is_out_of_bound(self, bound_x = [-inf, inf], bound_y = [-inf, inf], bound_z = [-inf, inf]) -> bool:
+        minX = min(*bound_x)
+        maxX = max(*bound_x)
+        minY = min(*bound_y)
+        maxY = max(*bound_y)
+        
+        if self.is_2d:
+            return self.x <= minX or self.x >= maxX or self.y <= minY or self.y >= maxY
+        else:
+            minZ = min(*bound_z)
+            maxZ = max(*bound_z)
+            return self.x <= minX or self.x >= maxX or self.y <= minY or self.y >= maxY or self.z <= minZ or self.z >= maxZ

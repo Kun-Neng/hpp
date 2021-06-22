@@ -5,10 +5,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="pyhpp",
-    version="0.0.4",
+    version="0.1.0",
     author="Kun-Neng Hung",
     author_email="kunneng.hung@gmail.com",
-    description="Algorithms for Path Planning",
+    description="Algorithms for Three Dimensional Path Planning",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Kun-Neng/hpp/tree/main/python",

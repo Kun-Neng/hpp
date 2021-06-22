@@ -189,7 +189,7 @@ test('test_constructor', () => {
         "boundary": {
             "zCeil": 6
         }
-    }
+    };
     new AStar(scenarioWithoutFloor);
 });
 

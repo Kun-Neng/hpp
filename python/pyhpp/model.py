@@ -11,11 +11,10 @@ class Model:
 
         start = waypoint["start"]
         stop = waypoint["stop"]
-        self.start_grid = Grid(start["x"], start["y"], start["z"], self.is_2d)
-        self.stop_grid = Grid(stop["x"], stop["y"], stop["z"], self.is_2d)
-        self.dist_x = self.stop_grid.x - self.start_grid.x
-        self.dist_y = self.stop_grid.y - self.start_grid.y
-        self.dist_z = self.stop_grid.z - self.start_grid.z
+        self.start_grid = Grid(start["x"], start["y"]) if self.is_2d else Grid(start["x"], start["y"], start["z"])
+        self.start_grid.set_as_start_grid()
+        self.stop_grid = Grid(stop["x"], stop["y"]) if self.is_2d else Grid(stop["x"], stop["y"], stop["z"])
+        self.dist = self.start_grid.distance_to(self.stop_grid)
 
         self.init_Q = dict()
 
@@ -26,8 +25,8 @@ class Model:
         return False
 
     @staticmethod
-    def create_obstacle_array(data, is_2d):
-        if len(data) == 0 or int(data["size"]) == 0:
+    def create_obstacle_array(data = None):
+        if data is None or len(data) == 0 or int(data["size"]) == 0:
             return []
 
         size = int(data["size"])
@@ -35,11 +34,11 @@ class Model:
         x_array = data["x"]
         y_array = data["y"]
 
-        if is_2d:
+        if "z" not in data:
             return [Grid(x_array[i], y_array[i]) for i in range(size)]
         else:
             z_array = data["z"]
-            return [Grid(x_array[i], y_array[i], z_array[i], is_2d) for i in range(size)]
+            return [Grid(x_array[i], y_array[i], z_array[i]) for i in range(size)]
 
     @staticmethod
     def grids_on_obstacles(array, grids):
@@ -65,52 +64,32 @@ class Model:
 
         return lower_bound + 1 < upper_bound
 
-    def update_init_Q(self, row, col, z, obstacle=None):
-        cell_grid = Grid(row, col, z, self.is_2d)
-        if cell_grid == obstacle:
-            return None
-
-        cell_obj = {
-            "row": row,
-            "col": col,
-            "z": z,
-            "prev": None,
-            "dist": inf,
-            "f": inf
-        }
-
-        if cell_grid == self.start_grid:
-            cell_obj["dist"] = 0
-            cell_obj["f"] = cell_obj["dist"] + abs(self.dist_x) + abs(self.dist_y) if self.is_2d \
-                else cell_obj["dist"] + abs(self.dist_x) + abs(self.dist_y) + abs(self.dist_z)
-
-        self.init_Q[str(cell_grid)] = cell_obj
-
     def create_initial_Q(self, is_fast=True):
         x = int(self.dimension["x"])
         y = int(self.dimension["y"])
 
         if self.is_2d:
-            [self.update_init_Q(row, col, 0, obstacle) for row in range(x) for col in range(y)
-                for obstacle in self.obstacle_array]
+            [self.update_init_Q(row, col, None) for row in range(x) for col in range(y)
+                if Grid(row, col) not in self.obstacle_array]
         else:
             z = int(self.dimension["z"])
 
             if is_fast:
                 # f_value = abs(self.left_x) + abs(self.left_y) + abs(self.left_z)  # option 1
-                from math import sqrt
-                f_value = sqrt(self.dist_x ** 2 + self.dist_y ** 2 + self.dist_z ** 2)  # option 2
-
-                self.init_Q[str(self.start_grid)] = {
-                    "row": self.start_grid.x,
-                    "col": self.start_grid.y,
-                    "z": self.start_grid.z,
-                    "prev": None,
-                    "dist": 0,
-                    "f": f_value
-                }
+                f_value = self.dist  # option 2
+                self.start_grid.f = f_value
+                self.init_Q[str(self.start_grid)] = self.start_grid
             else:
-                [self.update_init_Q(row, col, iz, obstacle) for row in range(x) for col in range(y) for iz in range(z)
-                    for obstacle in self.obstacle_array]
+                [self.update_init_Q(row, col, iz) for row in range(x) for col in range(y) for iz in range(z)
+                    if Grid(row, col, iz) not in self.obstacle_array]
 
         return self.init_Q
+    
+    def update_init_Q(self, row, col, z = None):
+        cell_grid = Grid(row, col, z)
+
+        if cell_grid == self.start_grid:
+            cell_grid.dist = 0
+            cell_grid.f = cell_grid.dist + self.dist
+
+        self.init_Q[str(cell_grid)] = cell_grid

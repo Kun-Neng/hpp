@@ -1,8 +1,12 @@
+import os
 import json
 from pyhpp.a_star import AStar
 
+scenario_json = os.getcwd() + '\\python\\tests\\test_scenario_3d.json'
+print(scenario_json)
+
 if __name__ == "__main__":
-    with open("tests/test_scenario_3d.json") as file:
+    with open(scenario_json) as file:
         scenario = json.load(file)
         file.close()
 

@@ -9,9 +9,7 @@ export class Model {
     readonly _obstacleArray: Array<Grid>;
     readonly _startGrid: Grid;
     readonly _stopGrid: Grid;
-    readonly _distX: number;
-    readonly _distY: number;
-    readonly _distZ: number;
+    readonly _dist: number;
     private _initQ: Map<string, Grid>;
 
     constructor(dimension: IDimension, obstacleArray: Array<Grid>, waypoint: IWaypoints) {
@@ -24,9 +22,7 @@ export class Model {
         const stop = waypoint.stop;
         this._startGrid = new Grid(start.x, start.y, start.z).setAsStartGrid();
         this._stopGrid = new Grid(stop.x, stop.y, stop.z);
-        this._distX = this._stopGrid.x - this._startGrid.x;
-        this._distY = this._stopGrid.y - this._startGrid.y;
-        this._distZ = this._stopGrid.z - this._startGrid.z;
+        this._dist = this._startGrid.distanceTo(this._stopGrid);
 
         this._initQ = new Map<string, Grid>();
     }
@@ -129,7 +125,7 @@ export class Model {
             const z = Number(this._dimension.z);
 
             if (isFast) {
-                const fValue = Math.sqrt(this._distX * this._distX + this._distY * this._distY + this._distZ * this._distZ);
+                const fValue = this._dist;
                 this._startGrid.f = fValue;
                 this._initQ.set(this._startGrid.str(), this._startGrid);
             } else {
@@ -157,7 +153,7 @@ export class Model {
 
         if (cellGrid.equal(this._startGrid)) {
             cellGrid.dist = 0;
-            cellGrid.f = this._is2d ? cellGrid.dist + Math.abs(this._distX) + Math.abs(this._distY) : cellGrid.dist + Math.abs(this._distX) + Math.abs(this._distY) + Math.abs(this._distZ);
+            cellGrid.f = cellGrid.dist + this._dist;
         }
 
         this._initQ.set(cellGrid.str(), cellGrid);
