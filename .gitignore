@@ -1,10 +1,14 @@
-node_modules
-.vscode/
 .idea/
+.vscode/
+.coverage
+
+.pytest_cache/
 python/**/__pycache__/
 python/build/
 python/dist/
 python/pyhpp.egg-info/
+
+node_modules
 typescript/coverage/
 typescript/lib/
 typescript/src/index.*
