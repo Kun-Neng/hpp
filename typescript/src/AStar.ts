@@ -81,7 +81,22 @@ export class AStar {
         // console.log(isGrouping);
         this._groupRadius = this._isGrouping ? Number(grouping!.radius) : 0;
         this._isGroupFlat = scenario.boundary ? true : false;
-        console.log(`[grouping] radius ${this._groupRadius} of ${this._isGroupFlat ? 'circle' : 'sphere'}`);
+
+        if (this._isGrouping) {
+            console.log(`[Grouping] radius ${this._groupRadius} of ${this._isGroupFlat ? 'circle' : 'sphere'}`);
+            if (this._obstacleArray.findIndex(obstacle => {
+                return this.intersect(this._startGrid, obstacle);
+            }) !== -1) {
+                const message = `[Grouping Error] obstacle is in the start ${this._isGroupFlat ? 'circle' : 'sphere'}.`;
+                console.log(message);
+            }
+            if (this._obstacleArray.findIndex(obstacle => {
+                return this.intersect(this._stopGrid, obstacle);
+            }) !== -1) {
+                const message = `[Grouping Error] obstacle is in the stop ${this._isGroupFlat ? 'circle' : 'sphere'}.`;
+                console.log(message);
+            }
+        }
 
         this._message = "[Ready] No Results.";
     }
