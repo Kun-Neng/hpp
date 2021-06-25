@@ -207,6 +207,42 @@ test('test_constructor', () => {
         }
     };
     new AStar(scenarioWithoutFloor);
+
+    const scenarioGroupingWithoutObstaclesInside = {
+        ...scenarioEmptyGroupingWithoutBoundary,
+        "grouping": {
+            "radius": 2
+        }
+    };
+    new AStar(scenarioGroupingWithoutObstaclesInside);
+
+    const scenarioObstaclesInSphere1 = {
+        ...scenarioEmptyGroupingWithoutBoundary,
+        "grouping": {
+            "radius": 5
+        }
+    };
+    new AStar(scenarioObstaclesInSphere1);
+
+    const scenarioObstaclesInSphere2 = {
+        ...scenarioEmptyGroupingWithoutBoundary,
+        "grouping": {
+            "radius": 10
+        }
+    };
+    new AStar(scenarioObstaclesInSphere2);
+
+    const scenarioObstaclesInBothCircles = {
+        ...scenarioEmptyGroupingWithoutBoundary,
+        "boundary": {
+            "zCeil": 6,
+            "zFloor": 1
+        },
+        "grouping": {
+            "radius": 10
+        }
+    };
+    new AStar(scenarioObstaclesInBothCircles);
 });
 
 test('test_find_the_min_F', () => {
