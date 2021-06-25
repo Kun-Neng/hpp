@@ -1,6 +1,8 @@
 import {IDimension} from './interface/IDimension';
 import {IObstacles} from './interface/IObstacles';
 import {IWaypoints} from './interface/IWaypoints';
+import {IBoundary} from './interface/IBoundary';
+import {IGrouping} from './interface/IGrouping';
 import {Grid} from './Grid';
 import {Model} from './Model';
 
@@ -21,10 +23,14 @@ export class AStar {
     readonly _zCeil: number;
     readonly _zFloor: number;
 
+    readonly _isGrouping: boolean;
+    readonly _groupRadius: number;
+    readonly _isGroupFlat: boolean;
+
     private _lastGridKey: string;
     private _message: string;
 
-    constructor(scenario: { dimension: IDimension, waypoint: IWaypoints, data?: IObstacles, boundary?: { zCeil?: number, zFloor?: number } }) {
+    constructor(scenario: { dimension: IDimension, waypoint: IWaypoints, data?: IObstacles, boundary?: IBoundary, grouping?: IGrouping }) {
         const dimension = scenario.dimension;
         this._is2d = Model.is2d(dimension);
         this._obstacleArray = Model.createObstacleArray(scenario.data);
@@ -69,6 +75,13 @@ export class AStar {
                 }
             }
         }
+
+        const grouping = scenario.grouping;
+        this._isGrouping = grouping ? Number(grouping.radius) ? true : false : false;
+        // console.log(isGrouping);
+        this._groupRadius = this._isGrouping ? Number(grouping!.radius) : 0;
+        this._isGroupFlat = scenario.boundary ? true : false;
+        console.log(`[grouping] radius ${this._groupRadius} of ${this._isGroupFlat ? 'circle' : 'sphere'}`);
 
         this._message = "[Ready] No Results.";
     }
@@ -174,10 +187,12 @@ export class AStar {
                         }
                     } else {
                         for (let shiftZ = -1; shiftZ <= 1; shiftZ++) {
+                            // Note: Here diagonally z-shift is not considered
                             const isNotDiagonal = (shiftRow === 0 || shiftCol === 0) && (shiftRow != shiftCol) || (shiftRow === 0 && shiftCol === 0);
                             const isDiagonal = !(shiftRow === 0 && shiftCol === 0 && shiftZ === 0);
 
-                            const isAllowed = this._allowDiagonal ? isDiagonal : isNotDiagonal;
+                            // const isAllowed = this._allowDiagonal ? isDiagonal : isNotDiagonal;
+                            const isAllowed = this._isGrouping ? isNotDiagonal : this._allowDiagonal ? isDiagonal : isNotDiagonal;
                             if (isAllowed) {
                                 const neighborGrid = currentGrid.shift(shiftRow, shiftCol, shiftZ);
 
@@ -188,11 +203,19 @@ export class AStar {
                                 // Full search (time-consuming) = 2D
 
                                 // Fast search
-                                if (this._obstacleArray.findIndex(obstacle => {
-                                    return obstacle.equal(neighborGrid);
-                                }) !== -1) {
-                                    // Find out an obstacle on the point
-                                    continue;
+                                if (this._isGrouping) {
+                                    if (this._obstacleArray.findIndex(obstacle => {
+                                        return this.intersect(neighborGrid, obstacle);
+                                    }) !== -1) {
+                                        continue;
+                                    }
+                                } else {
+                                    if (this._obstacleArray.findIndex(obstacle => {
+                                        return obstacle.equal(neighborGrid);
+                                    }) !== -1) {
+                                        // Find out an obstacle on the point
+                                        continue;
+                                    }
                                 }
 
                                 if (!finalQ.has(neighborGrid.str())) {
@@ -231,6 +254,30 @@ export class AStar {
             "elapsed_ms": calculateEndTime - calculateStartTime,
             "path": this.createPathFromFinalQ(finalQ),
             "message": this._message
+        }
+    }
+
+    private intersect(groupCenterGrid: Grid, obstacleGrid: Grid) {
+        const [boxMinX, boxMaxX, boxMinY, boxMaxY] = [
+            obstacleGrid.x - 0.5, obstacleGrid.x + 0.5,
+            obstacleGrid.y - 0.5, obstacleGrid.y + 0.5
+        ];
+        const x = Math.max(boxMinX, Math.min(groupCenterGrid.x, boxMaxX));
+        const y = Math.max(boxMinY, Math.min(groupCenterGrid.y, boxMaxY));
+
+        if (this._isGroupFlat) {
+            const closestPoint = new Grid(x, y);
+            // const distance = Math.sqrt(Math.pow(x - groupCenterGrid.x, 2) + Math.pow(y - groupCenterGrid.y, 2));
+            const distance = groupCenterGrid.distanceTo(closestPoint);
+
+            return distance <= this._groupRadius;
+        } else {
+            const [boxMinZ, boxMaxZ] = [obstacleGrid.z - 0.5, obstacleGrid.z + 0.5];
+            const z = Math.max(boxMinZ, Math.min(groupCenterGrid.z, boxMaxZ));
+            const closestPoint = new Grid(x, y, z);
+            const distance = groupCenterGrid.distanceTo(closestPoint);
+        
+            return distance <= this._groupRadius;
         }
     }
 
