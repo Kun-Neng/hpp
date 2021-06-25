@@ -266,9 +266,10 @@ export class AStar {
         const y = Math.max(boxMinY, Math.min(groupCenterGrid.y, boxMaxY));
 
         if (this._isGroupFlat) {
+            const flatCenterGrid = new Grid(groupCenterGrid.x, groupCenterGrid.y);
             const closestPoint = new Grid(x, y);
             // const distance = Math.sqrt(Math.pow(x - groupCenterGrid.x, 2) + Math.pow(y - groupCenterGrid.y, 2));
-            const distance = groupCenterGrid.distanceTo(closestPoint);
+            const distance = flatCenterGrid.distanceTo(closestPoint);
 
             return distance <= this._groupRadius;
         } else {
