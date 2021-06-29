@@ -183,15 +183,25 @@ class AStar:
                                 #     # ...
 
                                 # Fast search
-                                is_obstacle_found = False
-                                for index in range(self.num_obstacles):
-                                    obstacle_grid = self.obstacle_array[index]
-                                    if obstacle_grid == neighbor_grid:
-                                        # Find out an obstacle on the neighbor grid
-                                        is_obstacle_found = True
-                                        break
-                                if is_obstacle_found:
-                                    continue
+                                if self.is_grouping:
+                                    is_obstacle_found = False
+                                    for obstacle_grid in self.obstacle_array:
+                                        if self.intersect(neighbor_grid, obstacle_grid):
+                                            is_obstacle_found = True
+                                            # no more to check the other collisions
+                                            break
+                                    if is_obstacle_found:
+                                        # continue to find the next neighbor
+                                        continue
+                                else:
+                                    is_obstacle_found = False
+                                    for obstacle_grid in self.obstacle_array:
+                                        if obstacle_grid == neighbor_grid:
+                                            # Find out an obstacle on the neighbor grid
+                                            is_obstacle_found = True
+                                            break
+                                    if is_obstacle_found:
+                                        continue
 
                                 # has_key was removed in Python 3
                                 # https://docs.python.org/3.0/whatsnew/3.0.html#builtins
