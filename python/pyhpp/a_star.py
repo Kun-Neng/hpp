@@ -46,6 +46,21 @@ class AStar:
                 print(message)
                 self.message = message
         
+        grouping = scenario["grouping"] if "grouping" in scenario else None
+        self.is_grouping = True if grouping is not None and "radius" in grouping and str(grouping["radius"]).isnumeric() else False
+        self.group_radius = float(grouping["radius"]) if self.is_grouping else 0
+        self.is_group_flat = True if "boundary" in scenario else False
+
+        if self.is_grouping:
+            print("[Grouping] radius", self.group_radius, "of", {"circle" if self.is_group_flat else "sphere"})
+            for obstacle in self.obstacle_array:
+                if self.intersect(self.start_grid, obstacle):
+                    message = "[Grouping Error] obstacle is in the start", {"circle" if self.is_group_flat else "sphere"}
+                    print(message)
+                if self.intersect(self.stop_grid, obstacle):
+                    message = "[Grouping Error] obstacle is in the stop", {"circle" if self.is_group_flat else "sphere"}
+                    print(message)
+        
         self.message = "[Ready] No Results."
 
     @staticmethod
@@ -211,3 +226,26 @@ class AStar:
             "path": self.create_path_from_final_Q(final_Q),
             "message": self.message
         }
+    
+    def intersect(self, group_center_grid, obstacle_grid) -> bool:
+        [boxMinX, boxMaxX, boxMinY, boxMaxY] = [
+            obstacle_grid.x - 0.5, obstacle_grid.x + 0.5,
+            obstacle_grid.y - 0.5, obstacle_grid.y + 0.5
+        ]
+        x = max(boxMinX, min(group_center_grid.x, boxMaxX))
+        y = max(boxMinY, min(group_center_grid.y, boxMaxY))
+
+        if self.is_group_flat:
+            flatCenterGrid = Grid(group_center_grid.x, group_center_grid.y)
+            closestPoint = Grid(x, y)
+            # distance = sqrt(pow(x - group_center_grid.x, 2) + pow(y - group_center_grid.y, 2))
+            distance = flatCenterGrid.distance_to(closestPoint)
+
+            return distance <= self.group_radius
+        else:
+            [boxMinZ, boxMaxZ] = [obstacle_grid.z - 0.5, obstacle_grid.z + 0.5]
+            z = max(boxMinZ, min(group_center_grid.z, boxMaxZ))
+            closestPoint = Grid(x, y, z)
+            distance = group_center_grid.distance_to(closestPoint)
+        
+            return distance <= self.group_radius
