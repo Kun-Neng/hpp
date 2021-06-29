@@ -206,8 +206,9 @@ export class AStar {
                             const isNotDiagonal = (shiftRow === 0 || shiftCol === 0) && (shiftRow != shiftCol) || (shiftRow === 0 && shiftCol === 0);
                             const isDiagonal = !(shiftRow === 0 && shiftCol === 0 && shiftZ === 0);
 
-                            // const isAllowed = this._allowDiagonal ? isDiagonal : isNotDiagonal;
-                            const isAllowed = this._isGrouping ? isNotDiagonal : this._allowDiagonal ? isDiagonal : isNotDiagonal;
+                            const isAllowed = this._allowDiagonal ? isDiagonal : isNotDiagonal;
+                            // If _isGrouping, then isNotDiagonal
+                            // const isAllowed = this._isGrouping ? isNotDiagonal : this._allowDiagonal ? isDiagonal : isNotDiagonal;
                             if (isAllowed) {
                                 const neighborGrid = currentGrid.shift(shiftRow, shiftCol, shiftZ);
 
