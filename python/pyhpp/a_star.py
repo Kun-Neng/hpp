@@ -49,7 +49,7 @@ class AStar:
         grouping = scenario["grouping"] if "grouping" in scenario else None
         self.is_grouping = True if grouping is not None and "radius" in grouping and str(grouping["radius"]).isnumeric() else False
         self.group_radius = float(grouping["radius"]) if self.is_grouping else 0
-        self.is_group_flat = True if "boundary" in scenario else False
+        self.is_group_flat = True if self.is_2d or "boundary" in scenario else False
 
         if self.is_grouping:
             print("[Grouping] radius", self.group_radius, "of", {"circle" if self.is_group_flat else "sphere"})
