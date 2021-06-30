@@ -248,6 +248,25 @@ def test_create_path_from_finalQ():
     assert len(result_2D["z"]) == 0
 
 
+def test_intersect():
+    astar = AStar({
+        "dimension": {"x": 15, "y": 15},
+        "waypoint": {
+            "start": {"x": 12, "y": 0},
+            "stop": {"x": 1, "y": 11},
+            "allowDiagonal": False
+        },
+        "grouping": {"radius": 1}
+    })
+
+    group_center_grid = Grid(2.999, 5)
+    obstacle_grid = Grid(5, 5)
+    assert astar.intersect(group_center_grid, obstacle_grid) == False
+
+    intersected_group_center_grid = Grid(3, 5)
+    assert astar.intersect(intersected_group_center_grid, obstacle_grid) == True
+
+
 def test_calculate_path():
     '''
     Case 1: No results
