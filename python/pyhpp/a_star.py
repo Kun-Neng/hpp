@@ -24,8 +24,14 @@ class AStar:
         self.last_grid_key = str(self.stop_grid)
         self.allow_diagonal = bool(self.waypoint["allowDiagonal"]) if "allowDiagonal" in self.waypoint else False
 
-        is_fast = True if options is None or 'type' not in options else False if options['type'] == 'original' else True
-        model = Model(dimension, self.obstacle_array, self.waypoint)
+        if options is None:
+            debug_mode = False
+            is_fast = True
+        else:
+            debug_mode = True if 'debug_mode' in options and options['debug_mode'] is True else False
+            is_fast = False if 'type' in options and options['type'] == 'original' else True
+
+        model = Model(dimension, self.obstacle_array, self.waypoint, debug_mode)
         self.Q = model.create_initial_Q(is_fast)
 
         self.open_set = dict()

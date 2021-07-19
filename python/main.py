@@ -17,25 +17,40 @@ if __name__ == "__main__":
 
     print(f'Small 3D Scenario Data Size: {small_3d_scenario["data"]["size"]}')
     
-    a_star = AStar(small_3d_scenario)
-    result = a_star.calculate_path()
+    original_a_star = AStar(small_3d_scenario, {'debug_mode': True, 'type': 'original'})
+    # original_a_star = AStar(small_3d_scenario)
+    original_result = original_a_star.calculate_path()
 
-    # for [key, value] in result.items():
+    # for [key, value] in original_result.items():
     #     print(key, value)
 
-    visited_Q = result["visited_Q"]
-    # [print(item) for item in visited_Q.items()]
-    final_Q = result["final_Q"]
-    # [print(item) for item in final_Q.items()]
-    message = result["message"]
-    path = result["path"]
-    elapsed_time = result["elapsed_ms"]
-    print(f"message: {message}")
-    print(f'size of visited Q: {len(visited_Q)}')
-    print(f"x: {path['x']}")
-    print(f"y: {path['y']}")
-    print(f"z: {path['z']}")
-    print(f"elapsed_ms: {elapsed_time} ms")
+    original_visited_Q = original_result["visited_Q"]
+    # [print(item) for item in original_visited_Q.items()]
+    # original_final_Q = original_result["final_Q"]
+    # [print(item) for item in original_final_Q.items()]
+    original_message = original_result["message"]
+    original_path = original_result["path"]
+    original_elapsed_time = original_result["elapsed_ms"]
+    print(f"message: {original_message}")
+    print(f'size of visited Q: {len(original_visited_Q)}')
+    print(f"x: {original_path['x']}")
+    print(f"y: {original_path['y']}")
+    print(f"z: {original_path['z']}")
+    print(f"elapsed_ms: {original_elapsed_time} ms")
+
+    fast_a_star = AStar(small_3d_scenario, {'debug_mode': True, 'type': 'fast'})
+    fast_result = fast_a_star.calculate_path()
+
+    fast_visited_Q = fast_result["visited_Q"]
+    fast_message = fast_result["message"]
+    fast_path = fast_result["path"]
+    fast_elapsed_time = fast_result["elapsed_ms"]
+    print(f"message: {fast_message}")
+    print(f'size of visited Q: {len(fast_visited_Q)}')
+    print(f"x: {fast_path['x']}")
+    print(f"y: {fast_path['y']}")
+    print(f"z: {fast_path['z']}")
+    print(f"elapsed_ms: {fast_elapsed_time} ms")
 
     # print(medium_scenarios)
     for medium_3d_scenario_json in medium_scenarios:
@@ -46,6 +61,7 @@ if __name__ == "__main__":
         
         print(f'Medium 3D Scenario Data Size: {medium_3d_scenario["data"]["size"]}')
 
+        # a_star = AStar(medium_3d_scenario, {'debug_mode': True})
         a_star = AStar(medium_3d_scenario)
         result = a_star.calculate_path()
 

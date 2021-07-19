@@ -1,9 +1,10 @@
+import time
 from math import inf
 from pyhpp.grid import Grid
 
 
 class Model:
-    def __init__(self, dimension, obstacle_array, waypoint):
+    def __init__(self, dimension, obstacle_array, waypoint, debug_mode=False):
         self.dimension = dimension
         self.is_2d = Model.is_two_dimensional(self.dimension)
 
@@ -17,6 +18,8 @@ class Model:
         self.dist = self.start_grid.distance_to(self.stop_grid)
 
         self.init_Q = dict()
+
+        self.debug_mode = debug_mode
 
     @staticmethod
     def is_two_dimensional(dimension):
@@ -68,6 +71,8 @@ class Model:
         x = int(self.dimension["x"])
         y = int(self.dimension["y"])
 
+        calculate_start_time = time.time()
+        
         if self.is_2d:
             [self.update_init_Q(row, col, None) for row in range(x) for col in range(y)
                 if Grid(row, col) not in self.obstacle_array]
@@ -83,6 +88,10 @@ class Model:
                 [self.update_init_Q(row, col, iz) for row in range(x) for col in range(y) for iz in range(z)
                     if Grid(row, col, iz) not in self.obstacle_array]
 
+        calculate_end_time = time.time()
+        if self.debug_mode is True:
+            print(f'create_initial_Q time: {1000.0 * (calculate_end_time - calculate_start_time)} ms')
+        
         return self.init_Q
     
     def update_init_Q(self, row, col, z = None):
