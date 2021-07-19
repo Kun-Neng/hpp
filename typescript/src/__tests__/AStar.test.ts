@@ -277,4 +277,19 @@ test('test_calculate_path', () => {
         .toBe(scenario_3d_allow_diagonal.waypoint.stop.y);
     expect(result3DDiagonal.path.z[result3DDiagonal.path.z.length - 1])
         .toBe(scenario_3d_allow_diagonal.waypoint.stop.z);
+    
+    const originalOptions = {debugMode: true, type: 'original'};
+    const originalAStar3DDiagonal = new AStar(scenario_3d_allow_diagonal, originalOptions);
+    const originalResult3DDiagonal = originalAStar3DDiagonal.calculatePath();
+    expect(originalResult3DDiagonal.message).toBe('[Done] Arrival! 🚀');
+
+    const fastOptions = {debugMode: false, type: 'fast'};
+    const fastAStar3DDiagonal = new AStar(scenario_3d_allow_diagonal, fastOptions);
+    const fastResult3DDiagonal = fastAStar3DDiagonal.calculatePath();
+    expect(fastResult3DDiagonal.message).toBe('[Done] Arrival! 🚀');
+
+    const otherTypeOptions = {debugMode: false, type: undefined};
+    const otherAStar3DDiagonal = new AStar(scenario_3d_allow_diagonal, otherTypeOptions);
+    const otherResult3DDiagonal = otherAStar3DDiagonal.calculatePath();
+    expect(otherResult3DDiagonal.message).toBe('[Done] Arrival! 🚀');
 });

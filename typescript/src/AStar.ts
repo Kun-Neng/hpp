@@ -1,6 +1,7 @@
 import {IDimension} from './interface/IDimension';
 import {IObstacles} from './interface/IObstacles';
 import {IWaypoints} from './interface/IWaypoints';
+import {IOptions} from './interface/IOptions';
 import {Grid} from './Grid';
 import {Model} from './Model';
 
@@ -21,10 +22,13 @@ export class AStar {
     readonly _zCeil: number;
     readonly _zFloor: number;
 
+    readonly _debugMode: boolean;
+    readonly _type: string;
+
     private _lastGridKey: string;
     private _message: string;
 
-    constructor(scenario: { dimension: IDimension, waypoint: IWaypoints, data?: IObstacles, boundary?: { zCeil?: number, zFloor?: number } }) {
+    constructor(scenario: { dimension: IDimension, waypoint: IWaypoints, data?: IObstacles, boundary?: { zCeil?: number, zFloor?: number } }, options?: IOptions) {
         const dimension = scenario.dimension;
         this._is2d = Model.is2d(dimension);
         this._obstacleArray = Model.createObstacleArray(scenario.data);
@@ -33,8 +37,16 @@ export class AStar {
         const waypoint = scenario.waypoint;
         // console.log(waypoint);
 
-        const model = new Model(dimension, this._obstacleArray, waypoint);
-        this._Q = model.createInitialQ();
+        if (!options) {
+            this._debugMode = false;
+            this._type = 'fast';
+        } else {
+            this._debugMode = options.debugMode ? options.debugMode : false;
+            this._type = options.type ? options.type === 'original' ? 'original': 'fast' : 'fast';
+        }
+
+        const model = new Model(dimension, this._obstacleArray, waypoint, this._debugMode);
+        this._Q = model.createInitialQ(this._type === 'fast');
 
         const start = waypoint.start;
         const stop = waypoint.stop;

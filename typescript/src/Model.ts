@@ -12,7 +12,9 @@ export class Model {
     readonly _dist: number;
     private _initQ: Map<string, Grid>;
 
-    constructor(dimension: IDimension, obstacleArray: Array<Grid>, waypoint: IWaypoints) {
+    readonly _debugMode: boolean;
+
+    constructor(dimension: IDimension, obstacleArray: Array<Grid>, waypoint: IWaypoints, debugMode = false) {
         this._dimension = dimension;
         this._is2d = Model.is2d(this._dimension);
 
@@ -25,6 +27,8 @@ export class Model {
         this._dist = this._startGrid.distanceTo(this._stopGrid);
 
         this._initQ = new Map<string, Grid>();
+
+        this._debugMode = debugMode
     }
 
     static is2d(dimension: IDimension): boolean {
@@ -109,6 +113,8 @@ export class Model {
         const x = Number(this._dimension.x);
         const y = Number(this._dimension.y);
 
+        const calculateStartTime = Date.now();
+
         if (this._is2d) {
             for (let row = 0; row < x; row++) {
                 for (let col = 0; col < y; col++) {
@@ -143,6 +149,11 @@ export class Model {
                     }
                 }
             }
+        }
+
+        const calculateEndTime = Date.now();
+        if (this._debugMode) {
+            console.log(`create_initial_Q time: ${calculateEndTime - calculateStartTime} ms`);
         }
 
         return this._initQ;
