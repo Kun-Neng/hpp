@@ -41,20 +41,20 @@ const aStar = new AStar(scenario);
 ```
 const result = aStar.calculatePath();
 
-// visited_Q = result.visitedQ;
-// final_Q = result.finalQ;
+// visited_Q = result.visited_Q;
+// final_Q = result.final_Q;
 const path = result.path;
 ```
-> `visitedQ`: all the visited positions<br>
-> `finalQ`: all the positions in the A* path<br>
+> `visited_Q`: all the visited positions<br>
+> `final_Q`: all the positions in the A* path<br>
 > `path`: the A* path object constructed by the axis arrays from start to stop<br>
 
 * Useful information:
 ```
-message = result.message
+const message = result.message;
 ```
 > `message`: the information about path planning
 ```
-elapsed_time = result.elapsedMS
+const elapsed_time = result.elapsed_ms;
 ```
 > `elapsed_ms`: the running milliseconds of path planning
