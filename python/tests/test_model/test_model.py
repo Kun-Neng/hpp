@@ -132,7 +132,10 @@ def test_create_initial_Q():
     obstacle_3D_array = Model.create_obstacle_array(scenario_3d["data"])
     model3D = Model(scenario_3d["dimension"], obstacle_3D_array, scenario_3d["waypoint"])
     isFast = False
-    Q_3D = model3D.create_initial_Q(isFast)
+    original_Q_3D = model3D.create_initial_Q(isFast)
 
     number_obstacle_grids_3D = (int(scenario_3d["dimension"]["x"]) * int(scenario_3d["dimension"]["y"]) * int(scenario_3d["dimension"]["z"])) - int(scenario_3d["data"]["size"])
-    assert len(Q_3D) == number_obstacle_grids_3D
+    assert len(original_Q_3D) == number_obstacle_grids_3D
+
+    fast_Q_3D = model3D.create_initial_Q()
+    assert len(fast_Q_3D) == number_obstacle_grids_3D

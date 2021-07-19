@@ -199,11 +199,18 @@ def test_find_the_min_F():
     obstacle_3D_array = Model.create_obstacle_array(scenario["data"])
     model_3D = Model(scenario["dimension"], obstacle_3D_array, scenario["waypoint"])
     is_fast = True
-    Q_3D = model_3D.create_initial_Q(is_fast)
+    fast_Q_3D = model_3D.create_initial_Q(is_fast)
 
-    min_grid_3D = AStar.find_the_min_f(Q_3D)
+    min_grid_3D = AStar.find_the_min_f(fast_Q_3D)
     assert min_grid_3D["key"] == '5,9,2'
     assert int(min_grid_3D["value"].dist) == 0
+
+    is_fast = False
+    original_Q_3D = model_3D.create_initial_Q(is_fast)
+
+    original_min_grid_3D = AStar.find_the_min_f(original_Q_3D)
+    assert original_min_grid_3D["key"] == '5,9,2'
+    assert int(original_min_grid_3D["value"].dist) == 0
 
 
 def test_create_path_from_finalQ():
@@ -264,3 +271,8 @@ def test_calculate_path():
     assert result_3D_diagonal["path"]["x"][len(result_3D_diagonal["path"]["x"]) - 1] == int(scenario_3d_allow_diagonal["waypoint"]["stop"]["x"])
     assert result_3D_diagonal["path"]["y"][len(result_3D_diagonal["path"]["y"]) - 1] == int(scenario_3d_allow_diagonal["waypoint"]["stop"]["y"])
     assert result_3D_diagonal["path"]["z"][len(result_3D_diagonal["path"]["z"]) - 1] == int(scenario_3d_allow_diagonal["waypoint"]["stop"]["z"])
+
+    options = {'type': 'original'}
+    original_astar_3D_diagonal = AStar(scenario_3d_allow_diagonal, options)
+    original_result_3D_diagonal = original_astar_3D_diagonal.calculate_path()
+    assert original_result_3D_diagonal["message"] == '[Done] Arrival! 🚀'

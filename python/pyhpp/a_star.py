@@ -5,7 +5,7 @@ from pyhpp.model import Model
 
 
 class AStar:
-    def __init__(self, scenario):
+    def __init__(self, scenario, options=None):
         dimension = scenario["dimension"]
         self.is_2d = Model.is_two_dimensional(dimension)
 
@@ -24,8 +24,9 @@ class AStar:
         self.last_grid_key = str(self.stop_grid)
         self.allow_diagonal = bool(self.waypoint["allowDiagonal"]) if "allowDiagonal" in self.waypoint else False
 
+        is_fast = True if options is None or 'type' not in options else False if options['type'] == 'original' else True
         model = Model(dimension, self.obstacle_array, self.waypoint)
-        self.Q = model.create_initial_Q()
+        self.Q = model.create_initial_Q(is_fast)
 
         self.open_set = dict()
         self.open_set[str(self.start_grid)] = self.Q.get(str(self.start_grid))
