@@ -56,6 +56,15 @@ export class Grid {
         this._f = value;
     }
 
+    getCrux(crux: string): number {
+        if (crux === 'dist') {
+            return this._dist;
+        } else if (crux === 'f') {
+            return this._f;
+        }
+        return Number.MAX_SAFE_INTEGER;
+    }
+
     setAsStartGrid(): Grid {
         this._dist = 0;
 

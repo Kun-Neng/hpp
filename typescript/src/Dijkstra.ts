@@ -52,16 +52,16 @@ export class Dijkstra {
         this._message = "[Ready] No Results.";
     }
 
-    static findTheMinF(hashmap: Map<string, Grid>): { key: string, value: Grid } {
+    static findTheMinimum(hashmap: Map<string, Grid>, crux: string): { key: string, value: Grid } {
         let key = '';
         let value: any;
-        let minDist = Number.MAX_SAFE_INTEGER;
+        let minimum = Number.MAX_SAFE_INTEGER;
         hashmap.forEach((objInHashmap: Grid, keyInHashmap: string) => {
-            // console.log(keyInHashmap + ':' + objInHashmap.dist);
-            if (objInHashmap.dist <= minDist) {
+            // console.log(keyInHashmap + ':' + objInHashmap.getCrux(crux));
+            if (objInHashmap.getCrux(crux) <= minimum) {
                 key = keyInHashmap;
                 value = objInHashmap;
-                minDist = objInHashmap.dist;
+                minimum = objInHashmap.getCrux(crux);
             }
         });
 
@@ -108,7 +108,7 @@ export class Dijkstra {
 
         let size = this._openSet.size;
         while (size > 0) {
-            const obj = Dijkstra.findTheMinF(this._openSet);
+            const obj = Dijkstra.findTheMinimum(this._openSet, 'dist');
             const objKey = obj.key;
             const currentGrid = obj.value;
             finalQ.set(objKey, currentGrid);

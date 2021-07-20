@@ -10,6 +10,17 @@ test('test_is2d', () => {
     expect(grid3D123.is2d).toBe(false);
 });
 
+test('test_get_crux', () => {
+    expect(grid2D.getCrux('dist')).toBe(Number.MAX_SAFE_INTEGER);
+    expect(grid2D.getCrux('f')).toBe(Number.MAX_SAFE_INTEGER);
+    expect(grid2D.getCrux('')).toBe(Number.MAX_SAFE_INTEGER);
+
+    grid2D.dist = 1;
+    grid2D.f = 0.5;
+    expect(grid2D.getCrux('dist')).toBe(1);
+    expect(grid2D.getCrux('f')).toBe(0.5);
+});
+
 test('test_str', () => {
     expect(grid2D.str()).toBe('1,2');
     expect(grid3D120.str()).toBe('1,2,0');
