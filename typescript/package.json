@@ -1,6 +1,6 @@
 {
   "name": "jshpp",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Algorithms for Three Dimensional Path Planning",
   "main": "lib/AStar.js",
   "types": "lib/AStar.d.ts",
