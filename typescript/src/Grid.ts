@@ -95,7 +95,7 @@ export class Grid {
         if (this._is2d) {
             return Math.sqrt(distX * distX + distY * distY);
         } else {
-            const distZ = destGrid.z - this._z;
+            const distZ = Math.abs(destGrid.z - this._z);
             return Math.sqrt(distX * distX + distY * distY + distZ * distZ);
         }
     }
