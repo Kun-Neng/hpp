@@ -4,6 +4,7 @@ import {IWaypoints} from './interface/IWaypoints';
 import {IOptions} from './interface/IOptions';
 import {Grid} from './Grid';
 import {Model} from './Model';
+import Tools from './Tools';
 
 enum TIME_TAG {
     START,
@@ -85,22 +86,6 @@ export class AStar {
         this._message = "[Ready] No Results.";
     }
 
-    static findTheMinF(hashmap: Map<string, Grid>): { key: string, value: Grid } {
-        let key = '';
-        let value: any;
-        let minF = Number.MAX_SAFE_INTEGER;
-        hashmap.forEach((objInHashmap: Grid, keyInHashmap: string) => {
-            // console.log(keyInHashmap + ':' + objInHashmap.f);
-            if (objInHashmap.f <= minF) {
-                key = keyInHashmap;
-                value = objInHashmap;
-                minF = objInHashmap.f;
-            }
-        });
-
-        return { key, value };
-    }
-
     createPathFromFinalQ(finalQ: Map<string, Grid>): { x: number[], y: number[], z: number[] } {
         let finalGrid = finalQ.get(this._stopGrid.str()) ?? finalQ.get(this._lastGridKey);
 
@@ -141,7 +126,7 @@ export class AStar {
 
         let size = this._openSet.size;
         while (size > 0) {
-            const obj = AStar.findTheMinF(this._openSet);
+            const obj = Tools.findTheMinimum(this._openSet, 'f');
             const objKey = obj.key;
             const currentGrid = obj.value;
             finalQ.set(objKey, currentGrid);

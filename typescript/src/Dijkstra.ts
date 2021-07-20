@@ -3,6 +3,7 @@ import {IObstacles} from './interface/IObstacles';
 import {IWaypoints} from './interface/IWaypoints';
 import {Grid} from './Grid';
 import {Model} from './Model';
+import Tools from './Tools';
 
 enum TIME_TAG {
     START,
@@ -52,22 +53,6 @@ export class Dijkstra {
         this._message = "[Ready] No Results.";
     }
 
-    static findTheMinimum(hashmap: Map<string, Grid>, crux: string): { key: string, value: Grid } {
-        let key = '';
-        let value: any;
-        let minimum = Number.MAX_SAFE_INTEGER;
-        hashmap.forEach((objInHashmap: Grid, keyInHashmap: string) => {
-            // console.log(keyInHashmap + ':' + objInHashmap.getCrux(crux));
-            if (objInHashmap.getCrux(crux) <= minimum) {
-                key = keyInHashmap;
-                value = objInHashmap;
-                minimum = objInHashmap.getCrux(crux);
-            }
-        });
-
-        return { key, value };
-    }
-
     createPathFromFinalQ(finalQ: Map<string, Grid>): { x: number[], y: number[], z: number[] } {
         let finalGrid = finalQ.get(this._stopGrid.str()) ?? finalQ.get(this._lastGridKey);
 
@@ -108,7 +93,7 @@ export class Dijkstra {
 
         let size = this._openSet.size;
         while (size > 0) {
-            const obj = Dijkstra.findTheMinimum(this._openSet, 'dist');
+            const obj = Tools.findTheMinimum(this._openSet, 'dist');
             const objKey = obj.key;
             const currentGrid = obj.value;
             finalQ.set(objKey, currentGrid);
