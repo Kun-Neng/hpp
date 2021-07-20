@@ -17,8 +17,8 @@ test('test_get_crux', () => {
 
     grid2D.dist = 1;
     grid2D.f = 0.5;
-    expect(grid2D.getCrux('dist')).toBe(1);
-    expect(grid2D.getCrux('f')).toBe(0.5);
+    expect(grid2D.getCrux('dist')).toBe(grid2D.dist);
+    expect(grid2D.getCrux('f')).toBe(grid2D.f);
 });
 
 test('test_str', () => {

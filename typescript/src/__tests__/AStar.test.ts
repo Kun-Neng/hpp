@@ -1,5 +1,4 @@
 import {Grid} from '../Grid';
-import {Model} from '../Model';
 import {AStar} from '../AStar';
 
 const scenarioWithWaypointsOnSomeObstacle = {
@@ -191,25 +190,6 @@ test('test_constructor', () => {
         }
     };
     new AStar(scenarioWithoutFloor);
-});
-
-test('test_find_the_min_F', () => {
-    const obstacle2DArray = Model.createObstacleArray(scenario_2d.data);
-    const model2D = new Model(scenario_2d.dimension, obstacle2DArray, scenario_2d.waypoint);
-    const Q2D = model2D.createInitialQ();
-
-    const minGrid2D = AStar.findTheMinF(Q2D);
-    expect(minGrid2D.key).toBe('12,0');
-    expect(minGrid2D.value.dist).toBe(0);
-
-    const obstacle3DArray = Model.createObstacleArray(scenario.data);
-    const model3D = new Model(scenario.dimension, obstacle3DArray, scenario.waypoint);
-    const isFast = true;
-    const Q3D = model3D.createInitialQ(isFast);
-    
-    const minGrid3D = AStar.findTheMinF(Q3D);
-    expect(minGrid3D.key).toBe('5,9,2');
-    expect(minGrid3D.value.dist).toBe(0);
 });
 
 test('test_create_path_from_finalQ', () => {
