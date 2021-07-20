@@ -33,7 +33,7 @@ export class Dijkstra {
         // console.log(waypoint);
 
         const model = new Model(dimension, this._obstacleArray, waypoint, true);
-        this._Q = model.createInitialQ();
+        this._Q = model.createInitialQ(false);
 
         const start = waypoint.start;
         const stop = waypoint.stop;

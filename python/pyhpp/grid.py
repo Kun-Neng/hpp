@@ -34,6 +34,10 @@ class Grid:
         return Grid(self.x + int(x), self.y + int(y)) if self.is_2d \
             else Grid(self.x + int(x), self.y + int(y), self.z + int(z))
 
+    def manhattan_distance_to(self, destGrid) -> float:
+        distance = abs(destGrid.x - self.x) + abs(destGrid.y - self.y)
+        return distance if self.is_2d else distance + abs(destGrid.z - self.z)
+    
     def distance_to(self, destGrid) -> float:
         dist_X = abs(destGrid.x - self.x)
         dist_Y = abs(destGrid.y - self.y)

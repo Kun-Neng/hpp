@@ -26,7 +26,7 @@ class Dijkstra:
         self.allow_diagonal = bool(self.waypoint["allowDiagonal"]) if "allowDiagonal" in self.waypoint else False
         
         model = Model(dimension, self.obstacle_array, self.waypoint, True)
-        self.Q = model.create_initial_Q()
+        self.Q = model.create_initial_Q(False)
 
         self.open_set = dict()
         self.open_set[str(self.start_grid)] = self.Q.get(str(self.start_grid))

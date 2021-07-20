@@ -162,7 +162,7 @@ export class AStar {
                                 const alt = currentGrid.dist + dist;
                                 if (alt < neighbor.dist) {
                                     neighbor.dist = alt;
-                                    neighbor.f = alt + neighbor.distanceTo(this._stopGrid);
+                                    neighbor.f = alt + neighbor.manhattanDistanceTo(this._stopGrid);
                                     // neighbor.f = alt + Math.sqrt(distX * distX + distY * distY);
                                     neighbor.prev = currentGrid;
                                     this._openSet.set(neighborGrid.str(), neighbor);
@@ -206,7 +206,7 @@ export class AStar {
                                     }
                                     if (alt < neighborObj.dist) {
                                         neighborObj.dist = alt;
-                                        neighborObj.f = alt + neighborObj.distanceTo(this._stopGrid);
+                                        neighborObj.f = alt + neighborObj.manhattanDistanceTo(this._stopGrid);
                                         neighborObj.prev = currentGrid;
                                         this._openSet.set(neighborGrid.str(), neighborObj);
                                     }

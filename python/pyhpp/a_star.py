@@ -132,7 +132,7 @@ class AStar:
                                 alt = current_grid.dist + dist
                                 if alt < neighbor.dist:
                                     neighbor.dist = alt
-                                    neighbor.f = alt + neighbor.distance_to(self.stop_grid)
+                                    neighbor.f = alt + neighbor.manhattan_distance_to(self.stop_grid)
                                     # neighbor["f"] = alt + sqrt(dist_x ** 2 + dist_y ** 2)
                                     neighbor.prev = str(current_grid)
                                     self.open_set[str(neighbor_grid)] = neighbor
@@ -187,7 +187,7 @@ class AStar:
                                 alt = current_grid.dist + dist
                                 if alt < neighbor.dist:
                                     neighbor.dist = alt
-                                    neighbor.f = alt + neighbor.distance_to(self.stop_grid)
+                                    neighbor.f = alt + neighbor.manhattan_distance_to(self.stop_grid)
                                     neighbor.prev = str(current_grid)
                                     self.open_set[str(neighbor_grid)] = neighbor
 

@@ -88,6 +88,11 @@ export class Grid {
         }
     }
 
+    manhattanDistanceTo(destGrid: Grid): number {
+        const distance = Math.abs(destGrid.x - this._x) + Math.abs(destGrid.y - this._y);
+        return this._is2d ? distance : distance + Math.abs(destGrid.z - this._z);
+    }
+    
     distanceTo(destGrid: Grid): number {
         const distX = Math.abs(destGrid.x - this._x);
         const distY = Math.abs(destGrid.y - this._y);
