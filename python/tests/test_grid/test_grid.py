@@ -1,3 +1,4 @@
+from math import inf
 from pyhpp.grid import Grid
 
 grid_2D = Grid(1, 2)
@@ -24,6 +25,16 @@ def test_equal():
 
     assert (grid_3D123 == Grid(1, 2, 3)) == True
     assert (grid_3D123 == Grid(1, 2, 4)) == False
+
+def test_get_crux():
+    assert (grid_2D.get_crux('dist') == inf) == True
+    assert (grid_2D.get_crux('f') == inf) == True
+    assert (grid_2D.get_crux('') == inf) == True
+
+    grid_2D.dist = 1
+    grid_2D.f = 0.5
+    assert (grid_2D.get_crux('dist') == grid_2D.dist) == True
+    assert (grid_2D.get_crux('f') == grid_2D.f) == True
 
 def test_shift():
     assert (grid_2D.shift(2, 1) == Grid(3, 3)) == True

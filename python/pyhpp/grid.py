@@ -1,5 +1,4 @@
-from math import inf
-from math import sqrt
+from math import inf, sqrt
 
 
 class Grid:
