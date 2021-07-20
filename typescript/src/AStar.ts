@@ -154,7 +154,7 @@ export class AStar {
                             if (neighbor && !finalQ.get(neighborGrid.str())) {
                                 visitedQ.set(neighborGrid.str(), neighbor);
 
-                                if (this._openSet.get(neighborGrid.str())) {
+                                if (!this._openSet.has(neighborGrid.str())) {
                                     this._openSet.set(neighborGrid.str(), neighbor);
                                 }
 
