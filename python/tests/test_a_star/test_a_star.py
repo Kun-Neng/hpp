@@ -1,6 +1,5 @@
 import copy
 from pyhpp.grid import Grid
-from pyhpp.model import Model
 from pyhpp.a_star import AStar
 
 scenario_with_waypoints_on_some_obstacle = {
@@ -185,32 +184,6 @@ def test_constructor():
     scenario_without_floor = copy.deepcopy(scenario)
     scenario_without_floor["boundary"] = { "zCeil": 6 }
     AStar(scenario_without_floor)
-
-
-def test_find_the_min_F():
-    obstacle_2D_array = Model.create_obstacle_array(scenario_2d["data"])
-    model_2D = Model(scenario_2d["dimension"], obstacle_2D_array, scenario_2d["waypoint"])
-    Q_2D = model_2D.create_initial_Q()
-
-    min_grid_2D = AStar.find_the_min_f(Q_2D)
-    assert min_grid_2D["key"] == '12,0'
-    assert int(min_grid_2D["value"].dist) == 0
-
-    obstacle_3D_array = Model.create_obstacle_array(scenario["data"])
-    model_3D = Model(scenario["dimension"], obstacle_3D_array, scenario["waypoint"])
-    is_fast = True
-    fast_Q_3D = model_3D.create_initial_Q(is_fast)
-
-    min_grid_3D = AStar.find_the_min_f(fast_Q_3D)
-    assert min_grid_3D["key"] == '5,9,2'
-    assert int(min_grid_3D["value"].dist) == 0
-
-    is_fast = False
-    original_Q_3D = model_3D.create_initial_Q(is_fast)
-
-    original_min_grid_3D = AStar.find_the_min_f(original_Q_3D)
-    assert original_min_grid_3D["key"] == '5,9,2'
-    assert int(original_min_grid_3D["value"].dist) == 0
 
 
 def test_create_path_from_finalQ():

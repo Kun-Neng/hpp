@@ -20,6 +20,14 @@ class Grid:
     def __eq__(self, other):
         return str(self) == str(other)
 
+    def get_crux(self, crux) -> float:
+        if crux == 'dist':
+            return self.dist
+        elif crux == 'f':
+            return self.f
+        
+        return inf
+    
     def set_as_start_grid(self):
         self.dist = 0
     

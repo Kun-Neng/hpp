@@ -2,6 +2,7 @@ import time
 from math import inf, sqrt
 from pyhpp.grid import Grid
 from pyhpp.model import Model
+from pyhpp.tools import Tools
 
 
 class AStar:
@@ -55,23 +56,6 @@ class AStar:
         
         self.message = "[Ready] No Results."
 
-    @staticmethod
-    def find_the_min_f(hashmap):
-        obj_key = None
-        obj_value = None
-        min_F = inf
-        for [key, obj] in hashmap.items():
-            # print(key + ':' + str(obj.f))
-            if obj.f <= min_F:
-                obj_key = key
-                obj_value = obj
-                min_F = obj.f
-
-        return {
-            "key": obj_key,
-            "value": obj_value
-        }
-
     def create_path_from_final_Q(self, final_Q):
         final_grid = final_Q.get(str(self.stop_grid))
         if final_grid is None:
@@ -112,7 +96,7 @@ class AStar:
 
         size = len(self.open_set)
         while size > 0:
-            obj = AStar.find_the_min_f(self.open_set)
+            obj = Tools.find_the_minimum(self.open_set, 'f')
             obj_key = obj["key"]
             current_grid = obj["value"]
             final_Q[obj_key] = current_grid
