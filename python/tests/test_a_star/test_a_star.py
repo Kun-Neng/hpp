@@ -186,15 +186,6 @@ def test_constructor():
     AStar(scenario_without_floor)
 
 
-def test_create_path_from_finalQ():
-    astar_no_result_2D = AStar(scenario_2d_no_results)
-    dict_2D = dict({'6,6': Grid(6, 6)})
-    result_2D = astar_no_result_2D.create_path_from_final_Q(dict_2D)
-    assert int(result_2D["x"][0]) == 12
-    assert int(result_2D["y"][0]) == 0
-    assert len(result_2D["z"]) == 0
-
-
 def test_calculate_path():
     '''
     Case 1: No results

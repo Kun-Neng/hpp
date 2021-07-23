@@ -1,3 +1,4 @@
+from pyhpp.grid import Grid
 from pyhpp.model import Model
 from pyhpp.tools import Tools
 
@@ -65,3 +66,26 @@ def test_find_the_min_F():
     original_min_grid_3D = Tools.find_the_minimum(original_Q_3D, 'f')
     assert original_min_grid_3D["key"] == '5,9,2'
     assert int(original_min_grid_3D["value"].dist) == 0
+
+
+def test_create_path_from_finalQ():
+    start_grid = Grid(12, 0)
+    stop_grid = Grid(1, 11)
+    dict_2D = dict()
+
+    no_result_2D = Tools.create_path_from_final_Q(dict_2D, start_grid)
+    assert int(no_result_2D["x"][0]) == int(start_grid.x)
+    assert int(no_result_2D["y"][0]) == int(start_grid.y)
+    assert len(no_result_2D["z"]) == int(0)
+
+    last_grid = Grid(6, 6)
+    start_grid.prev = last_grid
+    dict_2D[str(last_grid)] = last_grid
+    partial_result_2D = Tools.create_path_from_final_Q(dict_2D, last_grid)
+    assert int(partial_result_2D["x"][0]) == int(last_grid.x)
+    assert int(partial_result_2D["y"][0]) == int(last_grid.y)
+
+    last_grid.prev = stop_grid
+    great_result_2D = Tools.create_path_from_final_Q(dict_2D, stop_grid)
+    assert int(great_result_2D["x"][0]) == int(stop_grid.x)
+    assert int(great_result_2D["y"][0]) == int(stop_grid.y)

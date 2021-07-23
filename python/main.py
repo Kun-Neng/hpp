@@ -56,26 +56,26 @@ if __name__ == "__main__":
     print(f"z: {fast_path['z']}")
 
     # print(medium_scenarios)
-    # for medium_3d_scenario_json in medium_scenarios:
-    #     print(f'========== Medium 3D Scenario JSON: {medium_3d_scenario_json} ==========')
-    #     with open(medium_3d_scenario_json) as file:
-    #         medium_3d_scenario = json.load(file)
-    #         file.close()
+    for medium_3d_scenario_json in medium_scenarios:
+        print(f'========== Medium 3D Scenario JSON: {medium_3d_scenario_json} ==========')
+        with open(medium_3d_scenario_json) as file:
+            medium_3d_scenario = json.load(file)
+            file.close()
         
-    #     print(f'Medium 3D Scenario Data Size: {medium_3d_scenario["data"]["size"]}')
+        print(f'Medium 3D Scenario Data Size: {medium_3d_scenario["data"]["size"]}')
 
-    #     # a_star = AStar(medium_3d_scenario, {'debug_mode': True})
-    #     a_star = AStar(medium_3d_scenario)
-    #     result = a_star.calculate_path()
+        # a_star = AStar(medium_3d_scenario, {'debug_mode': True})
+        a_star = AStar(medium_3d_scenario)
+        result = a_star.calculate_path()
 
-    #     visited_Q = result["visited_Q"]
-    #     message = result["message"]
-    #     path = result["path"]
-    #     elapsed_time = result["elapsed_ms"]
-    #     print(f'message: {message}')
-    #     print(f'size of visited Q: {len(visited_Q)}')
-    #     print(f'path length: {len(path["x"])}')
-    #     print(f'elapsed_ms: {elapsed_time} ms')
+        visited_Q = result["visited_Q"]
+        message = result["message"]
+        path = result["path"]
+        elapsed_time = result["elapsed_ms"]
+        print(f'message: {message}')
+        print(f'size of visited Q: {len(visited_Q)}')
+        print(f'path length: {len(path["x"])}')
+        print(f'elapsed_ms: {elapsed_time} ms')
 
     print(f'========== Dijkstra ==========')
     dijkstra = Dijkstra(small_3d_scenario)

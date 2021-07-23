@@ -56,37 +56,6 @@ class AStar:
         
         self.message = "[Ready] No Results."
 
-    def create_path_from_final_Q(self, final_Q):
-        final_grid = final_Q.get(str(self.stop_grid))
-        if final_grid is None:
-            final_grid = final_Q.get(str(self.last_grid_key))
-        
-        if final_grid is None:
-            final_grid = self.start_grid
-
-        new_x_array = [int(final_grid.x)]
-        new_y_array = [int(final_grid.y)]
-        new_z_array = [] if self.is_2d else [int(final_grid.z)]
-
-        while final_grid.prev is not None:
-            final_grid = final_Q.get(str(final_grid.prev))
-
-            current_row = int(final_grid.x)
-            current_col = int(final_grid.y)
-            current_z = 0 if self.is_2d else int(final_grid.z)
-
-            new_x_array.append(current_row)
-            new_y_array.append(current_col)
-
-            if not self.is_2d:
-                new_z_array.append(current_z)
-
-        return {
-            "x": list(reversed(new_x_array)),
-            "y": list(reversed(new_y_array)),
-            "z": list(reversed(new_z_array))
-        }
-
     def calculate_path(self):
         # print("A* Path Finding (2D)") if self.is_2d else print("A* Path Finding (3D)")
         final_Q = dict()
@@ -194,11 +163,13 @@ class AStar:
             size = len(self.open_set)
 
         calculate_end_time = time.time()
+
+        final_grid = final_Q.get(str(self.last_grid_key))
         
         return {
             "visited_Q": visited_Q,
             "final_Q": final_Q,
             "elapsed_ms": 1000.0 * (calculate_end_time - calculate_start_time),
-            "path": self.create_path_from_final_Q(final_Q),
+            "path": Tools.create_path_from_final_Q(final_Q, final_grid),
             "message": self.message
         }
