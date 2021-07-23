@@ -1,4 +1,3 @@
-import {Grid} from '../Grid';
 import {AStar} from '../AStar';
 
 const scenarioWithWaypointsOnSomeObstacle = {
@@ -157,14 +156,16 @@ const scenario_2d_no_results = {
     },
     "data": {
         "size": 28,
-        "x": [ 0,  1,  2,  2,
-               2,  2,  2,  2,  2,  2,  2,  2,
-               3,  4,  5,  6,  7,  8,  9, 10, 11, 12,
-              12, 12, 12, 12, 12, 12, 12, 12, 12, 12],
-        "y": [ 5,  5, 13, 14,
-               5,  6,  7,  8,  9, 10, 11, 12,
-              12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
-               2,  3,  4,  5,  6,  7,  8,  9, 10, 11]
+        "x": [11, 11, 11, 12, 12, 13, 13, 13],
+        "y": [-1,  0,  1, -1,  1, -1,  0,  1]
+        // "x": [ 0,  1,  2,  2,
+        //        2,  2,  2,  2,  2,  2,  2,  2,
+        //        3,  4,  5,  6,  7,  8,  9, 10, 11, 12,
+        //       12, 12, 12, 12, 12, 12, 12, 12, 12, 12],
+        // "y": [ 5,  5, 13, 14,
+        //        5,  6,  7,  8,  9, 10, 11, 12,
+        //       12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+        //        2,  3,  4,  5,  6,  7,  8,  9, 10, 11]
     }
 };
 
@@ -190,15 +191,6 @@ test('test_constructor', () => {
         }
     };
     new AStar(scenarioWithoutFloor);
-});
-
-test('test_create_path_from_finalQ', () => {
-    const aStarNoResult2D = new AStar(scenario_2d_no_results);
-    const hashmap2D = new Map([['6,6', new Grid(6, 6)]]);
-    const result2D = aStarNoResult2D.createPathFromFinalQ(hashmap2D);
-    expect(result2D.x[0]).toBe(12);
-    expect(result2D.y[0]).toBe(0);
-    expect(result2D.z.length).toBe(0);
 });
 
 test('test_calculate_path', () => {

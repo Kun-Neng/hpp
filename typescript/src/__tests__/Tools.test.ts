@@ -1,3 +1,4 @@
+import {Grid} from '../Grid';
 import {Model} from '../Model';
 import Tools from '../Tools';
 
@@ -40,6 +41,28 @@ const scenario_2d = {
     }
 };
 
+const scenario_2d_no_results = {
+    "dimension": {"x": 15, "y": 15},
+    "waypoint": {
+        "start": {"x": 12, "y": 0},
+        "stop": {"x": 1, "y": 11},
+        "allowDiagonal": false
+    },
+    "data": {
+        "size": 28,
+        "x": [11, 11, 11, 12, 12, 13, 13, 13],
+        "y": [-1,  0,  1, -1,  1, -1,  0,  1]
+        // "x": [ 0,  1,  2,  2,
+        //        2,  2,  2,  2,  2,  2,  2,  2,
+        //        3,  4,  5,  6,  7,  8,  9, 10, 11, 12,
+        //       12, 12, 12, 12, 12, 12, 12, 12, 12, 12],
+        // "y": [ 5,  5, 13, 14,
+        //        5,  6,  7,  8,  9, 10, 11, 12,
+        //       12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+        //        2,  3,  4,  5,  6,  7,  8,  9, 10, 11]
+    }
+};
+
 test('test_find_the_min_F', () => {
     const obstacle2DArray = Model.createObstacleArray(scenario_2d.data);
     const model2D = new Model(scenario_2d.dimension, obstacle2DArray, scenario_2d.waypoint);
@@ -57,4 +80,27 @@ test('test_find_the_min_F', () => {
     const minGrid3D = Tools.findTheMinimum(Q3D, 'f');
     expect(minGrid3D.key).toBe('5,9,2');
     expect(minGrid3D.value.dist).toBe(0);
+});
+
+test('test_create_path_from_finalQ', () => {
+    const startGrid = new Grid(12, 0);
+    const stopGrid = new Grid(1, 11);
+    const hashmap2D = new Map<string, Grid>();
+
+    const no_result2D = Tools.createPathFromFinalQ(hashmap2D, startGrid);
+    expect(no_result2D.x[0]).toBe(startGrid.x);
+    expect(no_result2D.y[0]).toBe(startGrid.y);
+    expect(no_result2D.z.length).toBe(0);
+
+    const lastGrid = new Grid(6, 6);
+    startGrid.prev = lastGrid;
+    hashmap2D.set(lastGrid.str(), lastGrid);
+    const partial_result2D = Tools.createPathFromFinalQ(hashmap2D, lastGrid);
+    expect(partial_result2D.x[0]).toBe(lastGrid.x);
+    expect(partial_result2D.y[0]).toBe(lastGrid.y);
+
+    lastGrid.prev = stopGrid;
+    const great_result2D = Tools.createPathFromFinalQ(hashmap2D, stopGrid);
+    expect(great_result2D.x[0]).toBe(stopGrid.x);
+    expect(great_result2D.y[0]).toBe(stopGrid.y);
 });

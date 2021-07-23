@@ -86,38 +86,6 @@ export class AStar {
         this._message = "[Ready] No Results.";
     }
 
-    createPathFromFinalQ(finalQ: Map<string, Grid>): { x: number[], y: number[], z: number[] } {
-        let finalGrid = finalQ.get(this._stopGrid.str()) ?? finalQ.get(this._lastGridKey);
-
-        if (!finalGrid) {
-            finalGrid = this._startGrid;
-        }
-
-        const newXArray: number[] = [Number(finalGrid.x)];
-        const newYArray: number[] = [Number(finalGrid.y)];
-        const newZArray: number[] = this._is2d ? [] : [Number(finalGrid.z)];
-
-        while (finalGrid && finalGrid.prev) {
-            finalGrid = finalQ.get(finalGrid.prev.str()) as Grid;
-            const currentRow = Number(finalGrid.x);
-            const currentCol = Number(finalGrid.y);
-            const currentZ = this._is2d ? 0 : Number(finalGrid.z);
-
-            newXArray.push(currentRow);
-            newYArray.push(currentCol);
-
-            if (!this._is2d) {
-                newZArray.push(currentZ);
-            }
-        }
-
-        return {
-            x: newXArray.reverse(),
-            y: newYArray.reverse(),
-            z: newZArray.reverse()
-        };
-    }
-
     calculatePath(): any {
         const finalQ = new Map<string, Grid>();
         const visitedQ = new Map<string, Grid>();
@@ -222,11 +190,13 @@ export class AStar {
 
         const calculateEndTime = this.getTime(TIME_TAG.END);
 
+        const finalGrid = finalQ.get(this._lastGridKey);
+
         return {
             "visited_Q": visitedQ,
             "final_Q": finalQ,
             "elapsed_ms": calculateEndTime - calculateStartTime,
-            "path": this.createPathFromFinalQ(finalQ),
+            "path": Tools.createPathFromFinalQ(finalQ, finalGrid!),
             "message": this._message
         }
     }
