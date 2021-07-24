@@ -6,7 +6,7 @@ interface Point {
     z?: number;
 }
 
-function isCollinear(p1: Point, p2: Point, p3: Point) {
+function isCollinear(p1: Point, p2: Point, p3: Point): boolean {
     const is2d = p1.z ? false : true;
 
     if (is2d) {

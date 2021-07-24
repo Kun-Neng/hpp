@@ -189,14 +189,17 @@ export class AStar {
         }
 
         const calculateEndTime = this.getTime(TIME_TAG.END);
-
+        const elapsedMS = calculateEndTime - calculateStartTime;
         const finalGrid = finalQ.get(this._lastGridKey);
+        const path = Tools.createPathFromFinalQ(finalQ, finalGrid!);
+        const refinedPath = Tools.refinePathFromCollinearity(path);
 
         return {
             "visited_Q": visitedQ,
             "final_Q": finalQ,
-            "elapsed_ms": calculateEndTime - calculateStartTime,
-            "path": Tools.createPathFromFinalQ(finalQ, finalGrid!),
+            "elapsed_ms": elapsedMS,
+            "path": path,
+            "refined_path": refinedPath,
             "message": this._message
         }
     }
