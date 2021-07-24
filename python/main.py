@@ -8,7 +8,7 @@ project_root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 print(f'Root Path of Project: {project_root_path}')
 small_3d_scenario_json = project_root_path + '\\scenarios\\small_3d_scenario.json'
 print(f'========== Small 3D Scenario JSON: {small_3d_scenario_json} ==========')
-medium_scenarios = [project_root_path + f'\\scenarios\\medium_3d_scenario{iScenario}.json' for iScenario in range(1, 5)]
+medium_scenarios = [project_root_path + f'\\scenarios\\medium_3d_scenario{i_scenario}.json' for i_scenario in range(1, 5)]
 
 
 if __name__ == "__main__":
@@ -51,10 +51,18 @@ if __name__ == "__main__":
     print(f"message: {fast_message}")
     print(f'size of visited Q: {len(fast_visited_Q)}')
     print(f"elapsed_ms: {fast_elapsed_time} ms")
+    print(f"length: {len(fast_path['x'])}")
     print(f"x: {fast_path['x']}")
     print(f"y: {fast_path['y']}")
     print(f"z: {fast_path['z']}")
 
+    refined_path = fast_result["refined_path"]
+    print(f"length: {len(refined_path['x'])}")
+    print(f"x: {refined_path['x']}")
+    print(f"y: {refined_path['y']}")
+    print(f"z: {refined_path['z']}")
+
+    i_scenario = 1
     # print(medium_scenarios)
     for medium_3d_scenario_json in medium_scenarios:
         print(f'========== Medium 3D Scenario JSON: {medium_3d_scenario_json} ==========')
@@ -71,11 +79,21 @@ if __name__ == "__main__":
         visited_Q = result["visited_Q"]
         message = result["message"]
         path = result["path"]
+        refined_path = result["refined_path"]
         elapsed_time = result["elapsed_ms"]
         print(f'message: {message}')
         print(f'size of visited Q: {len(visited_Q)}')
-        print(f'path length: {len(path["x"])}')
+        print(f'path length: {len(path["x"])} => {len(refined_path["x"])}')
+        if i_scenario == 1:
+            print(f'x: {path["x"]}')
+            print(f'y: {path["y"]}')
+            print(f'z: {path["z"]}')
+        print(f'x: {refined_path["x"]}')
+        print(f'y: {refined_path["y"]}')
+        print(f'z: {refined_path["z"]}')
         print(f'elapsed_ms: {elapsed_time} ms')
+
+        i_scenario += 1
 
     print(f'========== Dijkstra ==========')
     dijkstra = Dijkstra(small_3d_scenario)
