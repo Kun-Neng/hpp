@@ -153,13 +153,14 @@ class Dijkstra:
             size = len(self.open_set)
 
         calculate_end_time = time.time()
-
+        elapsed_ms = 1000.0 * (calculate_end_time - calculate_start_time)
         final_grid = final_Q.get(str(self.last_grid_key))
+        path = Tools.create_path_from_final_Q(final_Q, final_grid)
         
         return {
             "visited_Q": visited_Q,
             "final_Q": final_Q,
-            "elapsed_ms": 1000.0 * (calculate_end_time - calculate_start_time),
-            "path": Tools.create_path_from_final_Q(final_Q, final_grid),
+            "elapsed_ms": elapsed_ms,
+            "path": path,
             "message": self.message
         }

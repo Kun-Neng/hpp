@@ -153,14 +153,15 @@ export class Dijkstra {
         }
 
         const calculateEndTime = this.getTime(TIME_TAG.END);
-
+        const elapsedMS = calculateEndTime - calculateStartTime;
         const finalGrid = finalQ.get(this._lastGridKey);
+        const path = Tools.createPathFromFinalQ(finalQ, finalGrid!);
 
         return {
             "visited_Q": visitedQ,
             "final_Q": finalQ,
-            "elapsed_ms": calculateEndTime - calculateStartTime,
-            "path": Tools.createPathFromFinalQ(finalQ, finalGrid!),
+            "elapsed_ms": elapsedMS,
+            "path": path,
             "message": this._message
         }
     }

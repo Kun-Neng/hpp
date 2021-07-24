@@ -89,3 +89,68 @@ def test_create_path_from_finalQ():
     great_result_2D = Tools.create_path_from_final_Q(dict_2D, stop_grid)
     assert int(great_result_2D["x"][0]) == int(stop_grid.x)
     assert int(great_result_2D["y"][0]) == int(stop_grid.y)
+
+
+def test_is_collinear():
+    startPoint2D = {"x": 5, "y": 2}
+    nextPoint2D = {"x": 5, "y": 4}
+    futurePoint2D = {"x": 5, "y": 10}
+    assert Tools.is_collinear(startPoint2D, nextPoint2D, futurePoint2D) == True
+
+    testPoint2D1 = {"x": 8, "y": 10}
+    assert Tools.is_collinear(startPoint2D, nextPoint2D, testPoint2D1) == False
+
+    startPoint3D = {"x": 2, "y": 2, "z": 3}
+    nextPoint3D = {"x": 2, "y": 2, "z": 6}
+    futurePoint3D = {"x": 2, "y": 2, "z": 8}
+    assert Tools.is_collinear(startPoint3D, nextPoint3D, futurePoint3D) == True
+
+    testPoint3D1 = {"x": 2, "y": 4, "z": 10}
+    assert Tools.is_collinear(startPoint3D, nextPoint3D, testPoint3D1) == False
+
+
+def test_refine_path_from_collinearity():
+    zero_lengths_path = Tools.refine_path_from_collinearity({ "x": [], "y": [] })
+    assert zero_lengths_path is None
+    zero_z_length_path = Tools.refine_path_from_collinearity({ "x": [1, 2, 3], "y": [1, 1, 1], "z": [] })
+    assert len(zero_z_length_path["x"]) == 2
+    inconsistent_length_path_2d = Tools.refine_path_from_collinearity({ "x": [1, 2, 3], "y": [1, 1, 1, 1] })
+    assert inconsistent_length_path_2d is None
+    inconsistent_length_path_3d = Tools.refine_path_from_collinearity({ "x": [1, 2, 3], "y": [1, 1, 1], "z": [2] })
+    assert inconsistent_length_path_3d is None
+
+    non_diagonal_path_2d_last_three_collinear = {
+        "x": [12, 12, 11, 11, 11, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 1],
+        "y": [ 0,  1,  1,  2,  3,  4,  4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5]
+    }  #       o   o   o           o                              o  o
+    refined_non_diagonal_path_2d_last_three_collinear = Tools.refine_path_from_collinearity(non_diagonal_path_2d_last_three_collinear, True)
+    # print(refined_non_diagonal_path_2d_last_three_collinear)
+    assert len(refined_non_diagonal_path_2d_last_three_collinear["x"]) == 6
+    
+    non_diagonal_path_2d = {
+        "x": [12, 12, 11, 11, 11, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1, 1, 1,  1,  1],
+        "y": [ 0,  1,  1,  2,  3,  4,  4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 6, 7, 8, 9, 10, 11]
+    }  #       o   o   o           o                              o                      o
+    refined_non_diagonal_path_2d = Tools.refine_path_from_collinearity(non_diagonal_path_2d, True)
+    # print(refined_non_diagonal_path_2d)
+    assert len(refined_non_diagonal_path_2d["x"]) == 6
+
+    non_diagonal_path = {
+        "x": [5, 5, 5, 4, 3, 3, 3, 3, 3, 3, 4, 4, 5, 5],
+        "y": [9, 8, 7, 7, 7, 6, 5, 4, 3, 2, 2, 1, 1, 0],
+        "z": [2, 2, 2, 2, 2, 2, 2, 3, 4, 4, 4, 4, 4, 4]
+    }  #      o     o     o     o     o  o  o  o  o  o
+    refined_non_diagonal_path = Tools.refine_path_from_collinearity(non_diagonal_path, True)
+    # print(refined_non_diagonal_path)
+    assert len(non_diagonal_path["x"]) == 14
+    assert len(refined_non_diagonal_path["x"]) == 10
+
+    diagonal_path = {
+        "x": [5, 5, 4, 3, 3, 3, 4, 4, 5, 5, 5],
+        "y": [9, 8, 7, 6, 5, 4, 3, 2, 3, 2, 1],
+        "z": [2, 2, 2, 2, 2, 2, 3, 3, 4, 4, 4]
+    }  #      o  o     o     o  o  o  o     o
+    refined_diagonal_path = Tools.refine_path_from_collinearity(diagonal_path, True)
+    # print(refined_diagonal_path)
+    assert len(diagonal_path["x"]) == 11
+    assert len(refined_diagonal_path["x"]) == 8
