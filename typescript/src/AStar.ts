@@ -54,7 +54,9 @@ export class AStar {
         this._startGrid = this._is2d ?
             new Grid(start.x, start.y).setAsStartGrid() :
             new Grid(start.x, start.y, start.z).setAsStartGrid();
-        this._stopGrid = new Grid(stop.x, stop.y, stop.z);
+        this._stopGrid = this._is2d ?
+            new Grid(stop.x, stop.y) :
+            new Grid(stop.x, stop.y, stop.z);
         this._lastGridKey = this._stopGrid.str();
         this._allowDiagonal = waypoint.allowDiagonal ?? false;
 
