@@ -45,16 +45,12 @@ const visited_Q = result.visited_Q;
 const final_Q = result.final_Q;
 const path = result.path;
 ```
+This returned `result` contains the following main properties
 > `visited_Q`: all the visited positions<br>
 > `final_Q`: all the positions in the A* path<br>
-> `path`: the A* path array from start to stop
+> `path`: the A* path array from start to stop<br>
+> `refined_path`: the A* path with minimum number of points<br>
 
-* Useful information:
-```
-const message = result.message;
-```
-> `message`: the information about path planning
-```
-const elapsed_time = result.elapsed_ms;
-```
+and some useful information
+> `message`: the information about path planning<br>
 > `elapsed_ms`: the running milliseconds of path planning
