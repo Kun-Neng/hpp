@@ -1,7 +1,7 @@
 from math import inf, sqrt
 
 
-class Grid:
+class Node:
     def __init__(self, x, y, z = None):
         self.x = int(x)
         self.y = int(y)
@@ -27,25 +27,25 @@ class Grid:
         
         return inf
     
-    def set_as_start_grid(self):
+    def set_as_start_node(self):
         self.dist = 0
     
     def shift(self, x, y, z = 0):
-        return Grid(self.x + int(x), self.y + int(y)) if self.is_2d \
-            else Grid(self.x + int(x), self.y + int(y), self.z + int(z))
+        return Node(self.x + int(x), self.y + int(y)) if self.is_2d \
+            else Node(self.x + int(x), self.y + int(y), self.z + int(z))
 
-    def manhattan_distance_to(self, destGrid) -> float:
-        distance = abs(destGrid.x - self.x) + abs(destGrid.y - self.y)
-        return distance if self.is_2d else distance + abs(destGrid.z - self.z)
+    def manhattan_distance_to(self, destNode) -> float:
+        distance = abs(destNode.x - self.x) + abs(destNode.y - self.y)
+        return distance if self.is_2d else distance + abs(destNode.z - self.z)
     
-    def distance_to(self, destGrid) -> float:
-        dist_X = abs(destGrid.x - self.x)
-        dist_Y = abs(destGrid.y - self.y)
+    def distance_to(self, destNode) -> float:
+        dist_X = abs(destNode.x - self.x)
+        dist_Y = abs(destNode.y - self.y)
 
         if self.is_2d:
             return sqrt(dist_X * dist_X + dist_Y * dist_Y)
         else:
-            dist_Z = abs(destGrid.z - self.z)
+            dist_Z = abs(destNode.z - self.z)
             return sqrt(dist_X * dist_X + dist_Y * dist_Y + dist_Z * dist_Z)
     
     def is_out_of_bound(self, bound_x = [-inf, inf], bound_y = [-inf, inf], bound_z = [-inf, inf]) -> bool:

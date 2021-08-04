@@ -1,4 +1,4 @@
-from pyhpp.grid import Grid
+from pyhpp.node import Node
 from pyhpp.model import Model
 
 dimension_2D1 = {"x": 10, "y": 10}
@@ -45,7 +45,7 @@ def test_check_num_obstacles():
     assert len(obstacle_3D_array) == int(scenario_3d_data["size"])
 
 
-def test_grids_on_obstacles():
+def test_nodes_on_obstacles():
     scenario_3d_data = {
         "size": 16,
         "x": [4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7],
@@ -55,16 +55,16 @@ def test_grids_on_obstacles():
     obstacle_3D_array = Model.create_obstacle_array(scenario_3d_data)
 
     test_good_waypoint_array = [
-        Grid(5, 9, 2),
-        Grid(5, 0, 4)
+        Node(5, 9, 2),
+        Node(5, 0, 4)
     ]
-    assert Model.grids_on_obstacles(obstacle_3D_array, test_good_waypoint_array) == False
+    assert Model.nodes_on_obstacles(obstacle_3D_array, test_good_waypoint_array) == False
 
     test_error_waypoint_array = [
-        Grid(5, 9, 2),
-        Grid(6, 6, 5)
+        Node(5, 9, 2),
+        Node(6, 6, 5)
     ]
-    Model.grids_on_obstacles(obstacle_3D_array, test_error_waypoint_array) == True
+    Model.nodes_on_obstacles(obstacle_3D_array, test_error_waypoint_array) == True
 
 
 def test_boundary():
@@ -111,8 +111,8 @@ def test_create_initial_Q():
     model_2D = Model(scenario_2d["dimension"], obstacle_2D_array, scenario_2d["waypoint"])
     Q_2D = model_2D.create_initial_Q()
 
-    number_obstacle_grids_2D = (int(scenario_2d["dimension"]["x"]) * int(scenario_2d["dimension"]["y"])) - int(scenario_2d["data"]["size"])
-    assert len(Q_2D) == number_obstacle_grids_2D
+    number_obstacle_nodes_2D = (int(scenario_2d["dimension"]["x"]) * int(scenario_2d["dimension"]["y"])) - int(scenario_2d["data"]["size"])
+    assert len(Q_2D) == number_obstacle_nodes_2D
 
     scenario_3d = {
         "dimension": { "x": 10, "y": 10, "z": 10 },
@@ -134,8 +134,8 @@ def test_create_initial_Q():
     isFast = False
     original_Q_3D = model3D.create_initial_Q(isFast)
 
-    number_obstacle_grids_3D = (int(scenario_3d["dimension"]["x"]) * int(scenario_3d["dimension"]["y"]) * int(scenario_3d["dimension"]["z"])) - int(scenario_3d["data"]["size"])
-    assert len(original_Q_3D) == number_obstacle_grids_3D
+    number_obstacle_nodes_3D = (int(scenario_3d["dimension"]["x"]) * int(scenario_3d["dimension"]["y"]) * int(scenario_3d["dimension"]["z"])) - int(scenario_3d["data"]["size"])
+    assert len(original_Q_3D) == number_obstacle_nodes_3D
 
     fast_Q_3D = model3D.create_initial_Q()
-    assert len(fast_Q_3D) == number_obstacle_grids_3D
+    assert len(fast_Q_3D) == number_obstacle_nodes_3D

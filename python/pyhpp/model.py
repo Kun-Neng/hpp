@@ -1,6 +1,6 @@
 import time
 from math import inf
-from pyhpp.grid import Grid
+from pyhpp.node import Node
 
 
 class Model:
@@ -12,10 +12,10 @@ class Model:
 
         start = waypoint["start"]
         stop = waypoint["stop"]
-        self.start_grid = Grid(start["x"], start["y"]) if self.is_2d else Grid(start["x"], start["y"], start["z"])
-        self.start_grid.set_as_start_grid()
-        self.stop_grid = Grid(stop["x"], stop["y"]) if self.is_2d else Grid(stop["x"], stop["y"], stop["z"])
-        self.dist = self.start_grid.distance_to(self.stop_grid)
+        self.start_node = Node(start["x"], start["y"]) if self.is_2d else Node(start["x"], start["y"], start["z"])
+        self.start_node.set_as_start_node()
+        self.stop_node = Node(stop["x"], stop["y"]) if self.is_2d else Node(stop["x"], stop["y"], stop["z"])
+        self.dist = self.start_node.distance_to(self.stop_node)
 
         self.init_Q = dict()
 
@@ -38,16 +38,16 @@ class Model:
         y_array = data["y"]
 
         if "z" not in data:
-            return [Grid(x_array[i], y_array[i]) for i in range(size)]
+            return [Node(x_array[i], y_array[i]) for i in range(size)]
         else:
             z_array = data["z"]
-            return [Grid(x_array[i], y_array[i], z_array[i]) for i in range(size)]
+            return [Node(x_array[i], y_array[i], z_array[i]) for i in range(size)]
 
     @staticmethod
-    def grids_on_obstacles(array, grids):
-        for _, restricted_grid in enumerate(array):
-            for grid in grids:
-                if grid == restricted_grid:
+    def nodes_on_obstacles(array, nodes):
+        for _, restricted_node in enumerate(array):
+            for node in nodes:
+                if node == restricted_node:
                     print("the point is located on restricted region")
                     return True
         return False
@@ -75,18 +75,18 @@ class Model:
         
         if self.is_2d:
             [self.update_init_Q(row, col, None) for row in range(x) for col in range(y)
-                if Grid(row, col) not in self.obstacle_array]
+                if Node(row, col) not in self.obstacle_array]
         else:
             z = int(self.dimension["z"])
 
             if is_fast:
                 # f_value = abs(self.left_x) + abs(self.left_y) + abs(self.left_z)  # option 1
                 f_value = self.dist  # option 2
-                self.start_grid.f = f_value
-                self.init_Q[str(self.start_grid)] = self.start_grid
+                self.start_node.f = f_value
+                self.init_Q[str(self.start_node)] = self.start_node
             else:
                 [self.update_init_Q(row, col, iz) for row in range(x) for col in range(y) for iz in range(z)
-                    if Grid(row, col, iz) not in self.obstacle_array]
+                    if Node(row, col, iz) not in self.obstacle_array]
 
         calculate_end_time = time.time()
         if self.debug_mode is True:
@@ -95,10 +95,10 @@ class Model:
         return self.init_Q
     
     def update_init_Q(self, row, col, z = None):
-        cell_grid = Grid(row, col, z)
+        cell_node = Node(row, col, z)
 
-        if cell_grid == self.start_grid:
-            cell_grid.dist = 0
-            cell_grid.f = cell_grid.dist + self.dist
+        if cell_node == self.start_node:
+            cell_node.dist = 0
+            cell_node.f = cell_node.dist + self.dist
 
-        self.init_Q[str(cell_grid)] = cell_grid
+        self.init_Q[str(cell_node)] = cell_node

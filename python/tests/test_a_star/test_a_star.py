@@ -1,5 +1,4 @@
 import copy
-from pyhpp.grid import Grid
 from pyhpp.a_star import AStar
 
 scenario_with_waypoints_on_some_obstacle = {

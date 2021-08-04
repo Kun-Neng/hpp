@@ -1,4 +1,4 @@
-from pyhpp.grid import Grid
+from pyhpp.node import Node
 from pyhpp.model import Model
 from pyhpp.tools import Tools
 
@@ -47,48 +47,48 @@ def test_find_the_min_F():
     model_2D = Model(scenario_2d["dimension"], obstacle_2D_array, scenario_2d["waypoint"])
     Q_2D = model_2D.create_initial_Q()
 
-    min_grid_2D = Tools.find_the_minimum(Q_2D, 'f')
-    assert min_grid_2D["key"] == '12,0'
-    assert int(min_grid_2D["value"].dist) == 0
+    min_node_2D = Tools.find_the_minimum(Q_2D, 'f')
+    assert min_node_2D["key"] == '12,0'
+    assert int(min_node_2D["value"].dist) == 0
 
     obstacle_3D_array = Model.create_obstacle_array(scenario["data"])
     model_3D = Model(scenario["dimension"], obstacle_3D_array, scenario["waypoint"])
     is_fast = True
     fast_Q_3D = model_3D.create_initial_Q(is_fast)
 
-    min_grid_3D = Tools.find_the_minimum(fast_Q_3D, 'f')
-    assert min_grid_3D["key"] == '5,9,2'
-    assert int(min_grid_3D["value"].dist) == 0
+    min_node_3D = Tools.find_the_minimum(fast_Q_3D, 'f')
+    assert min_node_3D["key"] == '5,9,2'
+    assert int(min_node_3D["value"].dist) == 0
 
     is_fast = False
     original_Q_3D = model_3D.create_initial_Q(is_fast)
 
-    original_min_grid_3D = Tools.find_the_minimum(original_Q_3D, 'f')
-    assert original_min_grid_3D["key"] == '5,9,2'
-    assert int(original_min_grid_3D["value"].dist) == 0
+    original_min_node_3D = Tools.find_the_minimum(original_Q_3D, 'f')
+    assert original_min_node_3D["key"] == '5,9,2'
+    assert int(original_min_node_3D["value"].dist) == 0
 
 
 def test_create_path_from_finalQ():
-    start_grid = Grid(12, 0)
-    stop_grid = Grid(1, 11)
+    start_node = Node(12, 0)
+    stop_node = Node(1, 11)
     dict_2D = dict()
 
-    no_result_2D = Tools.create_path_from_final_Q(dict_2D, start_grid)
-    assert int(no_result_2D["x"][0]) == int(start_grid.x)
-    assert int(no_result_2D["y"][0]) == int(start_grid.y)
+    no_result_2D = Tools.create_path_from_final_Q(dict_2D, start_node)
+    assert int(no_result_2D["x"][0]) == int(start_node.x)
+    assert int(no_result_2D["y"][0]) == int(start_node.y)
     assert len(no_result_2D["z"]) == int(0)
 
-    last_grid = Grid(6, 6)
-    start_grid.prev = last_grid
-    dict_2D[str(last_grid)] = last_grid
-    partial_result_2D = Tools.create_path_from_final_Q(dict_2D, last_grid)
-    assert int(partial_result_2D["x"][0]) == int(last_grid.x)
-    assert int(partial_result_2D["y"][0]) == int(last_grid.y)
+    last_node = Node(6, 6)
+    start_node.prev = last_node
+    dict_2D[str(last_node)] = last_node
+    partial_result_2D = Tools.create_path_from_final_Q(dict_2D, last_node)
+    assert int(partial_result_2D["x"][0]) == int(last_node.x)
+    assert int(partial_result_2D["y"][0]) == int(last_node.y)
 
-    last_grid.prev = stop_grid
-    great_result_2D = Tools.create_path_from_final_Q(dict_2D, stop_grid)
-    assert int(great_result_2D["x"][0]) == int(stop_grid.x)
-    assert int(great_result_2D["y"][0]) == int(stop_grid.y)
+    last_node.prev = stop_node
+    great_result_2D = Tools.create_path_from_final_Q(dict_2D, stop_node)
+    assert int(great_result_2D["x"][0]) == int(stop_node.x)
+    assert int(great_result_2D["y"][0]) == int(stop_node.y)
 
 
 def test_is_collinear():

@@ -20,18 +20,18 @@ class Tools:
         }
     
     @staticmethod
-    def create_path_from_final_Q(final_Q, final_grid):
-        is_2d = final_grid.is_2d
-        new_x_array = [int(final_grid.x)]
-        new_y_array = [int(final_grid.y)]
-        new_z_array = [] if is_2d else [int(final_grid.z)]
+    def create_path_from_final_Q(final_Q, final_node):
+        is_2d = final_node.is_2d
+        new_x_array = [int(final_node.x)]
+        new_y_array = [int(final_node.y)]
+        new_z_array = [] if is_2d else [int(final_node.z)]
 
-        while final_grid.prev is not None:
-            final_grid = final_Q.get(str(final_grid.prev))
+        while final_node.prev is not None:
+            final_node = final_Q.get(str(final_node.prev))
 
-            current_row = int(final_grid.x)
-            current_col = int(final_grid.y)
-            current_z = 0 if is_2d else int(final_grid.z)
+            current_row = int(final_node.x)
+            current_col = int(final_node.y)
+            current_z = 0 if is_2d else int(final_node.z)
 
             new_x_array.append(current_row)
             new_y_array.append(current_col)
