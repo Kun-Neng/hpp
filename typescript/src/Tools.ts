@@ -1,4 +1,4 @@
-import {Grid} from './Grid';
+import {Node} from './Node';
 
 interface Point {
     x: number;
@@ -27,11 +27,11 @@ function isCollinear(p1: Point, p2: Point, p3: Point): boolean {
 }
 
 export default {
-    findTheMinimum: (hashmap: Map<string, Grid>, crux: string) => {
+    findTheMinimum: (hashmap: Map<string, Node>, crux: string) => {
         let key = '';
         let value: any;
         let minimum = Number.MAX_SAFE_INTEGER;
-        hashmap.forEach((objInHashmap: Grid, keyInHashmap: string) => {
+        hashmap.forEach((objInHashmap: Node, keyInHashmap: string) => {
             // console.log(keyInHashmap + ':' + objInHashmap.getCrux(crux));
             if (objInHashmap.getCrux(crux) <= minimum) {
                 key = keyInHashmap;
@@ -42,17 +42,17 @@ export default {
 
         return { key, value };
     },
-    createPathFromFinalQ: (finalQ: Map<string, Grid>, finalGrid: Grid) => {
-        const is2d = finalGrid.is2d;
-        const newXArray: number[] = [Number(finalGrid.x)];
-        const newYArray: number[] = [Number(finalGrid.y)];
-        const newZArray: number[] = is2d ? [] : [Number(finalGrid.z)];
+    createPathFromFinalQ: (finalQ: Map<string, Node>, finalNode: Node) => {
+        const is2d = finalNode.is2d;
+        const newXArray: number[] = [Number(finalNode.x)];
+        const newYArray: number[] = [Number(finalNode.y)];
+        const newZArray: number[] = is2d ? [] : [Number(finalNode.z)];
 
-        while (finalGrid && finalGrid.prev) {
-            finalGrid = finalQ.get(finalGrid.prev.str()) as Grid;
-            const currentRow = Number(finalGrid.x);
-            const currentCol = Number(finalGrid.y);
-            const currentZ = is2d ? 0 : Number(finalGrid.z);
+        while (finalNode && finalNode.prev) {
+            finalNode = finalQ.get(finalNode.prev.str()) as Node;
+            const currentRow = Number(finalNode.x);
+            const currentCol = Number(finalNode.y);
+            const currentZ = is2d ? 0 : Number(finalNode.z);
 
             newXArray.push(currentRow);
             newYArray.push(currentCol);

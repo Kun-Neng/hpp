@@ -1,4 +1,4 @@
-import {Grid} from '../Grid';
+import {Node} from '../Node';
 import {Model} from '../Model';
 import Tools from '../Tools';
 
@@ -46,41 +46,41 @@ test('test_find_the_min_F', () => {
     const model2D = new Model(scenario_2d.dimension, obstacle2DArray, scenario_2d.waypoint);
     const Q2D = model2D.createInitialQ();
 
-    const minGrid2D = Tools.findTheMinimum(Q2D, 'f');
-    expect(minGrid2D.key).toBe('12,0');
-    expect(minGrid2D.value.dist).toBe(0);
+    const minNode2D = Tools.findTheMinimum(Q2D, 'f');
+    expect(minNode2D.key).toBe('12,0');
+    expect(minNode2D.value.dist).toBe(0);
 
     const obstacle3DArray = Model.createObstacleArray(scenario.data);
     const model3D = new Model(scenario.dimension, obstacle3DArray, scenario.waypoint);
     const isFast = true;
     const Q3D = model3D.createInitialQ(isFast);
     
-    const minGrid3D = Tools.findTheMinimum(Q3D, 'f');
-    expect(minGrid3D.key).toBe('5,9,2');
-    expect(minGrid3D.value.dist).toBe(0);
+    const minNode3D = Tools.findTheMinimum(Q3D, 'f');
+    expect(minNode3D.key).toBe('5,9,2');
+    expect(minNode3D.value.dist).toBe(0);
 });
 
 test('test_create_path_from_finalQ', () => {
-    const startGrid = new Grid(12, 0);
-    const stopGrid = new Grid(1, 11);
-    const hashmap2D = new Map<string, Grid>();
+    const startNode = new Node(12, 0);
+    const stopNode = new Node(1, 11);
+    const hashmap2D = new Map<string, Node>();
 
-    const no_result2D = Tools.createPathFromFinalQ(hashmap2D, startGrid);
-    expect(no_result2D.x[0]).toBe(startGrid.x);
-    expect(no_result2D.y[0]).toBe(startGrid.y);
+    const no_result2D = Tools.createPathFromFinalQ(hashmap2D, startNode);
+    expect(no_result2D.x[0]).toBe(startNode.x);
+    expect(no_result2D.y[0]).toBe(startNode.y);
     expect(no_result2D.z.length).toBe(0);
 
-    const lastGrid = new Grid(6, 6);
-    startGrid.prev = lastGrid;
-    hashmap2D.set(lastGrid.str(), lastGrid);
-    const partial_result2D = Tools.createPathFromFinalQ(hashmap2D, lastGrid);
-    expect(partial_result2D.x[0]).toBe(lastGrid.x);
-    expect(partial_result2D.y[0]).toBe(lastGrid.y);
+    const lastNode = new Node(6, 6);
+    startNode.prev = lastNode;
+    hashmap2D.set(lastNode.str(), lastNode);
+    const partial_result2D = Tools.createPathFromFinalQ(hashmap2D, lastNode);
+    expect(partial_result2D.x[0]).toBe(lastNode.x);
+    expect(partial_result2D.y[0]).toBe(lastNode.y);
 
-    lastGrid.prev = stopGrid;
-    const great_result2D = Tools.createPathFromFinalQ(hashmap2D, stopGrid);
-    expect(great_result2D.x[0]).toBe(stopGrid.x);
-    expect(great_result2D.y[0]).toBe(stopGrid.y);
+    lastNode.prev = stopNode;
+    const great_result2D = Tools.createPathFromFinalQ(hashmap2D, stopNode);
+    expect(great_result2D.x[0]).toBe(stopNode.x);
+    expect(great_result2D.y[0]).toBe(stopNode.y);
 });
 
 test('test_is_collinear', () => {

@@ -1,10 +1,10 @@
-export class Grid {
+export class Node {
     readonly _x: number;
     readonly _y: number;
     private _z: number;
     private _is2d: boolean;
 
-    private _prev: Grid | undefined;
+    private _prev: Node | undefined;
     private _dist: number;
     private _f: number;
 
@@ -35,10 +35,10 @@ export class Grid {
         return this._is2d;
     }
 
-    public get prev(): Grid | undefined {
+    public get prev(): Node | undefined {
         return this._prev;
     }
-    public set prev(value: Grid | undefined) {
+    public set prev(value: Node | undefined) {
         this._prev = value;
     }
 
@@ -65,7 +65,7 @@ export class Grid {
         return Number.MAX_SAFE_INTEGER;
     }
 
-    setAsStartGrid(): Grid {
+    setAsStartNode(): Node {
         this._dist = 0;
 
         return this;
@@ -76,31 +76,31 @@ export class Grid {
             `${this._x},${this._y},${this._z}`;
     }
 
-    equal(other: Grid): boolean {
+    equal(other: Node): boolean {
         return this.str() === other.str();
     }
 
-    shift(x: number, y: number, z: number = 0): Grid {
+    shift(x: number, y: number, z: number = 0): Node {
         if (this._is2d) {
-            return new Grid(this._x + x, this._y + y);
+            return new Node(this._x + x, this._y + y);
         } else {
-            return new Grid(this._x + x, this._y + y, this._z + z);
+            return new Node(this._x + x, this._y + y, this._z + z);
         }
     }
 
-    manhattanDistanceTo(destGrid: Grid): number {
-        const distance = Math.abs(destGrid.x - this._x) + Math.abs(destGrid.y - this._y);
-        return this._is2d ? distance : distance + Math.abs(destGrid.z - this._z);
+    manhattanDistanceTo(destNode: Node): number {
+        const distance = Math.abs(destNode.x - this._x) + Math.abs(destNode.y - this._y);
+        return this._is2d ? distance : distance + Math.abs(destNode.z - this._z);
     }
     
-    distanceTo(destGrid: Grid): number {
-        const distX = Math.abs(destGrid.x - this._x);
-        const distY = Math.abs(destGrid.y - this._y);
+    distanceTo(destNode: Node): number {
+        const distX = Math.abs(destNode.x - this._x);
+        const distY = Math.abs(destNode.y - this._y);
 
         if (this._is2d) {
             return Math.sqrt(distX * distX + distY * distY);
         } else {
-            const distZ = Math.abs(destGrid.z - this._z);
+            const distZ = Math.abs(destNode.z - this._z);
             return Math.sqrt(distX * distX + distY * distY + distZ * distZ);
         }
     }

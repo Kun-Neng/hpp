@@ -1,4 +1,4 @@
-import {Grid} from '../Grid';
+import {Node} from '../Node';
 import {Model} from '../Model';
 
 test('test_is_2d', () => {
@@ -46,7 +46,7 @@ test('test_check_num_obstacles', () => {
     expect(obstacle3DArray.length).toBe(scenario_3d_data.size);
 });
 
-test('test_grids_on_obstacles', () => {
+test('test_nodes_on_obstacles', () => {
     const scenario_3d_data = {
         "size": 16,
         "x": [4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7],
@@ -56,16 +56,16 @@ test('test_grids_on_obstacles', () => {
     const obstacle3dArray = Model.createObstacleArray(scenario_3d_data);
 
     const testGoodWaypointArray = [
-        new Grid(5, 9, 2),
-        new Grid(5, 0, 4)
+        new Node(5, 9, 2),
+        new Node(5, 0, 4)
     ];
-    expect(Model.gridsOnObstacles(obstacle3dArray, testGoodWaypointArray)).toBe(false);
+    expect(Model.nodesOnObstacles(obstacle3dArray, testGoodWaypointArray)).toBe(false);
 
     const testErrorWaypointArray = [
-        new Grid(5, 9, 2),
-        new Grid(6, 6, 5)
+        new Node(5, 9, 2),
+        new Node(6, 6, 5)
     ];
-    expect(Model.gridsOnObstacles(obstacle3dArray, testErrorWaypointArray)).toBe(true);
+    expect(Model.nodesOnObstacles(obstacle3dArray, testErrorWaypointArray)).toBe(true);
 });
 
 test('test_boundary', () => {
@@ -112,8 +112,8 @@ test('test_create_initial_Q', () => {
     const model2D = new Model(scenario_2d.dimension, obstacle2DArray, scenario_2d.waypoint);
     const Q2D = model2D.createInitialQ();
     
-    const numberObstacleGrids2D = (scenario_2d.dimension.x * scenario_2d.dimension.y) - scenario_2d.data.size;
-    expect(Q2D.size).toBe(numberObstacleGrids2D);
+    const numberObstacleNodes2D = (scenario_2d.dimension.x * scenario_2d.dimension.y) - scenario_2d.data.size;
+    expect(Q2D.size).toBe(numberObstacleNodes2D);
 
     const scenario_3d = {
         "dimension": { "x": 10, "y": 10, "z": 10 },
@@ -135,6 +135,6 @@ test('test_create_initial_Q', () => {
     const isFast = false
     const Q3D = model3D.createInitialQ(isFast);
     
-    const numberObstacleGrids3D = (scenario_3d.dimension.x * scenario_3d.dimension.y * scenario_3d.dimension.z) - scenario_3d.data.size;
-    expect(Q3D.size).toBe(numberObstacleGrids3D);
+    const numberObstacleNodes3D = (scenario_3d.dimension.x * scenario_3d.dimension.y * scenario_3d.dimension.z) - scenario_3d.data.size;
+    expect(Q3D.size).toBe(numberObstacleNodes3D);
 });

@@ -1,20 +1,20 @@
 import {IDimension} from './interface/IDimension';
 import {IObstacles} from './interface/IObstacles';
 import {IWaypoints} from './interface/IWaypoints';
-import {Grid} from './Grid';
+import {Node} from './Node';
 
 export class Model {
     readonly _dimension: IDimension;
     readonly _is2d: boolean;
-    readonly _obstacleArray: Array<Grid>;
-    readonly _startGrid: Grid;
-    readonly _stopGrid: Grid;
+    readonly _obstacleArray: Array<Node>;
+    readonly _startNode: Node;
+    readonly _stopNode: Node;
     readonly _dist: number;
-    private _initQ: Map<string, Grid>;
+    private _initQ: Map<string, Node>;
 
     readonly _debugMode: boolean;
 
-    constructor(dimension: IDimension, obstacleArray: Array<Grid>, waypoint: IWaypoints, debugMode = false) {
+    constructor(dimension: IDimension, obstacleArray: Array<Node>, waypoint: IWaypoints, debugMode = false) {
         this._dimension = dimension;
         this._is2d = Model.is2d(this._dimension);
 
@@ -22,11 +22,11 @@ export class Model {
 
         const start = waypoint.start;
         const stop = waypoint.stop;
-        this._startGrid = new Grid(start.x, start.y, start.z).setAsStartGrid();
-        this._stopGrid = new Grid(stop.x, stop.y, stop.z);
-        this._dist = this._startGrid.distanceTo(this._stopGrid);
+        this._startNode = new Node(start.x, start.y, start.z).setAsStartNode();
+        this._stopNode = new Node(stop.x, stop.y, stop.z);
+        this._dist = this._startNode.distanceTo(this._stopNode);
 
-        this._initQ = new Map<string, Grid>();
+        this._initQ = new Map<string, Node>();
 
         this._debugMode = debugMode
     }
@@ -43,8 +43,8 @@ export class Model {
         return false;
     }
 
-    static createObstacleArray(data?: IObstacles): Array<Grid> {
-        const obstacleArray = new Array<Grid>();
+    static createObstacleArray(data?: IObstacles): Array<Node> {
+        const obstacleArray = new Array<Node>();
         if (!data) {
             return obstacleArray;
         }
@@ -60,25 +60,25 @@ export class Model {
 
         if (!data.z) {
             for (let i = 0; i < size; i++) {
-                obstacleArray.push(new Grid(xArray[i], yArray[i]));
+                obstacleArray.push(new Node(xArray[i], yArray[i]));
             }
         } else {
             const zArray = data.z;
             for (let i = 0; i < size; i++) {
-                obstacleArray.push(new Grid(xArray[i], yArray[i], zArray[i]));
+                obstacleArray.push(new Node(xArray[i], yArray[i], zArray[i]));
             }
         }
 
         return obstacleArray;
     }
 
-    static gridsOnObstacles(array: Array<Grid>, grids: Array<Grid>): boolean {
+    static nodesOnObstacles(array: Array<Node>, nodes: Array<Node>): boolean {
         const BreakException = {};
         try {
             array.forEach(obstacle => {
-                grids.forEach(grid => {
-                    if (grid.equal(obstacle)) {
-                        console.log(`the point ${grid.str()} is located on the obstacle.`);
+                nodes.forEach(node => {
+                    if (node.equal(obstacle)) {
+                        console.log(`the point ${node.str()} is located on the obstacle.`);
                         throw BreakException;
                     }
                 });
@@ -109,7 +109,7 @@ export class Model {
         return (lowerBound + 1 < upperBound);
     }
 
-    createInitialQ(isFast: boolean = true): Map<string, Grid> {
+    createInitialQ(isFast: boolean = true): Map<string, Node> {
         const x = Number(this._dimension.x);
         const y = Number(this._dimension.y);
 
@@ -118,7 +118,7 @@ export class Model {
         if (this._is2d) {
             for (let row = 0; row < x; row++) {
                 for (let col = 0; col < y; col++) {
-                    if (this._obstacleArray.findIndex((obstacle: Grid) => {
+                    if (this._obstacleArray.findIndex((obstacle: Node) => {
                         return (obstacle.x === row) && (obstacle.y === col);
                     }) !== -1) {
                         continue;
@@ -132,13 +132,13 @@ export class Model {
 
             if (isFast) {
                 const fValue = this._dist;
-                this._startGrid.f = fValue;
-                this._initQ.set(this._startGrid.str(), this._startGrid);
+                this._startNode.f = fValue;
+                this._initQ.set(this._startNode.str(), this._startNode);
             } else {
                 for (let row = 0; row < x; row++) {
                     for (let col = 0; col < y; col++) {
                         for (let iz = 0; iz < z; iz++) {
-                            if (this._obstacleArray.findIndex((obstacle: Grid) => {
+                            if (this._obstacleArray.findIndex((obstacle: Node) => {
                                 return (obstacle.x === row) && (obstacle.y === col) && (obstacle.z === iz);
                             }) !== -1) {
                                 continue;
@@ -160,13 +160,13 @@ export class Model {
     }
 
     private updateInitQ(row: number, col: number, z?: number | undefined): void {
-        const cellGrid = typeof z === 'number' ? new Grid(row, col, z) : new Grid(row, col);
+        const cellNode = typeof z === 'number' ? new Node(row, col, z) : new Node(row, col);
 
-        if (cellGrid.equal(this._startGrid)) {
-            cellGrid.dist = 0;
-            cellGrid.f = cellGrid.dist + this._dist;
+        if (cellNode.equal(this._startNode)) {
+            cellNode.dist = 0;
+            cellNode.f = cellNode.dist + this._dist;
         }
 
-        this._initQ.set(cellGrid.str(), cellGrid);
+        this._initQ.set(cellNode.str(), cellNode);
     }
 }

@@ -1,7 +1,7 @@
 import {IDimension} from './interface/IDimension';
 import {IObstacles} from './interface/IObstacles';
 import {IWaypoints} from './interface/IWaypoints';
-import {Grid} from './Grid';
+import {Node} from './Node';
 import {Model} from './Model';
 import Tools from './Tools';
 
@@ -12,16 +12,16 @@ enum TIME_TAG {
 
 export class Dijkstra {
     readonly _is2d: boolean;
-    readonly _obstacleArray: Array<Grid>;
-    readonly _startGrid: Grid;
-    readonly _stopGrid: Grid;
+    readonly _obstacleArray: Array<Node>;
+    readonly _startNode: Node;
+    readonly _stopNode: Node;
     readonly _allowDiagonal: boolean;
-    readonly _openSet: Map<string, Grid>;
-    readonly _Q: Map<string, Grid>;
+    readonly _openSet: Map<string, Node>;
+    readonly _Q: Map<string, Node>;
     readonly _zCeil: number;
     readonly _zFloor: number;
 
-    private _lastGridKey: string;
+    private _lastNodeKey: string;
     private _message: string;
 
     constructor(scenario: { dimension: IDimension, waypoint: IWaypoints, data?: IObstacles, boundary?: { zCeil?: number, zFloor?: number } }) {
@@ -37,15 +37,15 @@ export class Dijkstra {
 
         const start = waypoint.start;
         const stop = waypoint.stop;
-        this._startGrid = this._is2d ?
-            new Grid(start.x, start.y).setAsStartGrid() :
-            new Grid(start.x, start.y, start.z).setAsStartGrid();
-        this._stopGrid = new Grid(stop.x, stop.y, stop.z);
-        this._lastGridKey = this._stopGrid.str();
+        this._startNode = this._is2d ?
+            new Node(start.x, start.y).setAsStartNode() :
+            new Node(start.x, start.y, start.z).setAsStartNode();
+        this._stopNode = new Node(stop.x, stop.y, stop.z);
+        this._lastNodeKey = this._stopNode.str();
         this._allowDiagonal = waypoint.allowDiagonal ?? false;
 
-        this._openSet = new Map<string, Grid>();
-        this._openSet.set(this._startGrid.str(), this._startGrid);
+        this._openSet = new Map<string, Node>();
+        this._openSet.set(this._startNode.str(), this._startNode);
 
         this._zCeil = Number.MAX_SAFE_INTEGER;
         this._zFloor = Number.MIN_SAFE_INTEGER;
@@ -54,8 +54,8 @@ export class Dijkstra {
     }
 
     calculatePath(): any {
-        const finalQ = new Map<string, Grid>();
-        const visitedQ = new Map<string, Grid>();
+        const finalQ = new Map<string, Node>();
+        const visitedQ = new Map<string, Node>();
 
         const calculateStartTime = this.getTime(TIME_TAG.START);
 
@@ -63,12 +63,12 @@ export class Dijkstra {
         while (size > 0) {
             const obj = Tools.findTheMinimum(this._openSet, 'dist');
             const objKey = obj.key;
-            const currentGrid = obj.value;
-            finalQ.set(objKey, currentGrid);
-            this._lastGridKey = objKey;
+            const currentNode = obj.value;
+            finalQ.set(objKey, currentNode);
+            this._lastNodeKey = objKey;
             this._openSet.delete(objKey);
 
-            if (currentGrid.equal(this._stopGrid)) {
+            if (currentNode.equal(this._stopNode)) {
                 const message = "[Done] Arrival! 🚀";
                 console.log(message);
                 this._message = message;
@@ -83,22 +83,22 @@ export class Dijkstra {
 
                         const isAllowed = this._allowDiagonal ? isDiagonal : isNotDiagonal;
                         if (isAllowed) {
-                            const neighborGrid = currentGrid.shift(shiftRow, shiftCol);
-                            let neighbor = this._Q.get(neighborGrid.str());
+                            const neighborNode = currentNode.shift(shiftRow, shiftCol);
+                            let neighbor = this._Q.get(neighborNode.str());
 
-                            if (neighbor && !finalQ.get(neighborGrid.str())) {
-                                visitedQ.set(neighborGrid.str(), neighbor);
+                            if (neighbor && !finalQ.get(neighborNode.str())) {
+                                visitedQ.set(neighborNode.str(), neighbor);
 
-                                if (this._openSet.get(neighborGrid.str())) {
-                                    this._openSet.set(neighborGrid.str(), neighbor);
+                                if (this._openSet.get(neighborNode.str())) {
+                                    this._openSet.set(neighborNode.str(), neighbor);
                                 }
 
                                 const dist = Math.sqrt(shiftRow * shiftRow + shiftCol * shiftCol);
-                                const alt = currentGrid.dist + dist;
+                                const alt = currentNode.dist + dist;
                                 if (alt < neighbor.dist) {
                                     neighbor.dist = alt;
-                                    neighbor.prev = currentGrid;
-                                    this._openSet.set(neighborGrid.str(), neighbor);
+                                    neighbor.prev = currentNode;
+                                    this._openSet.set(neighborNode.str(), neighbor);
                                 }
                             }
                         }
@@ -109,9 +109,9 @@ export class Dijkstra {
 
                             const isAllowed = this._allowDiagonal ? isDiagonal : isNotDiagonal;
                             if (isAllowed) {
-                                const neighborGrid = currentGrid.shift(shiftRow, shiftCol, shiftZ);
+                                const neighborNode = currentNode.shift(shiftRow, shiftCol, shiftZ);
 
-                                if (neighborGrid.isOutOfBound({boundZ: [this._zFloor, this._zCeil]})) {
+                                if (neighborNode.isOutOfBound({boundZ: [this._zFloor, this._zCeil]})) {
                                     continue;
                                 }
 
@@ -119,28 +119,28 @@ export class Dijkstra {
 
                                 // Fast search
                                 if (this._obstacleArray.findIndex(obstacle => {
-                                    return obstacle.equal(neighborGrid);
+                                    return obstacle.equal(neighborNode);
                                 }) !== -1) {
                                     // Find out an obstacle on the point
                                     continue;
                                 }
 
-                                if (!finalQ.has(neighborGrid.str())) {
-                                    let neighborObj = visitedQ.get(neighborGrid.str());
+                                if (!finalQ.has(neighborNode.str())) {
+                                    let neighborObj = visitedQ.get(neighborNode.str());
                                     if (!neighborObj) {
-                                        neighborObj = new Grid(neighborGrid.x, neighborGrid.y, neighborGrid.z);
-                                        visitedQ.set(neighborGrid.str(), neighborObj);
+                                        neighborObj = new Node(neighborNode.x, neighborNode.y, neighborNode.z);
+                                        visitedQ.set(neighborNode.str(), neighborObj);
                                     }
 
                                     const dist = Math.sqrt(shiftRow * shiftRow + shiftCol * shiftCol + shiftZ * shiftZ);
-                                    const alt = currentGrid.dist + dist;
-                                    if (!this._openSet.has(neighborGrid.str())) {
-                                        this._openSet.set(neighborGrid.str(), neighborObj);
+                                    const alt = currentNode.dist + dist;
+                                    if (!this._openSet.has(neighborNode.str())) {
+                                        this._openSet.set(neighborNode.str(), neighborObj);
                                     }
                                     if (alt < neighborObj.dist) {
                                         neighborObj.dist = alt;
-                                        neighborObj.prev = currentGrid;
-                                        this._openSet.set(neighborGrid.str(), neighborObj);
+                                        neighborObj.prev = currentNode;
+                                        this._openSet.set(neighborNode.str(), neighborObj);
                                     }
                                 }
                             }
@@ -154,8 +154,8 @@ export class Dijkstra {
 
         const calculateEndTime = this.getTime(TIME_TAG.END);
         const elapsedMS = calculateEndTime - calculateStartTime;
-        const finalGrid = finalQ.get(this._lastGridKey);
-        const path = Tools.createPathFromFinalQ(finalQ, finalGrid!);
+        const finalNode = finalQ.get(this._lastNodeKey);
+        const path = Tools.createPathFromFinalQ(finalQ, finalNode!);
 
         return {
             "visited_Q": visitedQ,
