@@ -88,6 +88,11 @@ export class Node {
         }
     }
 
+    directionFrom(prevNode: Node): number[] {
+        return this._is2d ? [Math.sign(this._x - prevNode.x), Math.sign(this._y - prevNode.y)] :
+            [Math.sign(this._x - prevNode.x), Math.sign(this._y - prevNode.y), Math.sign(this._z - prevNode.z)];
+    }
+
     manhattanDistanceTo(destNode: Node): number {
         const distance = Math.abs(destNode.x - this._x) + Math.abs(destNode.y - this._y);
         return this._is2d ? distance : distance + Math.abs(destNode.z - this._z);
