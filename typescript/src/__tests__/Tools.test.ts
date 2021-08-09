@@ -41,6 +41,23 @@ const scenario_2d = {
     }
 };
 
+test('test_is_moving_straight', () => {
+    expect(Tools.isMovingStraight([0, 0])).toBe(true);
+    expect(Tools.isMovingStraight([1, 0])).toBe(true);
+    expect(Tools.isMovingStraight([-1, 0])).toBe(true);
+    expect(Tools.isMovingStraight([0, -1])).toBe(true);
+    expect(Tools.isMovingStraight([1, -1])).toBe(false);
+    
+    expect(Tools.isMovingStraight([0, 0, 0])).toBe(true);
+    expect(Tools.isMovingStraight([0, 1, 0])).toBe(true);
+    expect(Tools.isMovingStraight([0, 1, -1])).toBe(false);
+    expect(Tools.isMovingStraight([-1, -1, 0])).toBe(false);
+    expect(Tools.isMovingStraight([1, 0, 1])).toBe(false);
+
+    expect(Tools.isMovingStraight([1])).toBe(false);
+    expect(Tools.isMovingStraight([0, 0, 0, 1])).toBe(false);
+});
+
 test('test_find_the_min_F', () => {
     const obstacle2DArray = Model.createObstacleArray(scenario_2d.data);
     const model2D = new Model(scenario_2d.dimension, obstacle2DArray, scenario_2d.waypoint);

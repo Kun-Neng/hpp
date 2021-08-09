@@ -27,6 +27,18 @@ function isCollinear(p1: Point, p2: Point, p3: Point): boolean {
 }
 
 export default {
+    isMovingStraight: (direction: number[]) => {
+        if (direction.length === 2) {
+            return direction[0] === 0 || direction[1] === 0;
+        } else if (direction.length === 3) {
+            return (direction[0] === 0 && direction[1] === 0) ||
+                (direction[0] === 0 && direction[2] === 0) ||
+                (direction[1] === 0 && direction[2] === 0);
+        } else {
+            console.error(`Invalid direction ${direction}`);
+            return false;
+        }
+    },
     findTheMinimum: (hashmap: Map<string, Node>, crux: string) => {
         let key = '';
         let value: any;
