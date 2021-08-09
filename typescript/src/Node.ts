@@ -93,6 +93,17 @@ export class Node {
             [Math.sign(this._x - prevNode.x), Math.sign(this._y - prevNode.y), Math.sign(this._z - prevNode.z)];
     }
 
+    stepDistanceTo(destNode: Node): number {
+        if (this._is2d) {
+            const xSteps = Math.abs(destNode.x - this._x);
+            const ySteps = Math.abs(destNode.y - this._y);
+            return Math.sqrt(2) * Math.min(xSteps, ySteps) + Math.abs(xSteps - ySteps);
+        } else {
+            // TODO: three dimension
+            return -1;
+        }
+    }
+
     manhattanDistanceTo(destNode: Node): number {
         const distance = Math.abs(destNode.x - this._x) + Math.abs(destNode.y - this._y);
         return this._is2d ? distance : distance + Math.abs(destNode.z - this._z);
