@@ -46,6 +46,26 @@ test('test_shift', () => {
     expect(node3D120.shift(2, 1, 3).equal(new Node(3, 3, 3))).toBe(true);
 });
 
+test('test_direction_from', () => {
+    expect(node2D.directionFrom(new Node(0, 1))).toStrictEqual([1, 1]);
+    expect(node2D.directionFrom(new Node(1, 1))).toStrictEqual([0, 1]);
+    expect(node2D.directionFrom(new Node(2, 1))).toStrictEqual([-1, 1]);
+    expect(node2D.directionFrom(new Node(0, 2))).toStrictEqual([1, 0]);
+    expect(node2D.directionFrom(new Node(1, 2))).toStrictEqual([0, 0]);
+    expect(node2D.directionFrom(new Node(2, 2))).toStrictEqual([-1, 0]);
+    expect(node2D.directionFrom(new Node(0, 3))).toStrictEqual([1, -1]);
+    expect(node2D.directionFrom(new Node(1, 3))).toStrictEqual([0, -1]);
+    expect(node2D.directionFrom(new Node(2, 3))).toStrictEqual([-1, -1]);
+
+    expect(node3D120.directionFrom(node3D123)).toStrictEqual([0, 0, -1]);
+});
+
+test('test_step_distance_to', () => {
+    expect(node2D.stepDistanceTo(new Node(4, 2))).toBe(3);
+    expect(node2D.stepDistanceTo(new Node(4, 4))).toBe(Math.sqrt(2) * 2 + 1);
+    expect(node3D120.stepDistanceTo(node3D123)).toBe(-1);
+});
+
 test('test_is_out_of_bound', () => {
     expect(node2D.isOutOfBound({})).toBe(false);
     expect(node2D.isOutOfBound({boundZ: [-10, -5]})).toBe(false);
