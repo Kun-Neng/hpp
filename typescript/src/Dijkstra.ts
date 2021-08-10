@@ -163,7 +163,7 @@ export class Dijkstra {
             "elapsed_ms": elapsedMS,
             "path": path,
             "message": this._message
-        }
+        };
     }
 
     private getTimeString(ms: number): string {

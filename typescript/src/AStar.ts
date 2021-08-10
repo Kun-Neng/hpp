@@ -203,7 +203,7 @@ export class AStar {
             "path": path,
             "refined_path": refinedPath,
             "message": this._message
-        }
+        };
     }
 
     private getTimeString(ms: number): string {
