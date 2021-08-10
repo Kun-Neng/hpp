@@ -3,11 +3,26 @@ import {Node} from '../Node';
 const node2D = new Node(1, 2);
 const node3D120 = new Node(1, 2, 0);
 const node3D123 = new Node(1, 2, 3);
+const node3D212 = new Node(2, 1, 2);
 
 test('test_is2d', () => {
     expect(node2D.is2d).toBe(true);
     expect(node3D120.is2d).toBe(false);
     expect(node3D123.is2d).toBe(false);
+});
+
+test('test_for_JPS', () => {
+    expect(node2D.isObstacle).toBe(false);
+    node2D.isObstacle = true;
+    expect(node2D.isObstacle).toBe(true);
+
+    expect(node2D.isNatural).toBe(false);
+    node2D.isNatural = true;
+    expect(node2D.isNatural).toBe(true);
+
+    expect(node2D.isForced).toBe(false);
+    node2D.isForced = true;
+    expect(node2D.isForced).toBe(true);
 });
 
 test('test_get_crux', () => {
@@ -63,7 +78,8 @@ test('test_direction_from', () => {
 test('test_step_distance_to', () => {
     expect(node2D.stepDistanceTo(new Node(4, 2))).toBe(3);
     expect(node2D.stepDistanceTo(new Node(4, 4))).toBe(Math.sqrt(2) * 2 + 1);
-    expect(node3D120.stepDistanceTo(node3D123)).toBe(-1);
+    expect(node3D120.stepDistanceTo(node3D123)).toBe(3);
+    expect(node3D120.stepDistanceTo(node3D212)).toBe(Math.sqrt(2) + 2);
 });
 
 test('test_is_out_of_bound', () => {

@@ -4,6 +4,10 @@ export class Node {
     private _z: number;
     private _is2d: boolean;
 
+    private _isObstacle: boolean;
+    private _isNatural: boolean;
+    private _isForced: boolean;
+
     private _prev: Node | undefined;
     private _dist: number;
     private _f: number;
@@ -13,6 +17,10 @@ export class Node {
         this._y = y;
         this._z = typeof z === 'number' ? z : 0;
         this._is2d = typeof z === 'number' ? false : true;
+
+        this._isObstacle = false;
+        this._isNatural = false;
+        this._isForced = false;
 
         this._prev = undefined;
         this._dist = Number.MAX_SAFE_INTEGER;
@@ -33,6 +41,27 @@ export class Node {
 
     get is2d(): boolean {
         return this._is2d;
+    }
+
+    get isObstacle(): boolean {
+        return this._isObstacle;
+    }
+    set isObstacle(value: boolean) {
+        this._isObstacle = value;
+    }
+
+    get isNatural(): boolean {
+        return this._isNatural;
+    }
+    set isNatural(value: boolean) {
+        this._isNatural = value;
+    }
+
+    get isForced(): boolean {
+        return this._isForced;
+    }
+    set isForced(value: boolean) {
+        this._isForced = value;
     }
 
     public get prev(): Node | undefined {
@@ -94,13 +123,15 @@ export class Node {
     }
 
     stepDistanceTo(destNode: Node): number {
+        const xSteps = Math.abs(destNode.x - this._x);
+        const ySteps = Math.abs(destNode.y - this._y);
+        const xyStepDistances = Math.sqrt(2) * Math.min(xSteps, ySteps) + Math.abs(xSteps - ySteps);
+        
         if (this._is2d) {
-            const xSteps = Math.abs(destNode.x - this._x);
-            const ySteps = Math.abs(destNode.y - this._y);
-            return Math.sqrt(2) * Math.min(xSteps, ySteps) + Math.abs(xSteps - ySteps);
+            return xyStepDistances;
         } else {
-            // TODO: three dimension
-            return -1;
+            const zSteps = Math.abs(destNode.z - this._z);
+            return xyStepDistances + zSteps;
         }
     }
 
