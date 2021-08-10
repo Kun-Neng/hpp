@@ -16,6 +16,7 @@ test('test_is_2d', () => {
 });
 
 test('test_check_num_obstacles', () => {
+    // createObstacleArray
     const obstacleArray = Model.createObstacleArray();
     expect(obstacleArray.length).toBe(0);
 
@@ -44,6 +45,19 @@ test('test_check_num_obstacles', () => {
     };
     const obstacle3DArray = Model.createObstacleArray(scenario_3d_data);
     expect(obstacle3DArray.length).toBe(scenario_3d_data.size);
+
+    // createObstacleSet
+    const obstacleSet = Model.createObstacleSet();
+    expect(obstacleSet.size).toBe(0);
+
+    const obstacleEmptySet = Model.createObstacleSet(scenario_empty_data);
+    expect(obstacleEmptySet.size).toBe(0);
+
+    const obstacle2DSet = Model.createObstacleSet(scenario_2d_data);
+    expect(obstacle2DSet.size).toBe(4); // redundant data is removed
+    
+    const obstacle3DSet = Model.createObstacleSet(scenario_3d_data);
+    expect(obstacle3DSet.size).toBe(scenario_3d_data.size);
 });
 
 test('test_nodes_on_obstacles', () => {

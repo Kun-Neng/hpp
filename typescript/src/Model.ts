@@ -45,6 +45,7 @@ export class Model {
 
     static createObstacleArray(data?: IObstacles): Array<Node> {
         const obstacleArray = new Array<Node>();
+
         if (!data) {
             return obstacleArray;
         }
@@ -70,6 +71,36 @@ export class Model {
         }
 
         return obstacleArray;
+    }
+
+    static createObstacleSet(data?: IObstacles): Set<string> {
+        const obstacleSet = new Set<string>();
+
+        if (!data) {
+            return obstacleSet;
+        }
+
+        if (data.size === 0) {
+            return obstacleSet;
+        }
+
+        const size = data.size;
+
+        const xArray = data.x;
+        const yArray = data.y;
+
+        if (!data.z) {
+            for (let i = 0; i < size; i++) {
+                obstacleSet.add(`${xArray[i]},${yArray[i]}`);
+            }
+        } else {
+            const zArray = data.z;
+            for (let i = 0; i < size; i++) {
+                obstacleSet.add(`${xArray[i]},${yArray[i]},${zArray[i]}`);
+            }
+        }
+
+        return obstacleSet;
     }
 
     static nodesOnObstacles(array: Array<Node>, nodes: Array<Node>): boolean {
