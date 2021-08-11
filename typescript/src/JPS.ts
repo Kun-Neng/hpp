@@ -244,15 +244,7 @@ export class JPS {
 
         // diagonal
         if (direction[0] !== 0 && direction[1] !== 0) {
-            const nextXNode = this.jump(nextNode, [direction[0], 0]);
-            if (nextXNode) {
-                // console.log(`[jump] continue to find ${nextXNode.x},${nextXNode.y} along X, return node`);
-                return nextNode;
-            }
-
-            const nextYNode = this.jump(nextNode, [0, direction[1]]);
-            if (nextYNode) {
-                // console.log(`[jump] continue to find ${nextYNode.x},${nextYNode.y} along Y, return node`);
+            if (this.jump(nextNode, [direction[0], 0]) !== null || this.jump(nextNode, [0, direction[1]]) !== null) {
                 return nextNode;
             }
         }
