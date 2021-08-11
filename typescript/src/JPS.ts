@@ -45,7 +45,7 @@ export class JPS {
             new Node(stop.x, stop.y) :
             new Node(stop.x, stop.y, stop.z);
         this._lastNodeKey = this._stopNode.str();
-        
+
         this._openSet = new Map<string, Node>();
         this._openSet.set(this._startNode.str(), this._startNode);
         this._visitedQ = new Map<string, Node>();
@@ -54,53 +54,46 @@ export class JPS {
         this._message = "[Ready] No Results.";
     }
 
-    getNeighbors(node: Node): Node[] {
-        const neighborNodes = [];
-        const nodeName = `${node.x},${node.y}`;
-        // console.log(`[getNeighbors] from ${nodeName}`);
+    getNeighbors(currNode: Node): Node[] {
+        // console.log(`[getNeighbors] from ${currNode.x},${currNode.y}`);
 
+        const neighbors = [];
         for (let shiftX = -1; shiftX <= 1; shiftX++) {
             for (let shiftY = -1; shiftY <= 1; shiftY++) {
-                const neighborX = node.x + shiftX;
-                const neighborY = node.y + shiftY;
-                const neighborNodeKey = `${neighborX},${neighborY}`;
-                const neighborNode = new Node(neighborX, neighborY);
+                const neighbor = currNode.shift(shiftX, shiftY);
 
-                if (neighborNodeKey === nodeName) {
+                if (neighbor.equal(currNode)) {
                     continue;
                 }
 
-                if (this.checkIsOutOfBound(neighborNode)) {
+                if (this.checkIsOutOfBound(neighbor)) {
                     continue;
                 }
 
-                if (this.checkIsObstacle(neighborNode)) {
-                    neighborNode.isObstacle = true;
-                } else {
-                    neighborNode.prev = node;
+                if (this.checkIsObstacle(neighbor)) {
+                    neighbor.isObstacle = true;
                 }
 
-                neighborNodes.push(neighborNode);
+                neighbors.push(neighbor);
             }
         }
 
-        return neighborNodes;
+        return neighbors;
     }
 
-    checkIsNodeNatural(node: Node, neighbor: Node): boolean {
-        const pNode = node.prev;
-        
-        if (pNode) {
-            const directionToNode = node.directionFrom(pNode);
-            const nextX = node.x + directionToNode[0];
-            const nextY = node.y + directionToNode[1];
+    checkIsNodeNatural(currNode: Node, neighbor: Node): boolean {
+        const prevNode = currNode.prev;
+
+        if (prevNode) {
+            const directionToNode = currNode.directionFrom(prevNode);
+            const nextNode = currNode.shift(directionToNode[0], directionToNode[1]);
 
             if (Tools.isMovingStraight(directionToNode)) {
-                return (neighbor.x === nextX) && (neighbor.y === nextY);
+                return neighbor.equal(nextNode);
             } else {
-                return ((neighbor.x === nextX) && (neighbor.y === nextY) ||
-                    (neighbor.x === node.x) && (neighbor.y === nextY) ||
-                    (neighbor.x === nextX) && (neighbor.y === node.y));
+                return (neighbor.equal(nextNode) ||
+                    (neighbor.x === currNode.x) && (neighbor.y === nextNode.y) ||
+                    (neighbor.x === nextNode.x) && (neighbor.y === currNode.y));
             }
         } else {
             // start node
@@ -108,8 +101,8 @@ export class JPS {
         }
     }
 
-    prune(node: Node, neighbors: Node[]): Node[] {
-        const pNode = node.prev;
+    prune(currNode: Node, neighbors: Node[]): Node[] {
+        const pNode = currNode.prev;
 
         const candidateNeighbors = neighbors.filter(neighbor => neighbor.isNatural === true);
         const nonnaturalNeighbors = neighbors.filter(neighbor => neighbor.isObstacle === false && neighbor.isNatural === false);
@@ -117,7 +110,7 @@ export class JPS {
 
         /*console.log(nonnaturalNeighbors);
         if (obstacles.length > 0) {
-            console.log(`[prune] obstacles beisde ${node.x},${node.y}:`);
+            console.log(`[prune] obstacles beisde ${currNode.x},${currNode.y}:`);
             console.log(obstacles.map(obstacle => {
                 return {
                     x: obstacle.x,
@@ -130,34 +123,33 @@ export class JPS {
 
         if (pNode) {
             // console.log(`[prune] pNode: ${pNode.x},${pNode.y}`);
-            const directionToNode = node.directionFrom(pNode);
-            const nextNode = new Node(node.x + directionToNode[0], node.y + directionToNode[1]);
+            const directionToNode = currNode.directionFrom(pNode);
+            const nextNode = new Node(currNode.x + directionToNode[0], currNode.y + directionToNode[1]);
             // console.log(`[prune] next node: ${nextNode.x},${nextNode.y}`);
-            
+
             nonnaturalNeighbors.forEach(nonnaturalNeighbor => {
                 // const nonnaturalNeighborName = `${nonnaturalNeighbor.x},${nonnaturalNeighbor.y}`;
-
                 if (Tools.isMovingStraight(directionToNode)) {
-                    // straight move (Y)
-                    if (directionToNode[1] !== 0) {
-                        if (nonnaturalNeighbor.y === nextNode.y) {
-                            // const obstacle = obstacles.find(obstacle => obstacle.x === nonnaturalNeighbor.x && obstacle.y === node.y);
-                            const obstacle = this._obstacleSet.has(`${nonnaturalNeighbor.x},${node.y}`);
+                    // straight move (X)
+                    if (directionToNode[0] !== 0) {
+                        if (nonnaturalNeighbor.x === nextNode.x) {
+                            // const obstacle = obstacles.find(obstacle => obstacle.x === currNode.x && obstacle.y === nonnaturalNeighbor.y);
+                            const obstacle = this._obstacleSet.has(`${currNode.x},${nonnaturalNeighbor.y}`);
                             if (obstacle) {
                                 nonnaturalNeighbor.isForced = true;
-                                // console.log(`[prune][straight y move] make ${nonnaturalNeighborName} forced`);
+                                // console.log(`[prune][straight move (X)] make ${nonnaturalNeighborName} forced`);
                                 candidateNeighbors.push(nonnaturalNeighbor);
                             }
                         }
                     }
-                    // straight move (X)
-                    if (directionToNode[0] !== 0) {
-                        if (nonnaturalNeighbor.x === nextNode.x) {
-                            // const obstacle = obstacles.find(obstacle => obstacle.x === node.x && obstacle.y === nonnaturalNeighbor.y);
-                            const obstacle = this._obstacleSet.has(`${node.x},${nonnaturalNeighbor.y}`);
+                    // straight move (Y)
+                    if (directionToNode[1] !== 0) {
+                        if (nonnaturalNeighbor.y === nextNode.y) {
+                            // const obstacle = obstacles.find(obstacle => obstacle.x === nonnaturalNeighbor.x && obstacle.y === node.y);
+                            const obstacle = this._obstacleSet.has(`${nonnaturalNeighbor.x},${currNode.y}`);
                             if (obstacle) {
                                 nonnaturalNeighbor.isForced = true;
-                                // console.log(`[prune][straight x move] make ${nonnaturalNeighborName} forced`);
+                                // console.log(`[prune][straight move (Y)] make ${nonnaturalNeighborName} forced`);
                                 candidateNeighbors.push(nonnaturalNeighbor);
                             }
                         }
@@ -177,30 +169,31 @@ export class JPS {
                     //     }
                     // }
 
-                    const obstacleXNode = new Node(pNode.x + directionToNode[0], pNode.y);
-                    const obstacleYNode = new Node(pNode.x, pNode.y + directionToNode[1]);
+                    const prevNeighborNode = currNode.shift(-directionToNode[0], -directionToNode[1]);
+                    const obstacleXNode = prevNeighborNode.shift(directionToNode[0], 0);
+                    const obstacleYNode = prevNeighborNode.shift(0, directionToNode[1]);
                     if (this._obstacleSet.has(obstacleXNode.str())) {
-                        const directionToObstacle = obstacleXNode.directionFrom(pNode);
+                        const directionToObstacle = obstacleXNode.directionFrom(prevNeighborNode);
                         if (nonnaturalNeighbor.x === obstacleXNode.x + directionToObstacle[0] &&
                             nonnaturalNeighbor.y === obstacleXNode.y + directionToObstacle[1]) {
                             nonnaturalNeighbor.isForced = true;
-                            // console.log(`[prune][diagonal move X] make ${nonnaturalNeighborName} forced`);
+                            // console.log(`[prune][diagonal move (X)] make ${nonnaturalNeighborName} forced`);
                             candidateNeighbors.push(nonnaturalNeighbor);
                         }
                     }
                     if (this._obstacleSet.has(obstacleYNode.str())) {
-                        const directionToObstacle = obstacleYNode.directionFrom(pNode);
+                        const directionToObstacle = obstacleYNode.directionFrom(prevNeighborNode);
                         if (nonnaturalNeighbor.x === obstacleYNode.x + directionToObstacle[0] &&
                             nonnaturalNeighbor.y === obstacleYNode.y + directionToObstacle[1]) {
                             nonnaturalNeighbor.isForced = true;
-                            // console.log(`[prune][diagonal move Y] make ${nonnaturalNeighborName} forced`);
+                            // console.log(`[prune][diagonal move (Y)] make ${nonnaturalNeighborName} forced`);
                             candidateNeighbors.push(nonnaturalNeighbor);
                         }
                     }
                 }
             });
         }
-    
+
         return candidateNeighbors;
     }
 
@@ -209,36 +202,37 @@ export class JPS {
         // const currNodeName = `${currNode.x},${currNode.y}`;
         // console.log(`[jump] from ${currNodeName} jump to ${nextNode.x},${nextNode.y}`);
         // const log = `${currNodeName} => ${nextNode.x},${nextNode.y}: ${direction}`;
-    
+
         if (this.checkIsObstacle(nextNode)) {
             // console.log(`[jump][obstacle] ${log}`);
             return null;
         }
-    
+
         if (this.checkIsOutOfBound(nextNode)) {
             // console.log(`[jump][out of bound] ${log}`);
             return null;
         }
-    
+
         nextNode.prev = currNode;
-    
-        if (nextNode.x === this._stopNode.x && nextNode.y === this._stopNode.y) {
+
+        if (nextNode.equal(this._stopNode)) {
             // console.log(`[jump][goal] ${log}, return node`);
             return nextNode;
         }
-    
+
         const neighbors = this.getNeighbors(nextNode);
         neighbors.forEach(neighbor => {
             if (neighbor.isObstacle === false) {
                 neighbor.isNatural = this.checkIsNodeNatural(nextNode, neighbor);
             }
         });
+
         const hasObstacles = neighbors.findIndex(neighbor => neighbor.isObstacle === true) !== -1;
         if (hasObstacles) {
             // console.log(`[jump] there exists obstacles around ${nextNode.x},${nextNode.y}`);
             // console.log(`[jump] neighbors of ${nextNode.x},${nextNode.y}:`);
             // console.log(neighbors);
-    
+
             const candidateNeighbors = this.prune(nextNode, neighbors);
             // console.log(`[jump] candidateNeighbors of ${nextNode.x},${nextNode.y}:`);
             // console.log(candidateNeighbors);
@@ -247,72 +241,65 @@ export class JPS {
                 return nextNode;
             }
         }
-    
+
         // diagonal
         if (direction[0] !== 0 && direction[1] !== 0) {
             const nextXNode = this.jump(nextNode, [direction[0], 0]);
             if (nextXNode) {
-                // console.log(`[jump] continue to find ${nextXNode.x},${nextXNode.y} along x, return node`);
+                // console.log(`[jump] continue to find ${nextXNode.x},${nextXNode.y} along X, return node`);
                 return nextNode;
             }
-    
+
             const nextYNode = this.jump(nextNode, [0, direction[1]]);
             if (nextYNode) {
-                // console.log(`[jump] continue to find ${nextYNode.x},${nextYNode.y} along y, return node`);
+                // console.log(`[jump] continue to find ${nextYNode.x},${nextYNode.y} along Y, return node`);
                 return nextNode;
             }
         }
-    
+
         // console.log(`[jump] ${nextNode.x},${nextNode.y} jumps direction ${direction}`);
         return this.jump(nextNode, direction);
     }
 
     identifySuccessors(currNode: Node) {
         const neighbors = this.getNeighbors(currNode);
-
-        if (neighbors.length === 0) {
-            return;
-        }
-    
         neighbors.forEach(neighbor => {
             if (neighbor.isObstacle === false) {
                 neighbor.prev = currNode;
                 neighbor.isNatural = this.checkIsNodeNatural(currNode, neighbor);
             }
         });
-    
-        const candidateNeighbors = this.prune(currNode, neighbors);
-        // console.log(`[identifySuccessors] ${currNode.x},${currNode.y} has ${candidateNeighbors.length} candidate neighbors`);
 
-        if (candidateNeighbors.length === 0) {
+        const candidateNeighbors = this.prune(currNode, neighbors);
+        const numCandidateNeighbors = candidateNeighbors.length;
+        // console.log(`[identifySuccessors] ${currNode.x},${currNode.y} has ${numCandidateNeighbors} candidate neighbors`);
+        if (numCandidateNeighbors === 0) {
             return;
         }
-        
-        candidateNeighbors.forEach(neighbor => {
+
+        for (let i = 0; i < numCandidateNeighbors; i++) {
+            const neighbor = candidateNeighbors[i];
             const jumpNode = this.jump(currNode, neighbor.directionFrom(currNode));
             // console.log(`[identifySuccessors] jumpNode:`);
             // console.log(jumpNode);
             if (jumpNode) {
+                if (this._visitedQ.has(jumpNode.str())) {
+                    continue;
+                }
                 this._visitedQ.set(jumpNode.str(), jumpNode);
 
-                if (!this._finalQ.has(jumpNode.str())) {
-                    if (!this._openSet.has(jumpNode.str())) {
-                        this._openSet.set(jumpNode.str(), jumpNode);
-                    }
-    
-                    const dist = currNode.stepDistanceTo(jumpNode);
-                    const alt = currNode.dist + dist;
-                    if (alt < jumpNode.dist) {
-                        jumpNode.dist = alt;
-                        jumpNode.f = alt + jumpNode.manhattanDistanceTo(this._stopNode);
-                        jumpNode.prev = currNode;
-    
-                        this._openSet.set(jumpNode.str(), jumpNode);
-                        // console.log(`[identifySuccessors] for ${neighbor.x},${neighbor.y}: add jump node ${jumpNode.x},${jumpNode.y} (dist: ${jumpNode.dist.toFixed(4)})`);
-                    }
+                const dist = currNode.stepDistanceTo(jumpNode);
+                const alt = currNode.dist + dist;
+                if (alt < jumpNode.dist) {
+                    jumpNode.dist = alt;
+                    jumpNode.f = alt + jumpNode.manhattanDistanceTo(this._stopNode);
+                    jumpNode.prev = currNode;
+
+                    this._openSet.set(jumpNode.str(), jumpNode);
+                    // console.log(`[identifySuccessors] for ${neighbor.x},${neighbor.y}: add jump node ${jumpNode.x},${jumpNode.y} (dist: ${jumpNode.dist.toFixed(4)})`);
                 }
             }
-        });
+        }
     }
 
     calculatePath() {
@@ -343,14 +330,12 @@ export class JPS {
         const elapsedMS = calculateEndTime - calculateStartTime;
         const finalNode = this._finalQ.get(this._lastNodeKey);
         const path = Tools.createPathFromFinalQ(this._finalQ, finalNode!);
-        // const refinedPath = Tools.refinePathFromCollinearity(path);
 
         return {
             "visited_Q": this._visitedQ,
             "final_Q": this._finalQ,
             "elapsed_ms": elapsedMS,
             "path": path,
-            // "refined_path": refinedPath,
             "message": this._message
         };
     }
@@ -359,19 +344,11 @@ export class JPS {
         if (node.x < 0 || node.y < 0 || node.x >= this._dimension.x || node.y >= this._dimension.y) {
             return true;
         }
-    
+
         return false;
     }
-    
-    private checkIsObstacle(node: Node): boolean {
-        /*if (this._obstacleArray.findIndex(obstacle => {
-            return (obstacle.x === node.x) && (obstacle.y === node.y);
-        }) !== -1) {
-            return true;
-        }
-    
-        return false;*/
 
+    private checkIsObstacle(node: Node): boolean {
         return this._obstacleSet.has(node.str());
     }
 
