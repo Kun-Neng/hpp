@@ -222,6 +222,34 @@ test('test_get_neighbors', () => {
 
     const neighborsWithoutObstacle = jps.getNeighbors(new Node(6, 6));
     expect(neighborsWithoutObstacle.length).toBe(8);
+    neighborsWithoutObstacle.forEach(neighbor => {
+        expect(neighbor.isNatural).toStrictEqual(true);
+    });
+
+    // start node
+    const startNode = new Node(6, 6);
+    const prevStraightNode = new Node(5, 6);
+    const nextStraightNode = new Node(7, 6);
+    startNode.prev = prevStraightNode;
+    jps.getNeighbors(startNode).forEach(neighbor => {
+        if (neighbor.equal(nextStraightNode)) {
+            expect(neighbor.isNatural).toStrictEqual(true);
+        } else {
+
+            expect(neighbor.isNatural).toStrictEqual(false);
+        }
+    });
+
+    const prevDiagonalNode = new Node(7, 5);
+    const nextDiagonalNode = new Node(5, 7);
+    startNode.prev = prevDiagonalNode;
+    jps.getNeighbors(startNode).forEach(neighbor => {
+        if (neighbor.equal(new Node(5, 6)) || neighbor.equal(new Node(6, 7)) || neighbor.equal(nextDiagonalNode)) {
+            expect(neighbor.isNatural).toStrictEqual(true);
+        } else {
+            expect(neighbor.isNatural).toStrictEqual(false);
+        }
+    });
 
     const neighborsWithObstacle = jps.getNeighbors(new Node(13, 1));
     const walkableNeighbors = neighborsWithObstacle.filter(neighbor => neighbor.isObstacle === false);
@@ -231,7 +259,7 @@ test('test_get_neighbors', () => {
     expect(neighborsOutOfBound.length).toBe(5);
 });
 
-test('test_check_is_node_natural', () => {
+/*test('test_check_is_node_natural', () => {
     const jps = new JPS(small_2d_scenario);
 
     // start node
@@ -260,18 +288,10 @@ test('test_check_is_node_natural', () => {
             expect(jps.checkIsNodeNatural(startNode, neighbor)).toStrictEqual(false);
         }
     });
-});
+});*/
 
 test('test_prune', () => {
     const jps = new JPS(small_2d_scenario);
-
-    // start node
-    const startNode = new Node(6, 6);
-    const neighborsWithoutObstacle = jps.getNeighbors(startNode);
-    const candidateNeighbors = jps.prune(startNode, neighborsWithoutObstacle);
-    candidateNeighbors.forEach(neighbor => {
-        expect(jps.checkIsNodeNatural(startNode, neighbor)).toStrictEqual(true);
-    });
 
     // straight move (X)
     const nodeS1 = new Node(2, 4);

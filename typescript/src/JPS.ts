@@ -13,9 +13,7 @@ enum TIME_TAG {
 export class JPS {
     readonly _dimension: IDimension;
     readonly _is2d: boolean;
-    // readonly _obstacleArray: Array<Node>;
     readonly _obstacleSet: Set<string>;
-    readonly _numObstacles: number;
     readonly _startNode: Node;
     readonly _stopNode: Node;
     readonly _openSet: Map<string, Node>;
@@ -29,9 +27,7 @@ export class JPS {
     constructor(scenario: { dimension: IDimension, waypoint: IWaypoints, data?: IObstacles }) {
         this._dimension = scenario.dimension;
         this._is2d = Model.is2d(this._dimension);
-        // this._obstacleArray = Model.createObstacleArray(scenario.data);
         this._obstacleSet = Model.createObstacleSet(scenario.data);
-        this._numObstacles = this._obstacleSet.size;
 
         const waypoint = scenario.waypoint;
         // console.log(waypoint);
@@ -56,6 +52,9 @@ export class JPS {
 
     getNeighbors(currNode: Node): Node[] {
         // console.log(`[getNeighbors] from ${currNode.x},${currNode.y}`);
+        const prevNode = currNode.prev;
+        const directionToNode = prevNode ? currNode.directionFrom(prevNode) : [0, 0];
+        const nextNode = currNode.shift(directionToNode[0], directionToNode[1]);
 
         const neighbors = [];
         for (let shiftX = -1; shiftX <= 1; shiftX++) {
@@ -72,6 +71,19 @@ export class JPS {
 
                 if (this.checkIsObstacle(neighbor)) {
                     neighbor.isObstacle = true;
+                } else {
+                    if (!prevNode) {
+                        // start condition
+                        neighbor.isNatural = true;
+                    } else {
+                        if (Tools.isMovingStraight(directionToNode)) {
+                            neighbor.isNatural = neighbor.equal(nextNode);
+                        } else {
+                            neighbor.isNatural = (neighbor.equal(nextNode) ||
+                                (neighbor.x === currNode.x) && (neighbor.y === nextNode.y) ||
+                                (neighbor.x === nextNode.x) && (neighbor.y === currNode.y));
+                        }
+                    }
                 }
 
                 neighbors.push(neighbor);
@@ -81,7 +93,7 @@ export class JPS {
         return neighbors;
     }
 
-    checkIsNodeNatural(currNode: Node, neighbor: Node): boolean {
+    /*checkIsNodeNatural(currNode: Node, neighbor: Node): boolean {
         const prevNode = currNode.prev;
 
         if (prevNode) {
@@ -96,10 +108,10 @@ export class JPS {
                     (neighbor.x === nextNode.x) && (neighbor.y === currNode.y));
             }
         } else {
-            // start node
+            // start condition
             return true;
         }
-    }
+    }*/
 
     prune(currNode: Node, neighbors: Node[]): Node[] {
         const pNode = currNode.prev;
@@ -221,12 +233,6 @@ export class JPS {
         }
 
         const neighbors = this.getNeighbors(nextNode);
-        neighbors.forEach(neighbor => {
-            if (neighbor.isObstacle === false) {
-                neighbor.isNatural = this.checkIsNodeNatural(nextNode, neighbor);
-            }
-        });
-
         const hasObstacles = neighbors.findIndex(neighbor => neighbor.isObstacle === true) !== -1;
         if (hasObstacles) {
             // console.log(`[jump] there exists obstacles around ${nextNode.x},${nextNode.y}`);
@@ -255,13 +261,6 @@ export class JPS {
 
     identifySuccessors(currNode: Node) {
         const neighbors = this.getNeighbors(currNode);
-        neighbors.forEach(neighbor => {
-            if (neighbor.isObstacle === false) {
-                neighbor.prev = currNode;
-                neighbor.isNatural = this.checkIsNodeNatural(currNode, neighbor);
-            }
-        });
-
         const candidateNeighbors = this.prune(currNode, neighbors);
         const numCandidateNeighbors = candidateNeighbors.length;
         // console.log(`[identifySuccessors] ${currNode.x},${currNode.y} has ${numCandidateNeighbors} candidate neighbors`);
