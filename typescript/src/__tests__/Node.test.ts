@@ -75,11 +75,21 @@ test('test_direction_from', () => {
     expect(node3D120.directionFrom(node3D123)).toStrictEqual([0, 0, -1]);
 });
 
-test('test_step_distance_to', () => {
+test('test_distance_to', () => {
     expect(node2D.stepDistanceTo(new Node(4, 2))).toBe(3);
     expect(node2D.stepDistanceTo(new Node(4, 4))).toBe(Math.sqrt(2) * 2 + 1);
     expect(node3D120.stepDistanceTo(node3D123)).toBe(3);
     expect(node3D120.stepDistanceTo(node3D212)).toBe(Math.sqrt(2) + 2);
+
+    expect(node2D.manhattanDistanceTo(new Node(3, 5))).toBe(5);
+    expect(node3D120.manhattanDistanceTo(node3D212)).toBe(4);
+
+    const factorD = Math.sqrt(2) - 1;
+    expect(node2D.octileDistanceTo(new Node(3, 5))).toBe(factorD * 2 + 3);
+    expect(node2D.octileDistanceTo(new Node(5, 3))).toBe(factorD + 4);
+
+    expect(node3D120.octileDistanceTo(node3D123)).toBe(3);
+    expect(node3D120.octileDistanceTo(node3D212)).toBe(factorD + 3);
 });
 
 test('test_is_out_of_bound', () => {

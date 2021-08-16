@@ -125,7 +125,8 @@ export class Node {
     stepDistanceTo(destNode: Node): number {
         const xSteps = Math.abs(destNode.x - this._x);
         const ySteps = Math.abs(destNode.y - this._y);
-        const xyStepDistances = Math.sqrt(2) * Math.min(xSteps, ySteps) + Math.abs(xSteps - ySteps);
+        // const xyStepDistances = Math.sqrt(2) * Math.min(xSteps, ySteps) + Math.abs(xSteps - ySteps);
+        const xyStepDistances = Math.SQRT2 * Math.min(xSteps, ySteps) + Math.abs(xSteps - ySteps);
         
         if (this._is2d) {
             return xyStepDistances;
@@ -137,6 +138,16 @@ export class Node {
 
     manhattanDistanceTo(destNode: Node): number {
         const distance = Math.abs(destNode.x - this._x) + Math.abs(destNode.y - this._y);
+        return this._is2d ? distance : distance + Math.abs(destNode.z - this._z);
+    }
+
+    octileDistanceTo(destNode: Node): number {
+        const dx = Math.abs(destNode.x - this._x);
+        const dy = Math.abs(destNode.y - this._y);
+    
+        const factorD = Math.SQRT2 - 1;
+        // const distance = factorD * (dx + dy) + (1 - 2 * factorD) * Math.min(dx, dy);
+        const distance = (dy > dx) ? factorD * dx + dy : factorD * dy + dx;
         return this._is2d ? distance : distance + Math.abs(destNode.z - this._z);
     }
     
