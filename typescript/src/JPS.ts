@@ -65,11 +65,11 @@ export class JPS {
                     continue;
                 }
 
-                if (this.checkIsOutOfBound(neighbor)) {
+                if (neighbor.isOutOfBound({boundX: [-1, this._dimension.x], boundY: [-1, this._dimension.y]})) {
                     continue;
                 }
 
-                if (this.checkIsObstacle(neighbor)) {
+                if (this._obstacleSet.has(neighbor.str())) {
                     neighbor.isObstacle = true;
                 } else {
                     if (!prevNode) {
@@ -215,12 +215,12 @@ export class JPS {
         // console.log(`[jump] from ${currNodeName} jump to ${nextNode.x},${nextNode.y}`);
         // const log = `${currNodeName} => ${nextNode.x},${nextNode.y}: ${direction}`;
 
-        if (this.checkIsObstacle(nextNode)) {
+        if (this._obstacleSet.has(nextNode.str())) {
             // console.log(`[jump][obstacle] ${log}`);
             return null;
         }
 
-        if (this.checkIsOutOfBound(nextNode)) {
+        if (nextNode.isOutOfBound({boundX: [-1, this._dimension.x], boundY: [-1, this._dimension.y]})) {
             // console.log(`[jump][out of bound] ${log}`);
             return null;
         }
@@ -330,18 +330,6 @@ export class JPS {
             "path": path,
             "message": this._message
         };
-    }
-
-    private checkIsOutOfBound(node: Node): boolean {
-        if (node.x < 0 || node.y < 0 || node.x >= this._dimension.x || node.y >= this._dimension.y) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private checkIsObstacle(node: Node): boolean {
-        return this._obstacleSet.has(node.str());
     }
 
     private getTimeString(ms: number): string {
