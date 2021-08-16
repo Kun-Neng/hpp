@@ -18,7 +18,7 @@ export class JPS {
     readonly _stopNode: Node;
     readonly _openSet: Map<string, Node>;
 
-    private _visitedQ: Map<string, Node>;
+    private _visitedQ: Set<string>;
     private _finalQ: Map<string, Node>;
 
     private _lastNodeKey: string;
@@ -44,7 +44,7 @@ export class JPS {
 
         this._openSet = new Map<string, Node>();
         this._openSet.set(this._startNode.str(), this._startNode);
-        this._visitedQ = new Map<string, Node>();
+        this._visitedQ = new Set<string>();
         this._finalQ = new Map<string, Node>();
 
         this._message = "[Ready] No Results.";
@@ -277,13 +277,14 @@ export class JPS {
                 if (this._visitedQ.has(jumpNode.str())) {
                     continue;
                 }
-                this._visitedQ.set(jumpNode.str(), jumpNode);
+                this._visitedQ.add(jumpNode.str());
 
                 const dist = currNode.stepDistanceTo(jumpNode);
                 const alt = currNode.dist + dist;
                 if (alt < jumpNode.dist) {
                     jumpNode.dist = alt;
-                    jumpNode.f = alt + jumpNode.manhattanDistanceTo(this._stopNode);
+                    // jumpNode.f = alt + jumpNode.manhattanDistanceTo(this._stopNode);
+                    jumpNode.f = alt + jumpNode.octileDistanceTo(this._stopNode);
                     jumpNode.prev = currNode;
 
                     this._openSet.set(jumpNode.str(), jumpNode);
