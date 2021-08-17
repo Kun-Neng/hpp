@@ -3,6 +3,7 @@ import {IObstacles} from './interface/IObstacles';
 import {IWaypoints} from './interface/IWaypoints';
 import {IOptions} from './interface/IOptions';
 import {Node} from './Node';
+import {Heap} from './Heap';
 import {Model} from './Model';
 import Tools from './Tools';
 
@@ -18,7 +19,7 @@ export class AStar {
     readonly _startNode: Node;
     readonly _stopNode: Node;
     readonly _allowDiagonal: boolean;
-    readonly _openSet: Map<string, Node>;
+    readonly _openSet: Heap;
     readonly _Q: Map<string, Node>;
     readonly _zCeil: number;
     readonly _zFloor: number;
@@ -60,8 +61,8 @@ export class AStar {
         this._lastNodeKey = this._stopNode.str();
         this._allowDiagonal = waypoint.allowDiagonal ?? false;
 
-        this._openSet = new Map<string, Node>();
-        this._openSet.set(this._startNode.str(), this._startNode);
+        this._openSet = new Heap();
+        this._openSet.push(this._startNode);
 
         if (Model.nodesOnObstacles(this._obstacleArray, [this._startNode, this._stopNode])) {
             const message = "[Waypoint Error] start position or stop position is on some obstacle.";
@@ -94,16 +95,13 @@ export class AStar {
 
         const calculateStartTime = this.getTime(TIME_TAG.START);
 
-        let size = this._openSet.size;
-        while (size > 0) {
-            const obj = Tools.findTheMinimum(this._openSet, 'f');
-            const objKey = obj.key;
-            const currentNode = obj.value;
-            finalQ.set(objKey, currentNode);
+        while (!this._openSet.isEmpty()) {
+            const currentNode = this._openSet.pop();
+            const objKey = currentNode!.str();
+            finalQ.set(objKey, currentNode!);
             this._lastNodeKey = objKey;
-            this._openSet.delete(objKey);
 
-            if (currentNode.equal(this._stopNode)) {
+            if (currentNode!.equal(this._stopNode)) {
                 const message = "[Done] Arrival! 🚀";
                 console.log(message);
                 this._message = message;
@@ -118,24 +116,20 @@ export class AStar {
 
                         const isAllowed = this._allowDiagonal ? isDiagonal : isNotDiagonal;
                         if (isAllowed) {
-                            const neighborNode = currentNode.shift(shiftRow, shiftCol);
+                            const neighborNode = currentNode!.shift(shiftRow, shiftCol);
                             let neighbor = this._Q.get(neighborNode.str());
 
                             if (neighbor && !finalQ.get(neighborNode.str())) {
                                 visitedQ.set(neighborNode.str(), neighbor);
 
-                                if (!this._openSet.has(neighborNode.str())) {
-                                    this._openSet.set(neighborNode.str(), neighbor);
-                                }
-
                                 const dist = Math.sqrt(shiftRow * shiftRow + shiftCol * shiftCol);
-                                const alt = currentNode.dist + dist;
+                                const alt = currentNode!.dist + dist;
                                 if (alt < neighbor.dist) {
                                     neighbor.dist = alt;
                                     neighbor.f = alt + neighbor.manhattanDistanceTo(this._stopNode);
                                     // neighbor.f = alt + Math.sqrt(distX * distX + distY * distY);
                                     neighbor.prev = currentNode;
-                                    this._openSet.set(neighborNode.str(), neighbor);
+                                    this._openSet.push(neighbor);
                                 }
                             }
                         }
@@ -146,7 +140,7 @@ export class AStar {
 
                             const isAllowed = this._allowDiagonal ? isDiagonal : isNotDiagonal;
                             if (isAllowed) {
-                                const neighborNode = currentNode.shift(shiftRow, shiftCol, shiftZ);
+                                const neighborNode = currentNode!.shift(shiftRow, shiftCol, shiftZ);
 
                                 if (neighborNode.isOutOfBound({boundZ: [this._zFloor, this._zCeil]})) {
                                     continue;
@@ -170,15 +164,12 @@ export class AStar {
                                     }
 
                                     const dist = Math.sqrt(shiftRow * shiftRow + shiftCol * shiftCol + shiftZ * shiftZ);
-                                    const alt = currentNode.dist + dist;
-                                    if (!this._openSet.has(neighborNode.str())) {
-                                        this._openSet.set(neighborNode.str(), neighborObj);
-                                    }
+                                    const alt = currentNode!.dist + dist;
                                     if (alt < neighborObj.dist) {
                                         neighborObj.dist = alt;
                                         neighborObj.f = alt + neighborObj.manhattanDistanceTo(this._stopNode);
                                         neighborObj.prev = currentNode;
-                                        this._openSet.set(neighborNode.str(), neighborObj);
+                                        this._openSet.push(neighborObj);
                                     }
                                 }
                             }
@@ -186,8 +177,6 @@ export class AStar {
                     }
                 }
             }
-
-            size = this._openSet.size;
         }
 
         const calculateEndTime = this.getTime(TIME_TAG.END);

@@ -1,4 +1,5 @@
 import time
+import heapq
 from math import inf, sqrt
 from pyhpp.node import Node
 from pyhpp.model import Model
@@ -35,8 +36,9 @@ class AStar:
         model = Model(dimension, self.obstacle_array, self.waypoint, debug_mode)
         self.Q = model.create_initial_Q(is_fast)
 
-        self.open_set = dict()
-        self.open_set[str(self.start_node)] = self.Q.get(str(self.start_node))
+        self.open_set = []
+        heapq.heapify(self.open_set)
+        heapq.heappush(self.open_set, self.Q.get(str(self.start_node)))
 
         if Model.nodes_on_obstacles(self.obstacle_array, [self.start_node, self.stop_node]):
             message = "[Waypoint Error] start position or stop position is on the obstacle."
@@ -65,13 +67,11 @@ class AStar:
 
         size = len(self.open_set)
         while size > 0:
-            obj = Tools.find_the_minimum(self.open_set, 'f')
-            obj_key = obj["key"]
-            current_node = obj["value"]
+            current_node = heapq.heappop(self.open_set)
+            obj_key = str(current_node)
             final_Q[obj_key] = current_node
             if obj_key is not None:
                 self.last_node_key = str(obj_key)
-            del self.open_set[obj_key]
 
             if current_node == self.stop_node:
                 message = "[Done] Arrival! 🚀"
@@ -94,9 +94,6 @@ class AStar:
                             if neighbor is not None and str(neighbor_node) not in final_Q:
                                 visited_Q[str(neighbor_node)] = neighbor
 
-                                if str(neighbor_node) not in self.open_set:
-                                    self.open_set[str(neighbor_node)] = neighbor
-
                                 dist = sqrt(shift_row ** 2 + shift_col ** 2)
                                 alt = current_node.dist + dist
                                 if alt < neighbor.dist:
@@ -104,7 +101,7 @@ class AStar:
                                     neighbor.f = alt + neighbor.manhattan_distance_to(self.stop_node)
                                     # neighbor["f"] = alt + sqrt(dist_x ** 2 + dist_y ** 2)
                                     neighbor.prev = str(current_node)
-                                    self.open_set[str(neighbor_node)] = neighbor
+                                    heapq.heappush(self.open_set, neighbor)
                     else:
                         for shift_z in shift_node:
                             is_not_diagonal = ((shift_row == 0 or shift_col == 0) and (shift_row != shift_col)) \
@@ -149,16 +146,13 @@ class AStar:
                                     neighbor = Node(neighbor_node.x, neighbor_node.y, neighbor_node.z)
                                     visited_Q[str(neighbor_node)] = neighbor
 
-                                if str(neighbor_node) not in self.open_set:
-                                    self.open_set[str(neighbor_node)] = neighbor
-
                                 dist = sqrt(shift_row ** 2 + shift_col ** 2 + shift_z ** 2)
                                 alt = current_node.dist + dist
                                 if alt < neighbor.dist:
                                     neighbor.dist = alt
                                     neighbor.f = alt + neighbor.manhattan_distance_to(self.stop_node)
                                     neighbor.prev = str(current_node)
-                                    self.open_set[str(neighbor_node)] = neighbor
+                                    heapq.heappush(self.open_set, neighbor)
 
             size = len(self.open_set)
 
