@@ -109,6 +109,22 @@ scenario_no_results = {
     }
 }
 
+scenario_empty_grouping_without_boundary = {
+    "dimension": { "x": 10, "y": 10, "z": 10 },
+    "data": {
+        "size": 16,
+        "x": [4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7],
+        "y": [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+        "z": [2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
+    },
+    "waypoint": {
+        "start": { "x": 5, "y": 9, "z": 2 },
+        "stop": { "x": 5, "y": 0, "z": 4 },
+        "allowDiagonal": False
+    },
+    "grouping": {}
+}
+
 scenario = {
     "dimension": {"x": 10, "y": 10, "z": 10},
     "empty_data": {},
@@ -184,6 +200,23 @@ def test_constructor():
     scenario_without_floor["boundary"] = { "zCeil": 6 }
     AStar(scenario_without_floor)
 
+    scenario_grouping_without_obstacles_inside = copy.deepcopy(scenario_empty_grouping_without_boundary)
+    scenario_grouping_without_obstacles_inside["grouping"] = { "radius": 2 }
+    AStar(scenario_grouping_without_obstacles_inside)
+
+    scenario_obstacles_in_sphere1 = copy.deepcopy(scenario_empty_grouping_without_boundary)
+    scenario_obstacles_in_sphere1["grouping"] = { "radius": 5 }
+    AStar(scenario_obstacles_in_sphere1)
+
+    scenario_obstacles_in_sphere2 = copy.deepcopy(scenario_empty_grouping_without_boundary)
+    scenario_obstacles_in_sphere2["grouping"] = { "radius": 10 }
+    AStar(scenario_obstacles_in_sphere2)
+
+    scenario_obstacles_in_both_circles = copy.deepcopy(scenario_empty_grouping_without_boundary)
+    scenario_obstacles_in_both_circles["boundary"] = { "zCeil": 6, "zFloor": 1 }
+    scenario_obstacles_in_both_circles["grouping"] = { "radius": 10 }
+    AStar(scenario_obstacles_in_both_circles)
+
 
 def test_calculate_path():
     '''
@@ -234,8 +267,44 @@ def test_calculate_path():
     assert result_3D_diagonal["path"]["x"][len(result_3D_diagonal["path"]["x"]) - 1] == int(scenario_3d_allow_diagonal["waypoint"]["stop"]["x"])
     assert result_3D_diagonal["path"]["y"][len(result_3D_diagonal["path"]["y"]) - 1] == int(scenario_3d_allow_diagonal["waypoint"]["stop"]["y"])
     assert result_3D_diagonal["path"]["z"][len(result_3D_diagonal["path"]["z"]) - 1] == int(scenario_3d_allow_diagonal["waypoint"]["stop"]["z"])
+    
+    aStar_3D_empty_grouping_without_boundary = AStar(scenario_empty_grouping_without_boundary)
+    result_3D_empty_grouping_without_boundary = aStar_3D_empty_grouping_without_boundary.calculate_path()
+    assert result_3D_empty_grouping_without_boundary["message"] == '[Done] Arrival! 🚀'
+
+    scenario_grouping_without_boundary = copy.deepcopy(scenario_empty_grouping_without_boundary)
+    scenario_grouping_without_boundary["grouping"] = { "radius": 2 }
+    aStar_3D_grouping_without_boundary = AStar(scenario_grouping_without_boundary)
+    result_3D_grouping_without_boundary = aStar_3D_grouping_without_boundary.calculate_path()
+    assert result_3D_grouping_without_boundary["message"] == '[Done] Arrival! 🚀'
+
+    scenario_grouping_with_boundary = copy.deepcopy(scenario_grouping_without_boundary)
+    scenario_grouping_with_boundary["boundary"] = { "zCeil": 6, "zFloor": 1 }
+    aStar_3D_grouping_with_boundary = AStar(scenario_grouping_with_boundary)
+    result_3D_grouping_with_boundary = aStar_3D_grouping_with_boundary.calculate_path()
+    assert result_3D_grouping_with_boundary["message"] == '[Done] Arrival! 🚀'
 
     options = {'type': 'original'}
     original_astar_3D_diagonal = AStar(scenario_3d_allow_diagonal, options)
     original_result_3D_diagonal = original_astar_3D_diagonal.calculate_path()
     assert original_result_3D_diagonal["message"] == '[Done] Arrival! 🚀'
+
+
+def test_intersect():
+    astar = AStar({
+        "dimension": {"x": 15, "y": 15},
+        "waypoint": {
+            "start": {"x": 12, "y": 0},
+            "stop": {"x": 1, "y": 11},
+            "allowDiagonal": False
+        },
+        "grouping": {"radius": 1}
+    })
+
+    from pyhpp.node import Node
+    group_center_grid = Node(2.999, 5)
+    obstacle_grid = Node(5, 5)
+    assert astar.intersect(group_center_grid, obstacle_grid) == False
+
+    intersected_group_center_grid = Node(3, 5)
+    assert astar.intersect(intersected_group_center_grid, obstacle_grid) == True

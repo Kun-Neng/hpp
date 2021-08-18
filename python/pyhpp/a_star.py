@@ -54,6 +54,21 @@ class AStar:
                 print(message)
                 self.message = message
         
+        grouping = scenario["grouping"] if "grouping" in scenario else None
+        self.is_grouping = True if grouping is not None and "radius" in grouping and str(grouping["radius"]).isnumeric() else False
+        self.group_radius = float(grouping["radius"]) if self.is_grouping else 0
+        self.is_group_flat = True if self.is_2d or "boundary" in scenario else False
+
+        if self.is_grouping:
+            print("[Grouping] radius", self.group_radius, "of", {"circle" if self.is_group_flat else "sphere"})
+            for obstacle in self.obstacle_array:
+                if self.intersect(self.start_node, obstacle):
+                    message = "[Grouping Error] obstacle is in the start", {"circle" if self.is_group_flat else "sphere"}
+                    print(message)
+                if self.intersect(self.stop_node, obstacle):
+                    message = "[Grouping Error] obstacle is in the stop", {"circle" if self.is_group_flat else "sphere"}
+                    print(message)
+        
         self.message = "[Ready] No Results."
 
     def calculate_path(self):
@@ -128,15 +143,26 @@ class AStar:
                                 #     # ...
 
                                 # Fast search
-                                is_obstacle_found = False
-                                for index in range(self.num_obstacles):
-                                    obstacle_node = self.obstacle_array[index]
-                                    if obstacle_node == neighbor_node:
-                                        # Find out an obstacle on the neighbor node
-                                        is_obstacle_found = True
-                                        break
-                                if is_obstacle_found:
-                                    continue
+                                if self.is_grouping:
+                                    is_obstacle_found = False
+                                    for obstacle_node in self.obstacle_array:
+                                        if self.intersect(neighbor_node, obstacle_node):
+                                            is_obstacle_found = True
+                                            # no more to check the other collisions
+                                            break
+                                    if is_obstacle_found:
+                                        # continue to find the next neighbor
+                                        continue
+                                else:
+                                    is_obstacle_found = False
+                                    for index in range(self.num_obstacles):
+                                        obstacle_node = self.obstacle_array[index]
+                                        if obstacle_node == neighbor_node:
+                                            # Find out an obstacle on the neighbor node
+                                            is_obstacle_found = True
+                                            break
+                                    if is_obstacle_found:
+                                        continue
 
                                 # has_key was removed in Python 3
                                 # https://docs.python.org/3.0/whatsnew/3.0.html#builtins
@@ -176,3 +202,26 @@ class AStar:
             "refined_path": refined_path,
             "message": self.message
         }
+    
+    def intersect(self, group_center_node, obstacle_node) -> bool:
+        [box_min_x, box_max_x, box_min_y, box_max_y] = [
+            obstacle_node.x - 0.5, obstacle_node.x + 0.5,
+            obstacle_node.y - 0.5, obstacle_node.y + 0.5
+        ]
+        x = max(box_min_x, min(group_center_node.x, box_max_x))
+        y = max(box_min_y, min(group_center_node.y, box_max_y))
+
+        if self.is_group_flat:
+            flat_center_node = Node(group_center_node.x, group_center_node.y)
+            closest_point = Node(x, y)
+            # distance = sqrt(pow(x - group_center_node.x, 2) + pow(y - group_center_node.y, 2))
+            distance = flat_center_node.distance_to(closest_point)
+
+            return distance <= self.group_radius
+        else:
+            [boxMinZ, boxMaxZ] = [obstacle_node.z - 0.5, obstacle_node.z + 0.5]
+            z = max(boxMinZ, min(group_center_node.z, boxMaxZ))
+            closest_point = Node(x, y, z)
+            distance = group_center_node.distance_to(closest_point)
+        
+            return distance <= self.group_radius

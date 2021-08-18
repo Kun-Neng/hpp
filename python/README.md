@@ -1,5 +1,5 @@
 # pyhpp
-#### Python Package for A* Algorithms
+### Python Package for Path Planning Algorithms
 
 * Step 1: import A* algorithm
 ```

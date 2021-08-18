@@ -1,5 +1,5 @@
 # jshpp
-#### Node Package for A* Algorithms
+### Node Package for Path Planning Algorithms
 
 * Step 1: import A* algorithm
 ```

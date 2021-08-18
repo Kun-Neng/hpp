@@ -1,6 +1,8 @@
 import {IDimension} from './interface/IDimension';
 import {IObstacles} from './interface/IObstacles';
 import {IWaypoints} from './interface/IWaypoints';
+import {IBoundary} from './interface/IBoundary';
+import {IGrouping} from './interface/IGrouping';
 import {IOptions} from './interface/IOptions';
 import {Node} from './Node';
 import {Model} from './Model';
@@ -23,13 +25,17 @@ export class AStar {
     readonly _zCeil: number;
     readonly _zFloor: number;
 
+    readonly _isGrouping: boolean;
+    readonly _groupRadius: number;
+    readonly _isGroupFlat: boolean;
+
     readonly _debugMode: boolean;
     readonly _type: string;
 
     private _lastNodeKey: string;
     private _message: string;
 
-    constructor(scenario: { dimension: IDimension, waypoint: IWaypoints, data?: IObstacles, boundary?: { zCeil?: number, zFloor?: number } }, options?: IOptions) {
+    constructor(scenario: { dimension: IDimension, waypoint: IWaypoints, data?: IObstacles, boundary?: IBoundary, grouping?: IGrouping }, options?: IOptions) {
         const dimension = scenario.dimension;
         this._is2d = Model.is2d(dimension);
         this._obstacleArray = Model.createObstacleArray(scenario.data);
@@ -82,6 +88,28 @@ export class AStar {
                     console.log(message);
                     this._message = message;
                 }
+            }
+        }
+
+        const grouping = scenario.grouping;
+        this._isGrouping = grouping ? Number(grouping.radius) ? true : false : false;
+        // console.log(isGrouping);
+        this._groupRadius = this._isGrouping ? Number(grouping!.radius) : 0;
+        this._isGroupFlat = scenario.boundary ? true : false;
+
+        if (this._isGrouping) {
+            console.log(`[Grouping] radius ${this._groupRadius} of ${this._isGroupFlat ? 'circle' : 'sphere'}`);
+            if (this._obstacleArray.findIndex(obstacle => {
+                return this.intersect(this._startNode, obstacle);
+            }) !== -1) {
+                const message = `[Grouping Error] obstacle is in the start ${this._isGroupFlat ? 'circle' : 'sphere'}.`;
+                console.log(message);
+            }
+            if (this._obstacleArray.findIndex(obstacle => {
+                return this.intersect(this._stopNode, obstacle);
+            }) !== -1) {
+                const message = `[Grouping Error] obstacle is in the stop ${this._isGroupFlat ? 'circle' : 'sphere'}.`;
+                console.log(message);
             }
         }
 
@@ -141,10 +169,13 @@ export class AStar {
                         }
                     } else {
                         for (let shiftZ = -1; shiftZ <= 1; shiftZ++) {
+                            // Note: Here diagonally z-shift is not considered
                             const isNotDiagonal = (shiftRow === 0 || shiftCol === 0) && (shiftRow != shiftCol) || (shiftRow === 0 && shiftCol === 0);
                             const isDiagonal = !(shiftRow === 0 && shiftCol === 0 && shiftZ === 0);
 
                             const isAllowed = this._allowDiagonal ? isDiagonal : isNotDiagonal;
+                            // If _isGrouping, then isNotDiagonal
+                            // const isAllowed = this._isGrouping ? isNotDiagonal : this._allowDiagonal ? isDiagonal : isNotDiagonal;
                             if (isAllowed) {
                                 const neighborNode = currentNode.shift(shiftRow, shiftCol, shiftZ);
 
@@ -155,11 +186,19 @@ export class AStar {
                                 // Full search (time-consuming) = 2D
 
                                 // Fast search
-                                if (this._obstacleArray.findIndex(obstacle => {
-                                    return obstacle.equal(neighborNode);
-                                }) !== -1) {
-                                    // Find out an obstacle on the point
-                                    continue;
+                                if (this._isGrouping) {
+                                    if (this._obstacleArray.findIndex(obstacle => {
+                                        return this.intersect(neighborNode, obstacle);
+                                    }) !== -1) {
+                                        continue;
+                                    }
+                                } else {
+                                    if (this._obstacleArray.findIndex(obstacle => {
+                                        return obstacle.equal(neighborNode);
+                                    }) !== -1) {
+                                        // Find out an obstacle on the point
+                                        continue;
+                                    }
                                 }
 
                                 if (!finalQ.has(neighborNode.str())) {
@@ -204,6 +243,31 @@ export class AStar {
             "refined_path": refinedPath,
             "message": this._message
         };
+    }
+
+    private intersect(groupCenterNode: Node, obstacleNode: Node) {
+        const [boxMinX, boxMaxX, boxMinY, boxMaxY] = [
+            obstacleNode.x - 0.5, obstacleNode.x + 0.5,
+            obstacleNode.y - 0.5, obstacleNode.y + 0.5
+        ];
+        const x = Math.max(boxMinX, Math.min(groupCenterNode.x, boxMaxX));
+        const y = Math.max(boxMinY, Math.min(groupCenterNode.y, boxMaxY));
+
+        if (this._isGroupFlat) {
+            const flatCenterNode = new Node(groupCenterNode.x, groupCenterNode.y);
+            const closestPoint = new Node(x, y);
+            // const distance = Math.sqrt(Math.pow(x - groupCenterNode.x, 2) + Math.pow(y - groupCenterNode.y, 2));
+            const distance = flatCenterNode.distanceTo(closestPoint);
+
+            return distance <= this._groupRadius;
+        } else {
+            const [boxMinZ, boxMaxZ] = [obstacleNode.z - 0.5, obstacleNode.z + 0.5];
+            const z = Math.max(boxMinZ, Math.min(groupCenterNode.z, boxMaxZ));
+            const closestPoint = new Node(x, y, z);
+            const distance = groupCenterNode.distanceTo(closestPoint);
+        
+            return distance <= this._groupRadius;
+        }
     }
 
     private getTimeString(ms: number): string {

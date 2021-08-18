@@ -108,6 +108,22 @@ const scenario_no_results = {
     }
 };
 
+const scenarioEmptyGroupingWithoutBoundary = {
+    "dimension": { "x": 10, "y": 10, "z": 10 },
+    "data": {
+        "size": 16,
+        "x": [4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7],
+        "y": [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+        "z": [2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
+    },
+    "waypoint": {
+        "start": { "x": 5, "y": 9, "z": 2 },
+        "stop": { "x": 5, "y": 0, "z": 4 },
+        "allowDiagonal": false
+    },
+    "grouping": {}
+};
+
 const scenario = {
     "dimension": {"x": 10, "y": 10, "z": 10},
     "empty_data": {},
@@ -191,6 +207,42 @@ test('test_constructor', () => {
         }
     };
     new AStar(scenarioWithoutFloor);
+
+    const scenarioGroupingWithoutObstaclesInside = {
+        ...scenarioEmptyGroupingWithoutBoundary,
+        "grouping": {
+            "radius": 2
+        }
+    };
+    new AStar(scenarioGroupingWithoutObstaclesInside);
+
+    const scenarioObstaclesInSphere1 = {
+        ...scenarioEmptyGroupingWithoutBoundary,
+        "grouping": {
+            "radius": 5
+        }
+    };
+    new AStar(scenarioObstaclesInSphere1);
+
+    const scenarioObstaclesInSphere2 = {
+        ...scenarioEmptyGroupingWithoutBoundary,
+        "grouping": {
+            "radius": 10
+        }
+    };
+    new AStar(scenarioObstaclesInSphere2);
+
+    const scenarioObstaclesInBothCircles = {
+        ...scenarioEmptyGroupingWithoutBoundary,
+        "boundary": {
+            "zCeil": 6,
+            "zFloor": 1
+        },
+        "grouping": {
+            "radius": 10
+        }
+    };
+    new AStar(scenarioObstaclesInBothCircles);
 });
 
 test('test_calculate_path', () => {
@@ -249,7 +301,32 @@ test('test_calculate_path', () => {
         .toBe(scenario_3d_allow_diagonal.waypoint.stop.y);
     expect(result3DDiagonal.path.z[result3DDiagonal.path.z.length - 1])
         .toBe(scenario_3d_allow_diagonal.waypoint.stop.z);
-    
+
+    const aStar3DEmptyGroupingWithoutBoundary = new AStar(scenarioEmptyGroupingWithoutBoundary);
+    const result3DEmptyGroupingWithoutBoundary = aStar3DEmptyGroupingWithoutBoundary.calculatePath();
+    expect(result3DEmptyGroupingWithoutBoundary.message).toBe('[Done] Arrival! 🚀');
+
+    const scenarioGroupingWithoutBoundary = {
+        ...scenarioEmptyGroupingWithoutBoundary,
+        grouping: {
+            "radius": 2
+        }
+    };
+    const aStar3DGroupingWithoutBoundary = new AStar(scenarioGroupingWithoutBoundary);
+    const result3DGroupingWithoutBoundary = aStar3DGroupingWithoutBoundary.calculatePath();
+    expect(result3DGroupingWithoutBoundary.message).toBe('[Done] Arrival! 🚀');
+
+    const scenarioGroupingWithBoundary = {
+        ...scenarioGroupingWithoutBoundary,
+        boundary: {
+            "zCeil": 6,
+            "zFloor": 1
+        }
+    };
+    const aStar3DGroupingWithBoundary = new AStar(scenarioGroupingWithBoundary);
+    const result3DGroupingWithBoundary = aStar3DGroupingWithBoundary.calculatePath();
+    expect(result3DGroupingWithBoundary.message).toBe('[Done] Arrival! 🚀');
+
     const originalOptions = {debugMode: true, type: 'original'};
     const originalAStar3DDiagonal = new AStar(scenario_3d_allow_diagonal, originalOptions);
     const originalResult3DDiagonal = originalAStar3DDiagonal.calculatePath();

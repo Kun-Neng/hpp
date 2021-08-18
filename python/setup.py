@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="pyhpp",
-    version="0.1.2",
+    version="0.1.3",
     author="Kun-Neng Hung",
     author_email="kunneng.hung@gmail.com",
     description="Algorithms for Three Dimensional Path Planning",
