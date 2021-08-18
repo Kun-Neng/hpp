@@ -68,6 +68,26 @@ def test_find_the_min_F():
     assert int(original_min_node_3D["value"].dist) == 0
 
 
+def test_intersect():
+    assert Tools.intersect(Node(1, 1), Node(1, 2.5)) == True
+
+    group_center_2D = Node(2.999, 5)
+    obstacle_2D = Node(5, 5)
+    critical_distance_2D = 1.5
+    assert Tools.intersect(group_center_2D, obstacle_2D, critical_distance_2D, True) == False
+
+    intersected_group_center_2D = Node(3, 5)
+    assert Tools.intersect(intersected_group_center_2D, obstacle_2D, critical_distance_2D, True) == True
+
+    group_center_3D = Node(2.999, 5, 4)
+    obstacle_3D = Node(5, 5, 5)
+    critical_distance_3D = 1.582
+    assert Tools.intersect(group_center_3D, obstacle_3D, critical_distance_3D, False) == False
+
+    intersected_group_center_3D = Node(3, 5, 4)
+    assert Tools.intersect(intersected_group_center_3D, obstacle_3D, critical_distance_3D, False) == True
+
+
 def test_create_path_from_finalQ():
     start_node = Node(12, 0)
     stop_node = Node(1, 11)

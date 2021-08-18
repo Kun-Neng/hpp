@@ -77,6 +77,26 @@ test('test_find_the_min_F', () => {
     expect(minNode3D.value.dist).toBe(0);
 });
 
+test('test_intersect', () => {
+    expect(Tools.intersect(new Node(1, 1), new Node(1, 2.5))).toBe(true);
+
+    const groupCenter2D = new Node(2.999, 5);
+    const obstacle2D = new Node(5, 5);
+    const criticalDistance2D = 1.5;
+    expect(Tools.intersect(groupCenter2D, obstacle2D, criticalDistance2D)).toBe(false);
+
+    const intersectedGroupCenter2D = new Node(3, 5);
+    expect(Tools.intersect(intersectedGroupCenter2D, obstacle2D, criticalDistance2D)).toBe(true);
+
+    const groupCenter3D = new Node(2.999, 5, 4);
+    const obstacle3D = new Node(5, 5, 5);
+    const criticalDistance3D = 1.582;
+    expect(Tools.intersect(groupCenter3D, obstacle3D, criticalDistance3D, false)).toBe(false);
+
+    const intersectedGroupCenter3D = new Node(3, 5, 4);
+    expect(Tools.intersect(intersectedGroupCenter3D, obstacle3D, criticalDistance3D, false)).toBe(true);
+});
+
 test('test_create_path_from_finalQ', () => {
     const startNode = new Node(12, 0);
     const stopNode = new Node(1, 11);

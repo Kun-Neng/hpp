@@ -100,13 +100,13 @@ export class AStar {
         if (this._isGrouping) {
             console.log(`[Grouping] radius ${this._groupRadius} of ${this._isGroupFlat ? 'circle' : 'sphere'}`);
             if (this._obstacleArray.findIndex(obstacle => {
-                return this.intersect(this._startNode, obstacle);
+                return Tools.intersect(this._startNode, obstacle, this._groupRadius, this._isGroupFlat);
             }) !== -1) {
                 const message = `[Grouping Error] obstacle is in the start ${this._isGroupFlat ? 'circle' : 'sphere'}.`;
                 console.log(message);
             }
             if (this._obstacleArray.findIndex(obstacle => {
-                return this.intersect(this._stopNode, obstacle);
+                return Tools.intersect(this._stopNode, obstacle, this._groupRadius, this._isGroupFlat);
             }) !== -1) {
                 const message = `[Grouping Error] obstacle is in the stop ${this._isGroupFlat ? 'circle' : 'sphere'}.`;
                 console.log(message);
@@ -188,7 +188,7 @@ export class AStar {
                                 // Fast search
                                 if (this._isGrouping) {
                                     if (this._obstacleArray.findIndex(obstacle => {
-                                        return this.intersect(neighborNode, obstacle);
+                                        return Tools.intersect(neighborNode, obstacle, this._groupRadius, this._isGroupFlat);
                                     }) !== -1) {
                                         continue;
                                     }
@@ -243,31 +243,6 @@ export class AStar {
             "refined_path": refinedPath,
             "message": this._message
         };
-    }
-
-    private intersect(groupCenterNode: Node, obstacleNode: Node) {
-        const [boxMinX, boxMaxX, boxMinY, boxMaxY] = [
-            obstacleNode.x - 0.5, obstacleNode.x + 0.5,
-            obstacleNode.y - 0.5, obstacleNode.y + 0.5
-        ];
-        const x = Math.max(boxMinX, Math.min(groupCenterNode.x, boxMaxX));
-        const y = Math.max(boxMinY, Math.min(groupCenterNode.y, boxMaxY));
-
-        if (this._isGroupFlat) {
-            const flatCenterNode = new Node(groupCenterNode.x, groupCenterNode.y);
-            const closestPoint = new Node(x, y);
-            // const distance = Math.sqrt(Math.pow(x - groupCenterNode.x, 2) + Math.pow(y - groupCenterNode.y, 2));
-            const distance = flatCenterNode.distanceTo(closestPoint);
-
-            return distance <= this._groupRadius;
-        } else {
-            const [boxMinZ, boxMaxZ] = [obstacleNode.z - 0.5, obstacleNode.z + 0.5];
-            const z = Math.max(boxMinZ, Math.min(groupCenterNode.z, boxMaxZ));
-            const closestPoint = new Node(x, y, z);
-            const distance = groupCenterNode.distanceTo(closestPoint);
-        
-            return distance <= this._groupRadius;
-        }
     }
 
     private getTimeString(ms: number): string {

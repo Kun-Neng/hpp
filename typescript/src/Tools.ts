@@ -54,6 +54,28 @@ export default {
 
         return { key, value };
     },
+    intersect: (groupCenter: Node, obstacleNode: Node, radius: number = 1, isFlat: boolean = true) => {
+        const [boxMinX, boxMaxX, boxMinY, boxMaxY] = [
+            obstacleNode.x - 0.5, obstacleNode.x + 0.5,
+            obstacleNode.y - 0.5, obstacleNode.y + 0.5
+        ];
+        const x = Math.max(boxMinX, Math.min(groupCenter.x, boxMaxX));
+        const y = Math.max(boxMinY, Math.min(groupCenter.y, boxMaxY));
+
+        if (isFlat) {
+            const flatCenterNode = new Node(groupCenter.x, groupCenter.y);
+            const closestPoint = new Node(x, y);
+            // const distance = Math.sqrt(Math.pow(x - groupCenter.x, 2) + Math.pow(y - groupCenter.y, 2));
+            const distance = flatCenterNode.distanceTo(closestPoint);
+            return distance <= radius;
+        } else {
+            const [boxMinZ, boxMaxZ] = [obstacleNode.z - 0.5, obstacleNode.z + 0.5];
+            const z = Math.max(boxMinZ, Math.min(groupCenter.z, boxMaxZ));
+            const closestPoint = new Node(x, y, z);
+            const distance = groupCenter.distanceTo(closestPoint);
+            return distance <= radius;
+        }
+    },
     createPathFromFinalQ: (finalQ: Map<string, Node>, finalNode: Node) => {
         const is2d = finalNode.is2d;
         const newXArray: number[] = [Number(finalNode.x)];

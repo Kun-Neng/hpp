@@ -288,23 +288,3 @@ def test_calculate_path():
     original_astar_3D_diagonal = AStar(scenario_3d_allow_diagonal, options)
     original_result_3D_diagonal = original_astar_3D_diagonal.calculate_path()
     assert original_result_3D_diagonal["message"] == '[Done] Arrival! 🚀'
-
-
-def test_intersect():
-    astar = AStar({
-        "dimension": {"x": 15, "y": 15},
-        "waypoint": {
-            "start": {"x": 12, "y": 0},
-            "stop": {"x": 1, "y": 11},
-            "allowDiagonal": False
-        },
-        "grouping": {"radius": 1}
-    })
-
-    from pyhpp.node import Node
-    group_center_grid = Node(2.999, 5)
-    obstacle_grid = Node(5, 5)
-    assert astar.intersect(group_center_grid, obstacle_grid) == False
-
-    intersected_group_center_grid = Node(3, 5)
-    assert astar.intersect(intersected_group_center_grid, obstacle_grid) == True

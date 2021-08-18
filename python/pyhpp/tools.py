@@ -1,4 +1,5 @@
 from math import inf
+from pyhpp.node import Node
 
 
 class Tools:
@@ -18,6 +19,28 @@ class Tools:
             "key": obj_key,
             "value": obj_value
         }
+    
+    @staticmethod
+    def intersect(group_center, obstacle_node, radius = 1, is_flat = True) -> bool:
+        [box_min_x, box_max_x, box_min_y, box_max_y] = [
+            obstacle_node.x - 0.5, obstacle_node.x + 0.5,
+            obstacle_node.y - 0.5, obstacle_node.y + 0.5
+        ]
+        x = max(box_min_x, min(group_center.x, box_max_x))
+        y = max(box_min_y, min(group_center.y, box_max_y))
+        
+        if is_flat:
+            flat_center_node = Node(group_center.x, group_center.y)
+            closest_point = Node(x, y)
+            # distance = sqrt(pow(x - group_center.x, 2) + pow(y - group_center.y, 2))
+            distance = flat_center_node.distance_to(closest_point)
+            return distance <= radius
+        else:
+            [boxMinZ, boxMaxZ] = [obstacle_node.z - 0.5, obstacle_node.z + 0.5]
+            z = max(boxMinZ, min(group_center.z, boxMaxZ))
+            closest_point = Node(x, y, z)
+            distance = group_center.distance_to(closest_point)
+            return distance <= radius
     
     @staticmethod
     def create_path_from_final_Q(final_Q, final_node):
