@@ -40,7 +40,9 @@ export class Dijkstra {
         this._startNode = this._is2d ?
             new Node(start.x, start.y).setAsStartNode() :
             new Node(start.x, start.y, start.z).setAsStartNode();
-        this._stopNode = new Node(stop.x, stop.y, stop.z);
+        this._stopNode = this._is2d ?
+            new Node(stop.x, stop.y) :
+            new Node(stop.x, stop.y, stop.z);
         this._lastNodeKey = this._stopNode.str();
         this._allowDiagonal = waypoint.allowDiagonal ?? false;
 
@@ -89,7 +91,7 @@ export class Dijkstra {
                             if (neighbor && !finalQ.get(neighborNode.str())) {
                                 visitedQ.set(neighborNode.str(), neighbor);
 
-                                if (this._openSet.get(neighborNode.str())) {
+                                if (!this._openSet.has(neighborNode.str())) {
                                     this._openSet.set(neighborNode.str(), neighbor);
                                 }
 
