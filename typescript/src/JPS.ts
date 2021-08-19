@@ -19,7 +19,6 @@ export class JPS {
     readonly _openSet: Map<string, Node>;
 
     private _visitedQ: Set<string>;
-    private _finalQ: Map<string, Node>;
 
     private _lastNodeKey: string;
     private _message: string;
@@ -45,7 +44,6 @@ export class JPS {
         this._openSet = new Map<string, Node>();
         this._openSet.set(this._startNode.str(), this._startNode);
         this._visitedQ = new Set<string>();
-        this._finalQ = new Map<string, Node>();
 
         this._message = "[Ready] No Results.";
     }
@@ -295,6 +293,8 @@ export class JPS {
     }
 
     calculatePath() {
+        const finalQ = new Map<string, Node>();
+
         const calculateStartTime = this.getTime(TIME_TAG.START);
 
         let size = this._openSet.size;
@@ -302,7 +302,7 @@ export class JPS {
             const obj = Tools.findTheMinimum(this._openSet, 'f');
             const objKey = obj.key;
             const currentNode: Node = obj.value;
-            this._finalQ.set(objKey, currentNode);
+            finalQ.set(objKey, currentNode);
             this._openSet.delete(objKey);
 
             if (currentNode.equal(this._stopNode)) {
@@ -320,12 +320,12 @@ export class JPS {
 
         const calculateEndTime = this.getTime(TIME_TAG.END);
         const elapsedMS = calculateEndTime - calculateStartTime;
-        const finalNode = this._finalQ.get(this._lastNodeKey);
-        const path = Tools.createPathFromFinalQ(this._finalQ, finalNode!);
+        const finalNode = finalQ.get(this._lastNodeKey);
+        const path = Tools.createPathFromFinalQ(finalQ, finalNode!);
 
         return {
             "visited_Q": this._visitedQ,
-            "final_Q": this._finalQ,
+            "final_Q": finalQ,
             "elapsed_ms": elapsedMS,
             "path": path,
             "message": this._message
