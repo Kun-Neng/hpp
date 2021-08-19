@@ -16,7 +16,6 @@ enum TIME_TAG {
 export class AStar {
     readonly _is2d: boolean;
     readonly _obstacleArray: Array<Node>;
-    readonly _numObstacles: number;
     readonly _startNode: Node;
     readonly _stopNode: Node;
     readonly _allowDiagonal: boolean;
@@ -39,7 +38,6 @@ export class AStar {
         const dimension = scenario.dimension;
         this._is2d = Model.is2d(dimension);
         this._obstacleArray = Model.createObstacleArray(scenario.data);
-        this._numObstacles = this._obstacleArray.length;
 
         const waypoint = scenario.waypoint;
         // console.log(waypoint);
