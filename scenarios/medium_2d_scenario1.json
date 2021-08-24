@@ -312,9 +312,5 @@
             24
         ],
         "z": null
-    },
-    "boundary": {
-        "zCeil": 17,
-        "zFloor": 14
     }
 }

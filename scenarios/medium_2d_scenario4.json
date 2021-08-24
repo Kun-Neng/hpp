@@ -836,9 +836,5 @@
             20
         ],
         "z": null
-    },
-    "boundary": {
-        "zCeil": 16,
-        "zFloor": 14
     }
 }
