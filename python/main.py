@@ -8,7 +8,8 @@ project_root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 print(f'Root Path of Project: {project_root_path}')
 small_3d_scenario_json = project_root_path + '\\scenarios\\small_3d_scenario.json'
 print(f'========== Small 3D Scenario JSON: {small_3d_scenario_json} ==========')
-medium_scenarios = [project_root_path + f'\\scenarios\\medium_3d_scenario{i_scenario}.json' for i_scenario in range(1, 5)]
+medium_3d_scenarios = [project_root_path + f'\\scenarios\\medium_3d_scenario{i_scenario}.json' for i_scenario in range(1, 5)]
+medium_2d_scenarios = [project_root_path + f'\\scenarios\\medium_2d_scenario{i_scenario}.json' for i_scenario in range(1, 5)]
 
 
 if __name__ == "__main__":
@@ -63,17 +64,17 @@ if __name__ == "__main__":
     print(f"z: {refined_path['z']}")
 
     i_scenario = 1
-    # print(medium_scenarios)
-    for medium_3d_scenario_json in medium_scenarios:
+    # print(medium_3d_scenarios)
+    for medium_3d_scenario_json in medium_3d_scenarios:
         print(f'========== Medium 3D Scenario JSON: {medium_3d_scenario_json} ==========')
         with open(medium_3d_scenario_json) as file:
-            medium_3d_scenario = json.load(file)
+            medium_2d_scenario_grouping = json.load(file)
             file.close()
         
-        print(f'Medium 3D Scenario Data Size: {medium_3d_scenario["data"]["size"]}')
+        print(f'Medium 3D Scenario Data Size: {medium_2d_scenario_grouping["data"]["size"]}')
 
         # a_star = AStar(medium_3d_scenario, {'debug_mode': True})
-        a_star = AStar(medium_3d_scenario)
+        a_star = AStar(medium_2d_scenario_grouping)
         result = a_star.calculate_path()
 
         visited_Q = result["visited_Q"]
@@ -91,6 +92,40 @@ if __name__ == "__main__":
         print(f'x: {refined_path["x"]}')
         print(f'y: {refined_path["y"]}')
         print(f'z: {refined_path["z"]}')
+        print(f'elapsed_ms: {elapsed_time} ms')
+
+        i_scenario += 1
+    
+    i_scenario = 1
+    # print(medium_2d_scenarios)
+    for medium_2d_scenario_json in medium_2d_scenarios:
+        print(f'========== Medium 2D Scenario JSON: {medium_2d_scenario_json} ==========')
+        with open(medium_2d_scenario_json) as file:
+            medium_2d_scenario_grouping = json.load(file)
+            file.close()
+        
+        print(f'Medium 2D Scenario Data Size: {medium_2d_scenario_grouping["data"]["size"]}')
+
+        # a_star = AStar(medium_3d_scenario, {'debug_mode': True})
+        medium_2d_scenario_grouping["grouping"] = {
+            "radius": 1
+        }
+        a_star = AStar(medium_2d_scenario_grouping)
+        result = a_star.calculate_path()
+
+        visited_Q = result["visited_Q"]
+        message = result["message"]
+        path = result["path"]
+        refined_path = result["refined_path"]
+        elapsed_time = result["elapsed_ms"]
+        print(f'message: {message}')
+        print(f'size of visited Q: {len(visited_Q)}')
+        print(f'path length: {len(path["x"])} => {len(refined_path["x"])}')
+        # if i_scenario == 1:
+        #     print(f'x: {path["x"]}')
+        #     print(f'y: {path["y"]}')
+        print(f'x: {refined_path["x"]}')
+        print(f'y: {refined_path["y"]}')
         print(f'elapsed_ms: {elapsed_time} ms')
 
         i_scenario += 1

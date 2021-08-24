@@ -104,8 +104,18 @@ class AStar:
                         is_allowed = is_diagonal if self.allow_diagonal else is_not_diagonal
                         if is_allowed:
                             neighbor_node = current_node.shift(shift_row, shift_col)
-                            neighbor = self.Q.get(str(neighbor_node))
+                            if self.is_grouping:
+                                is_obstacle_found = False
+                                for obstacle_node in self.obstacle_array:
+                                    if Tools.intersect(neighbor_node, obstacle_node, self.group_radius, self.is_group_flat):
+                                        is_obstacle_found = True
+                                        # no more to check the other collisions
+                                        break
+                                if is_obstacle_found:
+                                    # continue to find the next neighbor
+                                    continue
 
+                            neighbor = self.Q.get(str(neighbor_node))
                             if neighbor is not None and str(neighbor_node) not in final_Q:
                                 visited_Q[str(neighbor_node)] = neighbor
 
