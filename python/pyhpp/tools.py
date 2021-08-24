@@ -119,7 +119,7 @@ class Tools:
 
             x.append(temp_start_point["x"])
             y.append(temp_start_point["y"])
-            if "z" in temp_start_point:
+            if temp_start_point["z"] is not None:
                 z.append(temp_start_point["z"])
 
             next_point = { "x": path["x"][i_point + 1], "y": path["y"][i_point + 1], "z": None if is_2d else path["z"][i_point + 1] }
@@ -142,7 +142,7 @@ class Tools:
 
                         x.append(last_point["x"])
                         y.append(last_point["y"])
-                        if "z" in last_point:
+                        if last_point["z"] is not None:
                             z.append(last_point["z"])
 
                         is_finished = True
@@ -168,7 +168,7 @@ class Tools:
                 x.append(last_point["x"])
                 y.append(next_to_last_point["y"])
                 y.append(last_point["y"])
-                if "z" in next_to_last_point and "z" in last_point:
+                if next_to_last_point["z"] is not None and last_point["z"] is not None:
                     z.append(next_to_last_point["z"])
                     z.append(last_point["z"])
             
