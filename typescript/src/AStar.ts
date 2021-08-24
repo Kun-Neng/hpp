@@ -93,7 +93,7 @@ export class AStar {
         this._isGrouping = grouping ? Number(grouping.radius) ? true : false : false;
         // console.log(isGrouping);
         this._groupRadius = this._isGrouping ? Number(grouping!.radius) : 0;
-        this._isGroupFlat = scenario.boundary ? true : false;
+        this._isGroupFlat = (this._is2d || boundary !== undefined);
 
         if (this._isGrouping) {
             console.log(`[Grouping] radius ${this._groupRadius} of ${this._isGroupFlat ? 'circle' : 'sphere'}`);
@@ -145,8 +145,13 @@ export class AStar {
                         const isAllowed = this._allowDiagonal ? isDiagonal : isNotDiagonal;
                         if (isAllowed) {
                             const neighborNode = currentNode.shift(shiftRow, shiftCol);
-                            let neighbor = this._Q.get(neighborNode.str());
+                            if (this._isGrouping) {
+                                if (this._obstacleArray.find(obstacle => Tools.intersect(neighborNode, obstacle, this._groupRadius))) {
+                                    continue;
+                                }
+                            }
 
+                            let neighbor = this._Q.get(neighborNode.str());
                             if (neighbor && !finalQ.get(neighborNode.str())) {
                                 visitedQ.set(neighborNode.str(), neighbor);
 

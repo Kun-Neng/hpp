@@ -302,6 +302,9 @@ test('test_calculate_path', () => {
     expect(result3DDiagonal.path.z[result3DDiagonal.path.z.length - 1])
         .toBe(scenario_3d_allow_diagonal.waypoint.stop.z);
 
+    /**
+     * 3D Grouping
+     */
     const aStar3DEmptyGroupingWithoutBoundary = new AStar(scenarioEmptyGroupingWithoutBoundary);
     const result3DEmptyGroupingWithoutBoundary = aStar3DEmptyGroupingWithoutBoundary.calculatePath();
     expect(result3DEmptyGroupingWithoutBoundary.message).toBe('[Done] Arrival! 🚀');
@@ -326,6 +329,29 @@ test('test_calculate_path', () => {
     const aStar3DGroupingWithBoundary = new AStar(scenarioGroupingWithBoundary);
     const result3DGroupingWithBoundary = aStar3DGroupingWithBoundary.calculatePath();
     expect(result3DGroupingWithBoundary.message).toBe('[Done] Arrival! 🚀');
+
+    /**
+     * 2D Grouping
+     */
+    const scenarioGrouping2D = {
+        ...scenario_2d,
+        grouping: {
+            "radius": 0.4
+        }
+    };
+    const aStarGrouping2D = new AStar(scenarioGrouping2D);
+    const resultGrouping2D = aStarGrouping2D.calculatePath();
+    expect(resultGrouping2D.message).toBe('[Done] Arrival! 🚀');
+
+    const scenarioGroupingNoResult2D = {
+        ...scenario_2d_no_results,
+        grouping: {
+            "radius": 1
+        }
+    };
+    const aStarGroupingNoResult2D = new AStar(scenarioGroupingNoResult2D);
+    const noResultGrouping2D = aStarGroupingNoResult2D.calculatePath();
+    expect(noResultGrouping2D.message).toBe('[Ready] No Results.');
 
     const originalOptions = {debugMode: true, type: 'original'};
     const originalAStar3DDiagonal = new AStar(scenario_3d_allow_diagonal, originalOptions);
