@@ -164,6 +164,7 @@ test('test_refine_path_from_collinearity', () => {
     const refinedNonDiagonalPath2DLastThreeCollinear = Tools.refinePathFromCollinearity(nonDiagonalPath2DLastThreeCollinear, true);
     // console.log(refinedNonDiagonalPath2DLastThreeCollinear);
     expect(Number(refinedNonDiagonalPath2DLastThreeCollinear?.x.length)).toBe(6);
+    expect(Number(refinedNonDiagonalPath2DLastThreeCollinear?.y.length)).toBe(6);
     
     const nonDiagonalPath2D = {
         x: [12, 12, 11, 11, 11, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1, 1, 1,  1,  1],
@@ -172,6 +173,7 @@ test('test_refine_path_from_collinearity', () => {
     const refinedNonDiagonalPath2D = Tools.refinePathFromCollinearity(nonDiagonalPath2D, true);
     // console.log(refinedNonDiagonalPath2D);
     expect(Number(refinedNonDiagonalPath2D?.x.length)).toBe(6);
+    expect(Number(refinedNonDiagonalPath2D?.y.length)).toBe(6);
 
     const nonDiagonalPath = {
         x: [5, 5, 5, 4, 3, 3, 3, 3, 3, 3, 4, 4, 5, 5],
@@ -182,6 +184,8 @@ test('test_refine_path_from_collinearity', () => {
     // console.log(refinedNonDiagonalPath);
     expect(Number(nonDiagonalPath.x.length)).toBe(14);
     expect(Number(refinedNonDiagonalPath?.x.length)).toBe(10);
+    expect(Number(refinedNonDiagonalPath?.y.length)).toBe(10);
+    expect(Number(refinedNonDiagonalPath?.z?.length)).toBe(10);
 
     const diagonalPath = {
         x: [5, 5, 4, 3, 3, 3, 4, 4, 5, 5, 5],
@@ -192,4 +196,17 @@ test('test_refine_path_from_collinearity', () => {
     // console.log(refinedDiagonalPath);
     expect(Number(diagonalPath.x.length)).toBe(11);
     expect(Number(refinedDiagonalPath?.x.length)).toBe(8);
+    expect(Number(refinedDiagonalPath?.y.length)).toBe(8);
+    expect(Number(refinedDiagonalPath?.z?.length)).toBe(8);
+
+    const PathWithZeroZ = {
+        x: [5, 5, 5,  5,  5,  5,  5,  5,  5,  5, 5, 5, 5, 5, 5],
+        y: [9, 9, 8,  7,  6,  5,  4,  3,  2,  1, 0, 0, 0, 0, 0],
+        z: [2, 1, 0, -1, -1, -1, -2, -2, -2, -1, 0, 1, 2, 3, 4]
+    }; //   o  o      o       o   o       o      o           o
+    const refinedPathWithZeroZ = Tools.refinePathFromCollinearity(PathWithZeroZ);
+    expect(Number(PathWithZeroZ.x.length)).toBe(15);
+    expect(Number(refinedPathWithZeroZ?.x.length)).toBe(8);
+    expect(Number(refinedPathWithZeroZ?.y.length)).toBe(8);
+    expect(Number(refinedPathWithZeroZ?.z?.length)).toBe(8);
 });

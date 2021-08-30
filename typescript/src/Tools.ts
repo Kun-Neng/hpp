@@ -148,7 +148,7 @@ export default {
 
             x.push(tempStartPoint.x);
             y.push(tempStartPoint.y);
-            if (tempStartPoint.z) {
+            if (tempStartPoint.z !== undefined) {
                 z.push(tempStartPoint.z);
             }
 
@@ -172,7 +172,7 @@ export default {
 
                         x.push(lastPoint.x);
                         y.push(lastPoint.y);
-                        if (lastPoint.z) {
+                        if (lastPoint.z !== undefined) {
                             z.push(lastPoint.z);
                         }
 
@@ -201,7 +201,7 @@ export default {
 
                 x.push(nextToLastPoint.x, lastPoint.x);
                 y.push(nextToLastPoint.y, lastPoint.y);
-                if (nextToLastPoint.z && lastPoint.z) {
+                if ((nextToLastPoint.z !== undefined) && (lastPoint.z !== undefined)) {
                     z.push(nextToLastPoint.z, lastPoint.z);
                 }
             }
