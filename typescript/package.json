@@ -1,6 +1,6 @@
 {
   "name": "jshpp",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Algorithms for Three Dimensional Path Planning",
   "main": "lib/HPP.js",
   "types": "lib/HPP.d.ts",
