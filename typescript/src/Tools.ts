@@ -123,6 +123,17 @@ export default {
                 return;
             }
         }
+
+        if (length === 1 || length === 2) {
+            return is2d ? {
+                x: path.x,
+                y: path.y
+            } : {
+                x: path.x,
+                y: path.y,
+                z: path.z
+            };
+        }
         
         const x: number[] = [];
         const y: number[] = [];

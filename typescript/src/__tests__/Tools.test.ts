@@ -148,6 +148,15 @@ test('test_refine_path_from_collinearity', () => {
     const inconsistentLengthPath3D = Tools.refinePathFromCollinearity({ x: [1, 2, 3], y: [1, 1, 1], z: [2] });
     expect(inconsistentLengthPath3D).toBe(undefined);
 
+    const shortLengthsPath2D1 = Tools.refinePathFromCollinearity({ x: [1], y: [2] });
+    expect(Number(shortLengthsPath2D1?.x.length)).toBe(1);
+    const shortLengthsPath2D2 = Tools.refinePathFromCollinearity({ x: [1, 1], y: [2, 2] });
+    expect(Number(shortLengthsPath2D2?.x.length)).toBe(2);
+    const shortLengthsPath3D1 = Tools.refinePathFromCollinearity({ x: [1], y: [2], z: [3] });
+    expect(Number(shortLengthsPath3D1?.x.length)).toBe(1);
+    const shortLengthsPath3D2 = Tools.refinePathFromCollinearity({ x: [1, 1], y: [2, 2], z: [3, 3] });
+    expect(Number(shortLengthsPath3D2?.x.length)).toBe(2);
+
     const nonDiagonalPath2DLastThreeCollinear = {
         x: [12, 12, 11, 11, 11, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 1],
         y: [ 0,  1,  1,  2,  3,  4,  4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5]

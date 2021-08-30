@@ -105,6 +105,16 @@ class Tools:
                 print('[Error] Inconsistent vector lengths of x and y/z arrays in the path.')
                 return None
         
+        if length == 1 or length == 2:
+            return {
+                "x": path["x"],
+                "y": path["y"]
+            } if is_2d else {
+                "x": path["x"],
+                "y": path["y"],
+                "z": path["z"]
+            }
+        
         x = []
         y = []
         z = []

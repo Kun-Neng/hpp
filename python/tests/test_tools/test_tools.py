@@ -139,6 +139,15 @@ def test_refine_path_from_collinearity():
     inconsistent_length_path_3d = Tools.refine_path_from_collinearity({ "x": [1, 2, 3], "y": [1, 1, 1], "z": [2] })
     assert inconsistent_length_path_3d is None
 
+    short_lengths_path_2d_1 = Tools.refine_path_from_collinearity({ "x": [1], "y": [2] })
+    assert len(short_lengths_path_2d_1["x"]) == 1
+    short_lengths_path_2d_2 = Tools.refine_path_from_collinearity({ "x": [1, 1], "y": [2, 2] })
+    assert len(short_lengths_path_2d_2["x"]) == 2
+    short_lengths_path_3d_1 = Tools.refine_path_from_collinearity({ "x": [1], "y": [2], "z": [3] })
+    assert len(short_lengths_path_3d_1["x"]) == 1
+    short_lengths_path_3d_2 = Tools.refine_path_from_collinearity({ "x": [1, 1], "y": [2, 2], "z": [3, 3] })
+    assert len(short_lengths_path_3d_2["x"]) == 2
+
     non_diagonal_path_2d_last_three_collinear = {
         "x": [12, 12, 11, 11, 11, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 1],
         "y": [ 0,  1,  1,  2,  3,  4,  4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5]
