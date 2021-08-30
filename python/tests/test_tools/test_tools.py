@@ -155,6 +155,7 @@ def test_refine_path_from_collinearity():
     refined_non_diagonal_path_2d_last_three_collinear = Tools.refine_path_from_collinearity(non_diagonal_path_2d_last_three_collinear, True)
     # print(refined_non_diagonal_path_2d_last_three_collinear)
     assert len(refined_non_diagonal_path_2d_last_three_collinear["x"]) == 6
+    assert len(refined_non_diagonal_path_2d_last_three_collinear["y"]) == 6
     
     non_diagonal_path_2d = {
         "x": [12, 12, 11, 11, 11, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1, 1, 1,  1,  1],
@@ -163,6 +164,7 @@ def test_refine_path_from_collinearity():
     refined_non_diagonal_path_2d = Tools.refine_path_from_collinearity(non_diagonal_path_2d, True)
     # print(refined_non_diagonal_path_2d)
     assert len(refined_non_diagonal_path_2d["x"]) == 6
+    assert len(refined_non_diagonal_path_2d["y"]) == 6
 
     non_diagonal_path = {
         "x": [5, 5, 5, 4, 3, 3, 3, 3, 3, 3, 4, 4, 5, 5],
@@ -173,6 +175,8 @@ def test_refine_path_from_collinearity():
     # print(refined_non_diagonal_path)
     assert len(non_diagonal_path["x"]) == 14
     assert len(refined_non_diagonal_path["x"]) == 10
+    assert len(refined_non_diagonal_path["y"]) == 10
+    assert len(refined_non_diagonal_path["z"]) == 10
 
     diagonal_path = {
         "x": [5, 5, 4, 3, 3, 3, 4, 4, 5, 5, 5],
@@ -183,3 +187,16 @@ def test_refine_path_from_collinearity():
     # print(refined_diagonal_path)
     assert len(diagonal_path["x"]) == 11
     assert len(refined_diagonal_path["x"]) == 8
+    assert len(refined_diagonal_path["y"]) == 8
+    assert len(refined_diagonal_path["z"]) == 8
+
+    path_with_zero_z = {
+        "x": [5, 5, 5,  5,  5,  5,  5,  5,  5,  5, 5, 5, 5, 5, 5],
+        "y": [9, 9, 8,  7,  6,  5,  4,  3,  2,  1, 0, 0, 0, 0, 0],
+        "z": [2, 1, 0, -1, -1, -1, -2, -2, -2, -1, 0, 1, 2, 3, 4]
+    }  #      o  o      o       o   o       o      o           o
+    refined_path_with_zero_z = Tools.refine_path_from_collinearity(path_with_zero_z)
+    assert len(path_with_zero_z["x"]) == 15
+    assert len(refined_path_with_zero_z["x"]) == 8
+    assert len(refined_path_with_zero_z["y"]) == 8
+    assert len(refined_path_with_zero_z["z"]) == 8
