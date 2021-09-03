@@ -7,8 +7,8 @@ from pyhpp.tools import Tools
 
 class AStar:
     def __init__(self, scenario, options=None):
-        dimension = scenario["dimension"]
-        self.is_2d = Model.is_two_dimensional(dimension)
+        self.dimension = scenario["dimension"]
+        self.is_2d = Model.is_two_dimensional(self.dimension)
 
         if "data" in scenario:
             self.obstacle_array = Model.create_obstacle_array(scenario["data"])
@@ -26,14 +26,17 @@ class AStar:
         self.allow_diagonal = bool(self.waypoint["allowDiagonal"]) if "allowDiagonal" in self.waypoint else False
 
         if options is None:
-            debug_mode = False
-            is_fast = True
+            self.debug_mode = False
+            self.is_fast = True
         else:
-            debug_mode = True if 'debug_mode' in options and options['debug_mode'] is True else False
-            is_fast = False if 'type' in options and options['type'] == 'original' else True
+            self.debug_mode = True if 'debug_mode' in options and options['debug_mode'] is True else False
+            self.is_fast = False if 'type' in options and options['type'] == 'original' else True
+        
+        if self.debug_mode:
+            print("A* Path Finding (2D)") if self.is_2d else print("A* Path Finding (3D)")
 
-        model = Model(dimension, self.obstacle_array, self.waypoint, debug_mode)
-        self.Q = model.create_initial_Q(is_fast)
+        model = Model(self.dimension, self.obstacle_array, self.waypoint, self.debug_mode)
+        self.Q = model.create_initial_Q(self.is_fast)
 
         self.open_set = dict()
         self.open_set[str(self.start_node)] = self.Q.get(str(self.start_node))
@@ -72,7 +75,6 @@ class AStar:
         self.message = "[Ready] No Results."
 
     def calculate_path(self):
-        # print("A* Path Finding (2D)") if self.is_2d else print("A* Path Finding (3D)")
         final_Q = dict()
         visited_Q = dict()
 
@@ -104,6 +106,11 @@ class AStar:
                         is_allowed = is_diagonal if self.allow_diagonal else is_not_diagonal
                         if is_allowed:
                             neighbor_node = current_node.shift(shift_row, shift_col)
+                            if neighbor_node.is_out_of_bound(
+                                bound_x = [-1, self.dimension['x']],
+                                bound_y = [-1, self.dimension['y']]):
+                                continue
+
                             if self.is_grouping:
                                 is_obstacle_found = False
                                 for obstacle_node in self.obstacle_array:
@@ -114,22 +121,51 @@ class AStar:
                                 if is_obstacle_found:
                                     # continue to find the next neighbor
                                     continue
+                            else:
+                                is_obstacle_found = False
+                                for index in range(self.num_obstacles):
+                                    obstacle_node = self.obstacle_array[index]
+                                    if obstacle_node == neighbor_node:
+                                        # Find out an obstacle on the neighbor node
+                                        is_obstacle_found = True
+                                        break
+                                if is_obstacle_found:
+                                    continue
 
-                            neighbor = self.Q.get(str(neighbor_node))
-                            if neighbor is not None and str(neighbor_node) not in final_Q:
+                            if str(neighbor_node) in final_Q:
+                                continue
+                            
+                            if self.is_fast is True:
+                                neighbor = visited_Q.get(str(neighbor_node))
+                                if neighbor is None:
+                                    neighbor = Node(neighbor_node.x, neighbor_node.y)
                                 visited_Q[str(neighbor_node)] = neighbor
 
                                 if str(neighbor_node) not in self.open_set:
                                     self.open_set[str(neighbor_node)] = neighbor
-
+                                
                                 dist = sqrt(shift_row ** 2 + shift_col ** 2)
                                 alt = current_node.dist + dist
                                 if alt < neighbor.dist:
                                     neighbor.dist = alt
                                     neighbor.f = alt + neighbor.manhattan_distance_to(self.stop_node)
-                                    # neighbor["f"] = alt + sqrt(dist_x ** 2 + dist_y ** 2)
                                     neighbor.prev = str(current_node)
                                     self.open_set[str(neighbor_node)] = neighbor
+                            else:
+                                neighbor = self.Q.get(str(neighbor_node))
+                                if neighbor is not None and str(neighbor_node) not in final_Q:
+                                    visited_Q[str(neighbor_node)] = neighbor
+
+                                    if str(neighbor_node) not in self.open_set:
+                                        self.open_set[str(neighbor_node)] = neighbor
+
+                                    dist = sqrt(shift_row ** 2 + shift_col ** 2)
+                                    alt = current_node.dist + dist
+                                    if alt < neighbor.dist:
+                                        neighbor.dist = alt
+                                        neighbor.f = alt + neighbor.manhattan_distance_to(self.stop_node)
+                                        neighbor.prev = str(current_node)
+                                        self.open_set[str(neighbor_node)] = neighbor
                     else:
                         for shift_z in shift_node:
                             is_not_diagonal = ((shift_row == 0 or shift_col == 0) and (shift_row != shift_col)) \
