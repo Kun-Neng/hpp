@@ -15,7 +15,7 @@ class Model:
         self.start_node = Node(start["x"], start["y"]) if self.is_2d else Node(start["x"], start["y"], start["z"])
         self.start_node.set_as_start_node()
         self.stop_node = Node(stop["x"], stop["y"]) if self.is_2d else Node(stop["x"], stop["y"], stop["z"])
-        self.dist = self.start_node.distance_to(self.stop_node)
+        self.dist = self.start_node.manhattan_distance_to(self.stop_node)
 
         self.init_Q = dict()
 
@@ -73,18 +73,17 @@ class Model:
 
         calculate_start_time = time.time()
         
-        if self.is_2d:
-            [self.update_init_Q(row, col, None) for row in range(x) for col in range(y)
-                if Node(row, col) not in self.obstacle_array]
+        if is_fast:
+            # f_value = abs(self.dist_x) + abs(self.dist_y) + abs(self.dist_z)  # option 1
+            f_value = self.dist  # option 2
+            self.start_node.f = f_value
+            self.init_Q[str(self.start_node)] = self.start_node
         else:
-            z = int(self.dimension["z"])
-
-            if is_fast:
-                # f_value = abs(self.left_x) + abs(self.left_y) + abs(self.left_z)  # option 1
-                f_value = self.dist  # option 2
-                self.start_node.f = f_value
-                self.init_Q[str(self.start_node)] = self.start_node
+            if self.is_2d:
+                [self.update_init_Q(row, col, None) for row in range(x) for col in range(y)
+                    if Node(row, col) not in self.obstacle_array]
             else:
+                z = int(self.dimension["z"])
                 [self.update_init_Q(row, col, iz) for row in range(x) for col in range(y) for iz in range(z)
                     if Node(row, col, iz) not in self.obstacle_array]
 

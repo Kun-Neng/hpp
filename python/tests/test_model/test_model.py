@@ -109,10 +109,14 @@ def test_create_initial_Q():
 
     obstacle_2D_array = Model.create_obstacle_array(scenario_2d["data"])
     model_2D = Model(scenario_2d["dimension"], obstacle_2D_array, scenario_2d["waypoint"])
-    Q_2D = model_2D.create_initial_Q()
+    Q_2D = model_2D.create_initial_Q(False)
+
+    model_fast_2D = Model(scenario_2d["dimension"], obstacle_2D_array, scenario_2d["waypoint"])
+    Q_fast_2D = model_fast_2D.create_initial_Q(True)
 
     number_obstacle_nodes_2D = (int(scenario_2d["dimension"]["x"]) * int(scenario_2d["dimension"]["y"])) - int(scenario_2d["data"]["size"])
     assert len(Q_2D) == number_obstacle_nodes_2D
+    assert len(Q_fast_2D) == 1
 
     scenario_3d = {
         "dimension": { "x": 10, "y": 10, "z": 10 },
