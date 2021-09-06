@@ -1,13 +1,18 @@
-# jshpp
-### Node Package for Path Planning Algorithms
+jshpp
+======
+#### Node Package for Path Planning Algorithms ####
 
+[![GitHub license](https://img.shields.io/github/license/Kun-Neng/hpp)](https://github.com/Kun-Neng/hpp/blob/main/LICENSE)
+
+Steps
+------
 * Step 1: import A* algorithm
-```
+```javascript
 const AStar = require('jshpp').AStar;
 ```
 
 * Step 2: prepare a JSON type scenario, e.g.,
-```
+```javascript
 const scenario = {
     "dimension": {"x": 10, "y": 10, "z": 10},
     "waypoint": {
@@ -27,18 +32,18 @@ const scenario = {
     }
 };
 ```
-> `dimension`: [required] whole dimension of the scenario<br>
+> `dimension`: [required] whole dimension of the scenario. Two dimensional scenario can be set up when `"z": 0`<br>
 > `waypoint`: [required] start and stop positions (default `allowDiagonal` is `False`)<br>
 > `data`: obstacle data (set as empty if none)<br>
 > `boundary`: the z-axis boundary of path for calculation<br>
 
 * Step 3: create an A* instance
-```
+```javascript
 const aStar = new AStar(scenario);
 ```
 
 * Step 4: calculate and get the results
-```
+```javascript
 const result = aStar.calculatePath();
 
 const visited_Q = result.visited_Q;
