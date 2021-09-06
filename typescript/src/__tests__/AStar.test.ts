@@ -245,126 +245,166 @@ test('test_constructor', () => {
     new AStar(scenarioObstaclesInBothCircles);
 });
 
-test('test_calculate_path', () => {
-    /**
-     * Case 1: No results
-     */
-    const aStarNoResult2D = new AStar(scenario_2d_no_results);
-    const noResult2D = aStarNoResult2D.calculatePath();
-    expect(noResult2D.message).toBe('[Ready] No Results.');
-
-    const aStarNoResult3D = new AStar(scenario_no_results);
-    const noResult3D = aStarNoResult3D.calculatePath();
-    expect(noResult3D.message).toBe('[Ready] No Results.');
-
-    /**
-     * Case 2: Arrival
-     */
-    const aStar2D = new AStar(scenario_2d);
-    const result2D = aStar2D.calculatePath();
-    expect(result2D.message).toBe('[Done] Arrival! 🚀');
-
-    const aStar3D = new AStar(scenario);
-    const result3D = aStar3D.calculatePath();
-    expect(result3D.message).toBe('[Done] Arrival! 🚀');
-
-    const scenario_2d_allow_diagonal = {
-        ...scenario_2d, waypoint: {
-            "start": {"x": 12, "y": 0},
-            "stop": {"x": 1, "y": 11},
-            "allowDiagonal": true
-        }
-    };
-    const aStar2DDiagonal = new AStar(scenario_2d_allow_diagonal);
-    const result2DDiagonal = aStar2DDiagonal.calculatePath();
-    expect(result2DDiagonal.message).toBe('[Done] Arrival! 🚀');
+describe('test_calculate_path', () => {
+    test('2D', () => {
+        /**
+         * Case 1: No results
+         */
+        const aStarNoResult2D = new AStar(scenario_2d_no_results);
+        const noResult2D = aStarNoResult2D.calculatePath();
+        expect(noResult2D.message).toBe('[Ready] No Results.');
     
-    expect(result2DDiagonal.path.x[result2DDiagonal.path.x.length - 1])
-        .toBe(scenario_2d_allow_diagonal.waypoint.stop.x);
-    expect(result2DDiagonal.path.y[result2DDiagonal.path.y.length - 1])
-        .toBe(scenario_2d_allow_diagonal.waypoint.stop.y);
+        /**
+         * Case 2: Arrival
+         */
+        const aStar2D = new AStar(scenario_2d);
+        const result2D = aStar2D.calculatePath();
+        expect(result2D.message).toBe('[Done] Arrival! 🚀');
+    
+        const scenario_2d_allow_diagonal = {
+            ...scenario_2d, waypoint: {
+                "start": {"x": 12, "y": 0},
+                "stop": {"x": 1, "y": 11},
+                "allowDiagonal": true
+            }
+        };
+        const aStar2DDiagonal = new AStar(scenario_2d_allow_diagonal);
+        const result2DDiagonal = aStar2DDiagonal.calculatePath();
+        expect(result2DDiagonal.message).toBe('[Done] Arrival! 🚀');
+        
+        expect(result2DDiagonal.path.x[result2DDiagonal.path.x.length - 1])
+            .toBe(scenario_2d_allow_diagonal.waypoint.stop.x);
+        expect(result2DDiagonal.path.y[result2DDiagonal.path.y.length - 1])
+            .toBe(scenario_2d_allow_diagonal.waypoint.stop.y);
+        
+        /**
+         * Case 3: Grouping
+         */
+         const scenarioGrouping2D = {
+            ...scenario_2d,
+            grouping: {
+                "radius": 0.4
+            }
+        };
+        const originalAStarGrouping2D = new AStar(scenarioGrouping2D, { type: 'original' });
+        const resultOriginalGrouping2D = originalAStarGrouping2D.calculatePath();
+        expect(resultOriginalGrouping2D.message).toBe('[Done] Arrival! 🚀');
 
-    const scenario_3d_allow_diagonal = {
-        ...scenario, waypoint: {
-            "start": {"x": 5, "y": 9, "z": 2},
-            "stop": {"x": 5, "y": 0, "z": 4},
-            "allowDiagonal": true
-        }
-    };
-    const aStar3DDiagonal = new AStar(scenario_3d_allow_diagonal);
-    const result3DDiagonal = aStar3DDiagonal.calculatePath();
-    expect(result3DDiagonal.message).toBe('[Done] Arrival! 🚀');
+        const fastAStarGrouping2D = new AStar(scenarioGrouping2D, { type: 'fast' });
+        const resultFastGrouping2D = fastAStarGrouping2D.calculatePath();
+        expect(resultFastGrouping2D.message).toBe('[Done] Arrival! 🚀');
+    
+        const scenarioGroupingNoResult2D = {
+            ...scenario_2d_no_results,
+            grouping: {
+                "radius": 1
+            }
+        };
+        const aStarGroupingNoResult2D = new AStar(scenarioGroupingNoResult2D);
+        const noResultGrouping2D = aStarGroupingNoResult2D.calculatePath();
+        expect(noResultGrouping2D.message).toBe('[Ready] No Results.');
+    
+        /**
+         * Case 4: Options
+         * debugMode: true | false
+         * type: 'original' | 'fast'
+         */
+        const originalOption = { type: 'original' };
+        const originalAstar2DDiagonal = new AStar(scenario_2d_allow_diagonal, originalOption);
+        const originalResult2DDiagonal = originalAstar2DDiagonal.calculatePath();
+        expect(originalResult2DDiagonal.message).toBe('[Done] Arrival! 🚀');
 
-    expect(result3DDiagonal.path.x[result3DDiagonal.path.x.length - 1])
-        .toBe(scenario_3d_allow_diagonal.waypoint.stop.x);
-    expect(result3DDiagonal.path.y[result3DDiagonal.path.y.length - 1])
-        .toBe(scenario_3d_allow_diagonal.waypoint.stop.y);
-    expect(result3DDiagonal.path.z[result3DDiagonal.path.z.length - 1])
-        .toBe(scenario_3d_allow_diagonal.waypoint.stop.z);
-
-    /**
-     * 3D Grouping
-     */
-    const aStar3DEmptyGroupingWithoutBoundary = new AStar(scenarioEmptyGroupingWithoutBoundary);
-    const result3DEmptyGroupingWithoutBoundary = aStar3DEmptyGroupingWithoutBoundary.calculatePath();
-    expect(result3DEmptyGroupingWithoutBoundary.message).toBe('[Done] Arrival! 🚀');
-
-    const scenarioGroupingWithoutBoundary = {
-        ...scenarioEmptyGroupingWithoutBoundary,
-        grouping: {
-            "radius": 2
-        }
-    };
-    const aStar3DGroupingWithoutBoundary = new AStar(scenarioGroupingWithoutBoundary);
-    const result3DGroupingWithoutBoundary = aStar3DGroupingWithoutBoundary.calculatePath();
-    expect(result3DGroupingWithoutBoundary.message).toBe('[Done] Arrival! 🚀');
-
-    const scenarioGroupingWithBoundary = {
-        ...scenarioGroupingWithoutBoundary,
-        boundary: {
-            "zCeil": 6,
-            "zFloor": 1
-        }
-    };
-    const aStar3DGroupingWithBoundary = new AStar(scenarioGroupingWithBoundary);
-    const result3DGroupingWithBoundary = aStar3DGroupingWithBoundary.calculatePath();
-    expect(result3DGroupingWithBoundary.message).toBe('[Done] Arrival! 🚀');
-
-    /**
-     * 2D Grouping
-     */
-    const scenarioGrouping2D = {
-        ...scenario_2d,
-        grouping: {
-            "radius": 0.4
-        }
-    };
-    const aStarGrouping2D = new AStar(scenarioGrouping2D);
-    const resultGrouping2D = aStarGrouping2D.calculatePath();
-    expect(resultGrouping2D.message).toBe('[Done] Arrival! 🚀');
-
-    const scenarioGroupingNoResult2D = {
-        ...scenario_2d_no_results,
-        grouping: {
-            "radius": 1
-        }
-    };
-    const aStarGroupingNoResult2D = new AStar(scenarioGroupingNoResult2D);
-    const noResultGrouping2D = aStarGroupingNoResult2D.calculatePath();
-    expect(noResultGrouping2D.message).toBe('[Ready] No Results.');
-
-    const originalOptions = {debugMode: true, type: 'original'};
-    const originalAStar3DDiagonal = new AStar(scenario_3d_allow_diagonal, originalOptions);
-    const originalResult3DDiagonal = originalAStar3DDiagonal.calculatePath();
-    expect(originalResult3DDiagonal.message).toBe('[Done] Arrival! 🚀');
-
-    const fastOptions = {debugMode: false, type: 'fast'};
-    const fastAStar3DDiagonal = new AStar(scenario_3d_allow_diagonal, fastOptions);
-    const fastResult3DDiagonal = fastAStar3DDiagonal.calculatePath();
-    expect(fastResult3DDiagonal.message).toBe('[Done] Arrival! 🚀');
-
-    const otherTypeOptions = {debugMode: false, type: undefined};
-    const otherAStar3DDiagonal = new AStar(scenario_3d_allow_diagonal, otherTypeOptions);
-    const otherResult3DDiagonal = otherAStar3DDiagonal.calculatePath();
-    expect(otherResult3DDiagonal.message).toBe('[Done] Arrival! 🚀');
+        const scenario_2d_without_diagonal = {
+            ...scenario_2d_allow_diagonal, waypoint: {
+                "start": {"x": 12, "y": 0},
+                "stop": {"x": 1, "y": 11},
+                "allowDiagonal": false
+            }
+        };
+        const originalAstar2DWithoutDiagonal = new AStar(scenario_2d_without_diagonal, originalOption);
+        const originalResult2DWithoutDiagonal = originalAstar2DWithoutDiagonal.calculatePath();
+        expect(originalResult2DWithoutDiagonal.message).toBe('[Done] Arrival! 🚀');
+    });
+    
+    test('3D', () => {
+        /**
+         * Case 1: No results
+         */
+        const aStarNoResult3D = new AStar(scenario_no_results);
+        const noResult3D = aStarNoResult3D.calculatePath();
+        expect(noResult3D.message).toBe('[Ready] No Results.');
+    
+        /**
+         * Case 2: Arrival
+         */
+        const aStar3D = new AStar(scenario);
+        const result3D = aStar3D.calculatePath();
+        expect(result3D.message).toBe('[Done] Arrival! 🚀');
+    
+        const scenario_3d_allow_diagonal = {
+            ...scenario, waypoint: {
+                "start": {"x": 5, "y": 9, "z": 2},
+                "stop": {"x": 5, "y": 0, "z": 4},
+                "allowDiagonal": true
+            }
+        };
+        const aStar3DDiagonal = new AStar(scenario_3d_allow_diagonal);
+        const result3DDiagonal = aStar3DDiagonal.calculatePath();
+        expect(result3DDiagonal.message).toBe('[Done] Arrival! 🚀');
+    
+        expect(result3DDiagonal.path.x[result3DDiagonal.path.x.length - 1])
+            .toBe(scenario_3d_allow_diagonal.waypoint.stop.x);
+        expect(result3DDiagonal.path.y[result3DDiagonal.path.y.length - 1])
+            .toBe(scenario_3d_allow_diagonal.waypoint.stop.y);
+        expect(result3DDiagonal.path.z[result3DDiagonal.path.z.length - 1])
+            .toBe(scenario_3d_allow_diagonal.waypoint.stop.z);
+    
+        /**
+         * Case 3: Grouping
+         */
+        const aStar3DEmptyGroupingWithoutBoundary = new AStar(scenarioEmptyGroupingWithoutBoundary);
+        const result3DEmptyGroupingWithoutBoundary = aStar3DEmptyGroupingWithoutBoundary.calculatePath();
+        expect(result3DEmptyGroupingWithoutBoundary.message).toBe('[Done] Arrival! 🚀');
+    
+        const scenarioGroupingWithoutBoundary = {
+            ...scenarioEmptyGroupingWithoutBoundary,
+            grouping: {
+                "radius": 2
+            }
+        };
+        const aStar3DGroupingWithoutBoundary = new AStar(scenarioGroupingWithoutBoundary);
+        const result3DGroupingWithoutBoundary = aStar3DGroupingWithoutBoundary.calculatePath();
+        expect(result3DGroupingWithoutBoundary.message).toBe('[Done] Arrival! 🚀');
+    
+        const scenarioGroupingWithBoundary = {
+            ...scenarioGroupingWithoutBoundary,
+            boundary: {
+                "zCeil": 6,
+                "zFloor": 1
+            }
+        };
+        const aStar3DGroupingWithBoundary = new AStar(scenarioGroupingWithBoundary);
+        const result3DGroupingWithBoundary = aStar3DGroupingWithBoundary.calculatePath();
+        expect(result3DGroupingWithBoundary.message).toBe('[Done] Arrival! 🚀');
+    
+        /**
+         * Case 4: Options
+         * debugMode: true | false
+         * type: 'original' | 'fast'
+         */
+        const originalOptions = {debugMode: true, type: 'original'};
+        const originalAStar3DDiagonal = new AStar(scenario_3d_allow_diagonal, originalOptions);
+        const originalResult3DDiagonal = originalAStar3DDiagonal.calculatePath();
+        expect(originalResult3DDiagonal.message).toBe('[Done] Arrival! 🚀');
+    
+        const fastOptions = {debugMode: false, type: 'fast'};
+        const fastAStar3DDiagonal = new AStar(scenario_3d_allow_diagonal, fastOptions);
+        const fastResult3DDiagonal = fastAStar3DDiagonal.calculatePath();
+        expect(fastResult3DDiagonal.message).toBe('[Done] Arrival! 🚀');
+    
+        const otherTypeOptions = {debugMode: false, type: undefined};
+        const otherAStar3DDiagonal = new AStar(scenario_3d_allow_diagonal, otherTypeOptions);
+        const otherResult3DDiagonal = otherAStar3DDiagonal.calculatePath();
+        expect(otherResult3DDiagonal.message).toBe('[Done] Arrival! 🚀');
+    });
 });
