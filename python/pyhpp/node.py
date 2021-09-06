@@ -1,3 +1,4 @@
+from heapq import heappop
 from math import inf, sqrt
 
 
@@ -19,6 +20,9 @@ class Node:
     def __eq__(self, other):
         return str(self) == str(other)
 
+    def __lt__(self, next) -> bool:
+        return self.f < next.f
+    
     def get_crux(self, crux) -> float:
         if crux == 'dist':
             return self.dist
@@ -60,3 +64,24 @@ class Node:
             minZ = min(*bound_z)
             maxZ = max(*bound_z)
             return self.x <= minX or self.x >= maxX or self.y <= minY or self.y >= maxY or self.z <= minZ or self.z >= maxZ
+
+
+if __name__ == '__main__':
+    import math
+    import random
+    import heapq
+
+    def create_node(index):
+        node = Node(index, index)
+        node.f = math.floor(random.random() * 100)
+        return node
+
+    node_array = [create_node(i) for i in range(300)]
+
+    heapq.heapify(node_array)
+
+    print(f'size: {len(node_array)}')
+    print(f'Contents:')
+    while (len(node_array) > 0):
+        top = heapq.heappop(node_array)
+        print(f'{top.f} ({str(top)})')
