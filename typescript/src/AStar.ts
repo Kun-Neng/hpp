@@ -14,6 +14,7 @@ enum TIME_TAG {
 };
 
 export class AStar {
+    readonly _dimension: IDimension;
     readonly _is2d: boolean;
     readonly _obstacleArray: Array<Node>;
     readonly _startNode: Node;
@@ -29,14 +30,14 @@ export class AStar {
     readonly _isGroupFlat: boolean;
 
     readonly _debugMode: boolean;
-    readonly _type: string;
+    readonly _isFast: boolean;
 
     private _lastNodeKey: string;
     private _message: string;
 
     constructor(scenario: { dimension: IDimension, waypoint: IWaypoints, data?: IObstacles, boundary?: IBoundary, grouping?: IGrouping }, options?: IOptions) {
-        const dimension = scenario.dimension;
-        this._is2d = Model.is2d(dimension);
+        this._dimension = scenario.dimension;
+        this._is2d = Model.is2d(this._dimension);
         this._obstacleArray = Model.createObstacleArray(scenario.data);
 
         const waypoint = scenario.waypoint;
@@ -44,14 +45,14 @@ export class AStar {
 
         if (!options) {
             this._debugMode = false;
-            this._type = 'fast';
+            this._isFast = true;
         } else {
             this._debugMode = options.debugMode ? options.debugMode : false;
-            this._type = options.type ? options.type === 'original' ? 'original': 'fast' : 'fast';
+            this._isFast = options.type ? options.type === 'original' ? false: true : true;
         }
 
-        const model = new Model(dimension, this._obstacleArray, waypoint, this._debugMode);
-        this._Q = model.createInitialQ(this._type === 'fast');
+        const model = new Model(this._dimension, this._obstacleArray, waypoint, this._debugMode);
+        this._Q = model.createInitialQ(this._isFast);
 
         const start = waypoint.start;
         const stop = waypoint.stop;
@@ -145,18 +146,54 @@ export class AStar {
                         const isAllowed = this._allowDiagonal ? isDiagonal : isNotDiagonal;
                         if (isAllowed) {
                             const neighborNode = currentNode.shift(shiftRow, shiftCol);
+                            if (neighborNode.isOutOfBound({
+                                boundX: [-1, this._dimension.x],
+                                boundY: [-1, this._dimension.y]
+                            })) {
+                                continue;
+                            }
+
                             if (this._isGrouping) {
                                 if (this._obstacleArray.find(obstacle => Tools.intersect(neighborNode, obstacle, this._groupRadius))) {
                                     continue;
                                 }
+                            } else {
+                                if (this._obstacleArray.find(obstacle => obstacle.equal(neighborNode))) {
+                                    // Find out an obstacle on the point
+                                    continue;
+                                }
+                            }
+                            
+                            const neighborNodeStr = neighborNode.str();
+                            if (finalQ.has(neighborNodeStr)) {
+                                continue;
                             }
 
-                            let neighbor = this._Q.get(neighborNode.str());
-                            if (neighbor && !finalQ.get(neighborNode.str())) {
-                                visitedQ.set(neighborNode.str(), neighbor);
+                            if (this._isFast) {
+                                let neighborObj = visitedQ.get(neighborNodeStr);
+                                if (!neighborObj) {
+                                    neighborObj = new Node(neighborNode.x, neighborNode.y);
+                                    visitedQ.set(neighborNodeStr, neighborObj);
+                                }
 
-                                if (!this._openSet.has(neighborNode.str())) {
-                                    this._openSet.set(neighborNode.str(), neighbor);
+                                if (!this._openSet.has(neighborNodeStr)) {
+                                    this._openSet.set(neighborNodeStr, neighborObj);
+                                }
+
+                                const dist = Math.sqrt(shiftRow * shiftRow + shiftCol * shiftCol);
+                                const alt = currentNode.dist + dist;
+                                if (alt < neighborObj.dist) {
+                                    neighborObj.dist = alt;
+                                    neighborObj.f = alt + neighborObj.manhattanDistanceTo(this._stopNode);
+                                    neighborObj.prev = currentNode;
+                                    this._openSet.set(neighborNodeStr, neighborObj);
+                                }
+                            } else {
+                                const neighbor = this._Q.get(neighborNodeStr) as Node;
+                                visitedQ.set(neighborNodeStr, neighbor);
+
+                                if (!this._openSet.has(neighborNodeStr)) {
+                                    this._openSet.set(neighborNodeStr, neighbor);
                                 }
 
                                 const dist = Math.sqrt(shiftRow * shiftRow + shiftCol * shiftCol);
@@ -164,9 +201,8 @@ export class AStar {
                                 if (alt < neighbor.dist) {
                                     neighbor.dist = alt;
                                     neighbor.f = alt + neighbor.manhattanDistanceTo(this._stopNode);
-                                    // neighbor.f = alt + Math.sqrt(distX * distX + distY * distY);
                                     neighbor.prev = currentNode;
-                                    this._openSet.set(neighborNode.str(), neighbor);
+                                    this._openSet.set(neighborNodeStr, neighbor);
                                 }
                             }
                         }
@@ -190,38 +226,38 @@ export class AStar {
 
                                 // Fast search
                                 if (this._isGrouping) {
-                                    if (this._obstacleArray.findIndex(obstacle => {
-                                        return Tools.intersect(neighborNode, obstacle, this._groupRadius, this._isGroupFlat);
-                                    }) !== -1) {
+                                    if (this._obstacleArray.find(obstacle => Tools.intersect(neighborNode, obstacle, this._groupRadius, this._isGroupFlat))) {
                                         continue;
                                     }
                                 } else {
-                                    if (this._obstacleArray.findIndex(obstacle => {
-                                        return obstacle.equal(neighborNode);
-                                    }) !== -1) {
+                                    if (this._obstacleArray.find(obstacle => obstacle.equal(neighborNode))) {
                                         // Find out an obstacle on the point
                                         continue;
                                     }
                                 }
 
-                                if (!finalQ.has(neighborNode.str())) {
-                                    let neighborObj = visitedQ.get(neighborNode.str());
-                                    if (!neighborObj) {
-                                        neighborObj = new Node(neighborNode.x, neighborNode.y, neighborNode.z);
-                                        visitedQ.set(neighborNode.str(), neighborObj);
-                                    }
+                                const neighborNodeStr = neighborNode.str();
+                                if (finalQ.has(neighborNodeStr)) {
+                                    continue;
+                                }
 
-                                    const dist = Math.sqrt(shiftRow * shiftRow + shiftCol * shiftCol + shiftZ * shiftZ);
-                                    const alt = currentNode.dist + dist;
-                                    if (!this._openSet.has(neighborNode.str())) {
-                                        this._openSet.set(neighborNode.str(), neighborObj);
-                                    }
-                                    if (alt < neighborObj.dist) {
-                                        neighborObj.dist = alt;
-                                        neighborObj.f = alt + neighborObj.manhattanDistanceTo(this._stopNode);
-                                        neighborObj.prev = currentNode;
-                                        this._openSet.set(neighborNode.str(), neighborObj);
-                                    }
+                                let neighborObj = visitedQ.get(neighborNodeStr);
+                                if (!neighborObj) {
+                                    neighborObj = new Node(neighborNode.x, neighborNode.y, neighborNode.z);
+                                    visitedQ.set(neighborNodeStr, neighborObj);
+                                }
+
+                                if (!this._openSet.has(neighborNodeStr)) {
+                                    this._openSet.set(neighborNodeStr, neighborObj);
+                                }
+
+                                const dist = Math.sqrt(shiftRow * shiftRow + shiftCol * shiftCol + shiftZ * shiftZ);
+                                const alt = currentNode.dist + dist;
+                                if (alt < neighborObj.dist) {
+                                    neighborObj.dist = alt;
+                                    neighborObj.f = alt + neighborObj.manhattanDistanceTo(this._stopNode);
+                                    neighborObj.prev = currentNode;
+                                    this._openSet.set(neighborNodeStr, neighborObj);
                                 }
                             }
                         }
