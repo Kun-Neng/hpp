@@ -58,7 +58,10 @@ class AStar:
                 self.message = message
         
         grouping = scenario["grouping"] if "grouping" in scenario else None
-        self.is_grouping = True if grouping is not None and "radius" in grouping and str(grouping["radius"]).isnumeric() else False
+        # Only for integer type
+        # self.is_grouping = True if grouping is not None and "radius" in grouping and str(grouping["radius"]).isnumeric() else False
+        # For integer and float type
+        self.is_grouping = True if grouping is not None and "radius" in grouping and Tools.is_number(str(grouping["radius"])) else False
         self.group_radius = float(grouping["radius"]) if self.is_grouping else 0
         self.is_group_flat = True if self.is_2d or "boundary" in scenario else False
 
