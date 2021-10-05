@@ -97,18 +97,27 @@ export class AStar {
         this._isGroupFlat = (this._is2d || boundary !== undefined);
 
         if (this._isGrouping) {
-            console.log(`[Grouping] radius ${this._groupRadius} of ${this._isGroupFlat ? 'circle' : 'sphere'}`);
+            const groupingStyle = this._isGroupFlat ? 'circle' : 'sphere';
+            console.log(`[Grouping] radius ${this._groupRadius + 0.6} of ${groupingStyle}`);
+            let numObstaclesInGroup = 0;
             if (this._obstacleArray.findIndex(obstacle => {
                 return Tools.intersect(this._startNode, obstacle, this._groupRadius, this._isGroupFlat);
             }) !== -1) {
-                const message = `[Grouping Error] obstacle is in the start ${this._isGroupFlat ? 'circle' : 'sphere'}.`;
-                console.log(message);
+                const message = `[Grouping Error] obstacle is in the start ${groupingStyle}`;
+                // console.log(message);
+                numObstaclesInGroup += 1;
             }
             if (this._obstacleArray.findIndex(obstacle => {
                 return Tools.intersect(this._stopNode, obstacle, this._groupRadius, this._isGroupFlat);
             }) !== -1) {
-                const message = `[Grouping Error] obstacle is in the stop ${this._isGroupFlat ? 'circle' : 'sphere'}.`;
+                const message = `[Grouping Error] obstacle is in the stop ${groupingStyle}`;
                 console.log(message);
+            }
+
+            if (numObstaclesInGroup > 0) {
+                numObstaclesInGroup === 1 ?
+                    console.log(`[Grouping Error] ${numObstaclesInGroup} obstacle is in the start ${groupingStyle}`) :
+                    console.log(`[Grouping Error] ${numObstaclesInGroup} obstacles are in the start ${groupingStyle}`);
             }
         }
 
