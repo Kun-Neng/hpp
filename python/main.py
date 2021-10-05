@@ -6,6 +6,7 @@ from pyhpp.dijkstra import Dijkstra
 
 project_root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 print(f'Root Path of Project: {project_root_path}')
+# test_2d_scenario_json = project_root_path + '\\scenarios\\test_medium_2d_scenario.json'
 small_2d_scenario_json = project_root_path + '\\scenarios\\small_2d_scenario.json'
 small_3d_scenario_json = project_root_path + '\\scenarios\\small_3d_scenario.json'
 print(f'========== Small 3D Scenario JSON: {small_3d_scenario_json} ==========')
@@ -39,12 +40,20 @@ def print_result(title, result, is_detailed=False):
             print('refined_path:')
             print(f"x: {refined_path['x']}")
             print(f"y: {refined_path['y']}")
-            print(f"z: {refined_path['z']}")
+            print(f"z: {refined_path['z'] if 'z' in refined_path else []}")
     
     print('\n')
 
 
 if __name__ == "__main__":
+    # with open(test_2d_scenario_json) as file:
+    #     test_2d_scenario = json.load(file)
+    #     file.close()
+    
+    # fast_2d_a_star = AStar(test_2d_scenario, {'debug_mode': True, 'type': 'fast'})
+    # fast_2d_result = fast_2d_a_star.calculate_path()
+    # print_result('[fast 2D A* result]', fast_2d_result, True)
+
     with open(small_2d_scenario_json) as file:
         small_2d_scenario = json.load(file)
         file.close()
