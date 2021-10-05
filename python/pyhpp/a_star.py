@@ -58,19 +58,29 @@ class AStar:
                 self.message = message
         
         grouping = scenario["grouping"] if "grouping" in scenario else None
-        self.is_grouping = True if grouping is not None and "radius" in grouping and str(grouping["radius"]).isnumeric() else False
+        # Only for integer type
+        # self.is_grouping = True if grouping is not None and "radius" in grouping and str(grouping["radius"]).isnumeric() else False
+        # For integer and float type
+        self.is_grouping = True if grouping is not None and "radius" in grouping and Tools.is_number(str(grouping["radius"])) else False
         self.group_radius = float(grouping["radius"]) if self.is_grouping else 0
         self.is_group_flat = True if self.is_2d or "boundary" in scenario else False
 
         if self.is_grouping:
-            print("[Grouping] radius", self.group_radius, "of", {"circle" if self.is_group_flat else "sphere"})
+            grouping_style = 'circle' if self.is_group_flat else 'sphere'
+            print('[Grouping] radius', (self.group_radius + 0.6), 'of', grouping_style)
+            num_obstacles_in_group = 0
             for obstacle in self.obstacle_array:
                 if Tools.intersect(self.start_node, obstacle, self.group_radius, self.is_group_flat):
-                    message = "[Grouping Error] obstacle is in the start", {"circle" if self.is_group_flat else "sphere"}
-                    print(message)
+                    message = f'[Grouping Error] obstacle is in the start {grouping_style}'
+                    # print(message)
+                    num_obstacles_in_group = num_obstacles_in_group + 1
                 if Tools.intersect(self.stop_node, obstacle, self.group_radius, self.is_group_flat):
-                    message = "[Grouping Error] obstacle is in the stop", {"circle" if self.is_group_flat else "sphere"}
+                    message = f'[Grouping Error] obstacle is in the stop {grouping_style}'
                     print(message)
+            
+            if num_obstacles_in_group > 0:
+                print(f'[Grouping Error] {num_obstacles_in_group} obstacle is in the start {grouping_style}') if num_obstacles_in_group == 1 \
+                else print(f'[Grouping Error] {num_obstacles_in_group} obstacles are in the start {grouping_style}')
         
         self.message = "[Ready] No Results."
 

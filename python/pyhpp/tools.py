@@ -4,6 +4,14 @@ from pyhpp.node import Node
 
 class Tools:
     @staticmethod
+    def is_number(str) -> bool:
+        try:
+            float(str)
+            return True
+        except ValueError:
+            return False
+    
+    @staticmethod
     def find_the_minimum(hashmap, crux):
         obj_key = None
         obj_value = None

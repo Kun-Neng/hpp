@@ -268,6 +268,9 @@ def test_calculate_path():
     assert result_3D_diagonal["path"]["y"][len(result_3D_diagonal["path"]["y"]) - 1] == int(scenario_3d_allow_diagonal["waypoint"]["stop"]["y"])
     assert result_3D_diagonal["path"]["z"][len(result_3D_diagonal["path"]["z"]) - 1] == int(scenario_3d_allow_diagonal["waypoint"]["stop"]["z"])
     
+    '''
+    3D Grouping
+    '''
     aStar_3D_empty_grouping_without_boundary = AStar(scenario_empty_grouping_without_boundary)
     result_3D_empty_grouping_without_boundary = aStar_3D_empty_grouping_without_boundary.calculate_path()
     assert result_3D_empty_grouping_without_boundary["message"] == '[Done] Arrival! 🚀'
@@ -284,7 +287,32 @@ def test_calculate_path():
     result_3D_grouping_with_boundary = aStar_3D_grouping_with_boundary.calculate_path()
     assert result_3D_grouping_with_boundary["message"] == '[Done] Arrival! 🚀'
 
+    '''
+    2D Grouping
+    '''
+    scenario_grouping_2D = copy.deepcopy(scenario_2d)
+    scenario_grouping_2D["grouping"] = { "radius": 0.4 }
+    aStar_grouping_2D = AStar(scenario_grouping_2D)
+    result_grouping_2D = aStar_grouping_2D.calculate_path()
+    assert result_grouping_2D["message"] == '[Done] Arrival! 🚀'
+
+    scenario_grouping_no_result_2D = copy.deepcopy(scenario_2d_no_results)
+    scenario_grouping_no_result_2D["grouping"] = { "radius": 1 }
+    aStar_grouping_no_result_2D = AStar(scenario_grouping_no_result_2D)
+    no_result_grouping_2D = aStar_grouping_no_result_2D.calculate_path()
+    assert no_result_grouping_2D["message"] == '[Ready] No Results.'
+
     options = {'type': 'original'}
     original_astar_3D_diagonal = AStar(scenario_3d_allow_diagonal, options)
     original_result_3D_diagonal = original_astar_3D_diagonal.calculate_path()
     assert original_result_3D_diagonal["message"] == '[Done] Arrival! 🚀'
+
+    fast_options = {'debugMode': False, 'type': 'fast'}
+    fast_aStar_3D_diagonal = AStar(scenario_3d_allow_diagonal, fast_options)
+    fast_result_3D_diagonal = fast_aStar_3D_diagonal.calculate_path()
+    assert fast_result_3D_diagonal["message"] == '[Done] Arrival! 🚀'
+
+    other_type_options = {'debugMode': False}
+    other_aStar_3D_diagonal = AStar(scenario_3d_allow_diagonal, other_type_options)
+    other_result_3D_diagonal = other_aStar_3D_diagonal.calculate_path()
+    assert other_result_3D_diagonal["message"] == '[Done] Arrival! 🚀'
