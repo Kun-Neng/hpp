@@ -1,3 +1,4 @@
+import {describe, test, expect} from '@jest/globals';
 import {AStar} from '../AStar';
 
 const scenarioWithWaypointsOnSomeObstacle = {
@@ -171,7 +172,7 @@ const scenario_2d_no_results = {
         "allowDiagonal": false
     },
     "data": {
-        "size": 28,
+        "size": 8,
         "x": [11, 11, 11, 12, 12, 13, 13, 13],
         "y": [-1,  0,  1, -1,  1, -1,  0,  1]
         // "x": [ 0,  1,  2,  2,
@@ -303,6 +304,18 @@ describe('test_calculate_path', () => {
         const aStarGroupingNoResult2D = new AStar(scenarioGroupingNoResult2D);
         const noResultGrouping2D = aStarGroupingNoResult2D.calculatePath();
         expect(noResultGrouping2D.message).toBe('[Ready] No Results.');
+
+        const scenarioGroupingObstacleOnStopNoResult2D = {
+            ...scenarioGroupingNoResult2D,
+            data: {
+                "size": 8,
+                "x": [ 0,  0,  0,  1,  1,  2,  2,  2],
+                "y": [10, 11, 12, 10, 12, 10, 11, 12]
+            }
+        };
+        const aStarGroupingObstacleOnStopNoResult2D = new AStar(scenarioGroupingObstacleOnStopNoResult2D);
+        const noResultGroupingObstacleOnStop2D = aStarGroupingObstacleOnStopNoResult2D.calculatePath();
+        expect(noResultGroupingObstacleOnStop2D.message).toBe('[Path Error] No Results.');
     
         /**
          * Case 4: Options

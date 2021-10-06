@@ -34,6 +34,7 @@ export class AStar {
 
     private _lastNodeKey: string;
     private _message: string;
+    private _numObstaclesInStopGroup: number = 0;
 
     constructor(scenario: { dimension: IDimension, waypoint: IWaypoints, data?: IObstacles, boundary?: IBoundary, grouping?: IGrouping }, options?: IOptions) {
         this._dimension = scenario.dimension;
@@ -99,25 +100,33 @@ export class AStar {
         if (this._isGrouping) {
             const groupingStyle = this._isGroupFlat ? 'circle' : 'sphere';
             console.log(`[Grouping] radius ${this._groupRadius + 0.6} of ${groupingStyle}`);
-            let numObstaclesInGroup = 0;
+            
+            let numObstaclesInStartGroup = 0;
+            this._numObstaclesInStopGroup = 0;
             if (this._obstacleArray.findIndex(obstacle => {
                 return Tools.intersect(this._startNode, obstacle, this._groupRadius, this._isGroupFlat);
             }) !== -1) {
-                const message = `[Grouping Error] obstacle is in the start ${groupingStyle}`;
+                // const message = `[Grouping Error] obstacle is in the start ${groupingStyle}`;
                 // console.log(message);
-                numObstaclesInGroup += 1;
+                numObstaclesInStartGroup += 1;
             }
             if (this._obstacleArray.findIndex(obstacle => {
                 return Tools.intersect(this._stopNode, obstacle, this._groupRadius, this._isGroupFlat);
             }) !== -1) {
-                const message = `[Grouping Error] obstacle is in the stop ${groupingStyle}`;
-                console.log(message);
+                // const message = `[Grouping Error] obstacle is in the stop ${groupingStyle}`;
+                // console.log(message);
+                this._numObstaclesInStopGroup += 1;
             }
 
-            if (numObstaclesInGroup > 0) {
-                numObstaclesInGroup === 1 ?
-                    console.log(`[Grouping Error] ${numObstaclesInGroup} obstacle is in the start ${groupingStyle}`) :
-                    console.log(`[Grouping Error] ${numObstaclesInGroup} obstacles are in the start ${groupingStyle}`);
+            if (numObstaclesInStartGroup > 0) {
+                numObstaclesInStartGroup === 1 ?
+                    console.log(`[Grouping Error] ${numObstaclesInStartGroup} obstacle is in the start ${groupingStyle}`) :
+                    console.log(`[Grouping Error] ${numObstaclesInStartGroup} obstacles are in the start ${groupingStyle}`);
+            }
+            if (this._numObstaclesInStopGroup > 0) {
+                this._numObstaclesInStopGroup === 1 ?
+                    console.log(`[Grouping Error] ${this._numObstaclesInStopGroup} obstacle is in the stop ${groupingStyle}`) :
+                    console.log(`[Grouping Error] ${this._numObstaclesInStopGroup} obstacles are in the stop ${groupingStyle}`);
             }
         }
 
@@ -129,6 +138,27 @@ export class AStar {
         const visitedQ = new Map<string, Node>();
 
         const calculateStartTime = this.getTime(TIME_TAG.START);
+
+        if (this._numObstaclesInStopGroup > 0) {
+            const calculateEndTime = this.getTime(TIME_TAG.END);
+            const elapsedMS = calculateEndTime - calculateStartTime;
+            const path = {
+                x: [Number(this._startNode.x)],
+                y: [Number(this._startNode.y)],
+                z: this._is2d ? [] : [Number(this._startNode.z)]
+            };
+            const refinedPath = Tools.refinePathFromCollinearity(path);
+            this._message = "[Path Error] No Results.";
+
+            return {
+                "visited_Q": visitedQ,
+                "final_Q": finalQ,
+                "elapsed_ms": elapsedMS,
+                "path": path,
+                "refined_path": refinedPath,
+                "message": this._message
+            };
+        }
 
         let size = this._openSet.size;
         while (size > 0) {

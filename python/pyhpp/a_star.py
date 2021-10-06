@@ -65,22 +65,28 @@ class AStar:
         self.group_radius = float(grouping["radius"]) if self.is_grouping else 0
         self.is_group_flat = True if self.is_2d or "boundary" in scenario else False
 
+        self.num_obstacles_in_stop_group = 0
         if self.is_grouping:
             grouping_style = 'circle' if self.is_group_flat else 'sphere'
             print('[Grouping] radius', (self.group_radius + 0.6), 'of', grouping_style)
-            num_obstacles_in_group = 0
+            
+            num_obstacles_in_start_group = 0
             for obstacle in self.obstacle_array:
                 if Tools.intersect(self.start_node, obstacle, self.group_radius, self.is_group_flat):
-                    message = f'[Grouping Error] obstacle is in the start {grouping_style}'
+                    # message = f'[Grouping Error] obstacle is in the start {grouping_style}'
                     # print(message)
-                    num_obstacles_in_group = num_obstacles_in_group + 1
+                    num_obstacles_in_start_group = num_obstacles_in_start_group + 1
                 if Tools.intersect(self.stop_node, obstacle, self.group_radius, self.is_group_flat):
-                    message = f'[Grouping Error] obstacle is in the stop {grouping_style}'
-                    print(message)
+                    # message = f'[Grouping Error] obstacle is in the stop {grouping_style}'
+                    # print(message)
+                    self.num_obstacles_in_stop_group = self.num_obstacles_in_stop_group + 1
             
-            if num_obstacles_in_group > 0:
-                print(f'[Grouping Error] {num_obstacles_in_group} obstacle is in the start {grouping_style}') if num_obstacles_in_group == 1 \
-                else print(f'[Grouping Error] {num_obstacles_in_group} obstacles are in the start {grouping_style}')
+            if num_obstacles_in_start_group > 0:
+                print(f'[Grouping Error] {num_obstacles_in_start_group} obstacle is in the start {grouping_style}') if num_obstacles_in_start_group == 1 \
+                else print(f'[Grouping Error] {num_obstacles_in_start_group} obstacles are in the start {grouping_style}')
+            if self.num_obstacles_in_stop_group > 0:
+                print(f'[Grouping Error] {self.num_obstacles_in_stop_group} obstacle is in the stop {grouping_style}') if self.num_obstacles_in_stop_group == 1 \
+                else print(f'[Grouping Error] {self.num_obstacles_in_stop_group} obstacles are in the stop {grouping_style}')
         
         self.message = "[Ready] No Results."
 
@@ -89,6 +95,26 @@ class AStar:
         visited_Q = dict()
 
         calculate_start_time = time.time()
+
+        if self.num_obstacles_in_stop_group > 0:
+            calculate_end_time = time.time()
+            elapsed_ms = 1000.0 * (calculate_end_time - calculate_start_time)
+            path = {
+                "x": [int(self.start_node.x)],
+                "y": [int(self.start_node.y)],
+                "z": [] if self.is_2d else [int(self.start_node.z)]
+            }
+            refined_path = Tools.refine_path_from_collinearity(path)
+            self.message = "[Path Error] No Results."
+            
+            return {
+                "visited_Q": visited_Q,
+                "final_Q": final_Q,
+                "elapsed_ms": elapsed_ms,
+                "path": path,
+                "refined_path": refined_path,
+                "message": self.message
+            }
 
         size = len(self.open_set)
         while size > 0:
