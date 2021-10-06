@@ -172,15 +172,17 @@ scenario_2d_no_results = {
         "allowDiagonal": False
     },
     "data": {
-        "size": 32,
-        "x": [ 0,  1,  2,  2,
-               2,  2,  2,  2,  2,  2,  2,  2,
-               3,  4,  5,  6,  7,  8,  9, 10, 11, 12,
-              12, 12, 12, 12, 12, 12, 12, 12, 12, 12],
-        "y": [ 5,  5, 13, 14,
-               5,  6,  7,  8,  9, 10, 11, 12,
-              12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
-               2,  3,  4,  5,  6,  7,  8,  9, 10, 11]
+        "size": 8,
+        "x": [11, 11, 11, 12, 12, 13, 13, 13],
+        "y": [-1,  0,  1, -1,  1, -1,  0,  1]
+        # "x": [ 0,  1,  2,  2,
+        #        2,  2,  2,  2,  2,  2,  2,  2,
+        #        3,  4,  5,  6,  7,  8,  9, 10, 11, 12,
+        #       12, 12, 12, 12, 12, 12, 12, 12, 12, 12],
+        # "y": [ 5,  5, 13, 14,
+        #        5,  6,  7,  8,  9, 10, 11, 12,
+        #       12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+        #        2,  3,  4,  5,  6,  7,  8,  9, 10, 11]
     }
 }
 
@@ -301,6 +303,16 @@ def test_calculate_path():
     aStar_grouping_no_result_2D = AStar(scenario_grouping_no_result_2D)
     no_result_grouping_2D = aStar_grouping_no_result_2D.calculate_path()
     assert no_result_grouping_2D["message"] == '[Ready] No Results.'
+
+    scenario_grouping_obstacle_on_stop_no_result_2D = copy.deepcopy(scenario_grouping_no_result_2D)
+    scenario_grouping_obstacle_on_stop_no_result_2D["data"] = {
+        "size": 8,
+        "x": [ 0,  0,  0,  1,  1,  2,  2,  2],
+        "y": [10, 11, 12, 10, 12, 10, 11, 12]
+    }
+    aStar_grouping_obstacle_on_stop_no_result_2D = AStar(scenario_grouping_obstacle_on_stop_no_result_2D)
+    no_result_grouping_obstacle_on_stop_2D = aStar_grouping_obstacle_on_stop_no_result_2D.calculate_path()
+    assert no_result_grouping_obstacle_on_stop_2D["message"] == '[Path Error] No Results.'
 
     options = {'type': 'original'}
     original_astar_3D_diagonal = AStar(scenario_3d_allow_diagonal, options)
