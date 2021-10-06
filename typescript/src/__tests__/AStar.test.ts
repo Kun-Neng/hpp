@@ -253,7 +253,7 @@ describe('test_calculate_path', () => {
          */
         const aStarNoResult2D = new AStar(scenario_2d_no_results);
         const noResult2D = aStarNoResult2D.calculatePath();
-        expect(noResult2D.message).toBe('[Ready] No Results.');
+        expect(noResult2D.message).toBe('[Done] no results.');
     
         /**
          * Case 2: Arrival
@@ -303,7 +303,7 @@ describe('test_calculate_path', () => {
         };
         const aStarGroupingNoResult2D = new AStar(scenarioGroupingNoResult2D);
         const noResultGrouping2D = aStarGroupingNoResult2D.calculatePath();
-        expect(noResultGrouping2D.message).toBe('[Ready] No Results.');
+        expect(noResultGrouping2D.message).toBe('[Path Error] no results due to obstacles in START area.');
 
         const scenarioGroupingObstacleOnStopNoResult2D = {
             ...scenarioGroupingNoResult2D,
@@ -315,7 +315,7 @@ describe('test_calculate_path', () => {
         };
         const aStarGroupingObstacleOnStopNoResult2D = new AStar(scenarioGroupingObstacleOnStopNoResult2D);
         const noResultGroupingObstacleOnStop2D = aStarGroupingObstacleOnStopNoResult2D.calculatePath();
-        expect(noResultGroupingObstacleOnStop2D.message).toBe('[Path Error] No Results.');
+        expect(noResultGroupingObstacleOnStop2D.message).toBe('[Path Error] no results due to obstacles in STOP area.');
     
         /**
          * Case 4: Options
@@ -345,7 +345,7 @@ describe('test_calculate_path', () => {
          */
         const aStarNoResult3D = new AStar(scenario_no_results);
         const noResult3D = aStarNoResult3D.calculatePath();
-        expect(noResult3D.message).toBe('[Ready] No Results.');
+        expect(noResult3D.message).toBe('[Done] no results.');
     
         /**
          * Case 2: Arrival
