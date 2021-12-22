@@ -2,6 +2,7 @@ HPP Series
 ======
 *Algorithms for Three Dimensional A\* Path Planning*
 
+[![CircleCI](https://circleci.com/gh/circleci/circleci-docs.svg?style=svg)](https://circleci.com/gh/circleci/circleci-docs)
 [![GitHub issues](https://img.shields.io/github/issues/Kun-Neng/hpp)](https://github.com/Kun-Neng/hpp/issues)
 [![GitHub forks](https://img.shields.io/github/forks/Kun-Neng/hpp)](https://github.com/Kun-Neng/hpp/network)
 [![GitHub stars](https://img.shields.io/github/stars/Kun-Neng/hpp)](https://github.com/Kun-Neng/hpp/stargazers)
