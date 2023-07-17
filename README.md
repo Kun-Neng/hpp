@@ -28,6 +28,6 @@ Also see the [Usage](https://github.com/Kun-Neng/docker_jshpp)
 
 Online Demo (jshpp)
 ------
-A* Path Finding [Website](https://pathfinding2019.herokuapp.com/)
+A* Path Planning [Website](https://a-star-path-planning.appspot.com)
 
 ### :man_technologist: Feel free to send me PR or issue.
