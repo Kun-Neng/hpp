@@ -14,22 +14,22 @@ const AStar = require('jshpp').AStar;
 * Step 2: prepare a JSON type scenario, e.g.,
 ```javascript
 const scenario = {
-    "dimension": {"x": 10, "y": 10, "z": 10},
-    "waypoint": {
-        "start": {"x": 5, "y": 9, "z": 2},
-        "stop": {"x": 5, "y": 0, "z": 4},
-        "allowDiagonal": false
-    },
-    "data": {
-        "size": 16,
-        "x": [4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7],
-        "y": [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-        "z": [2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
-    },
-    "boundary": {
-        "zCeil": 6,
-        "zFloor": 1
-    }
+  "dimension": {"x": 10, "y": 10, "z": 10},
+  "waypoint": {
+    "start": {"x": 5, "y": 9, "z": 2},
+    "stop": {"x": 5, "y": 0, "z": 4},
+    "allowDiagonal": false
+  },
+  "data": {
+    "size": 16,
+    "x": [4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7],
+    "y": [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    "z": [2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
+  },
+  "boundary": {
+    "zCeil": 6,
+    "zFloor": 1
+  }
 };
 ```
 > `dimension`: [required] whole dimension of the scenario. Two dimensional scenario can be set up when `"z": 0`<br>

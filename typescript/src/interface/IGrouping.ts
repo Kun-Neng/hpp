@@ -1,3 +1,3 @@
 export interface IGrouping {
-    radius?: number;
+  radius?: number;
 }
