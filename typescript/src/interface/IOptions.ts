@@ -1,4 +1,4 @@
 export interface IOptions {
-    debugMode?: boolean;
-    type?: string;
+  debugMode?: boolean;
+  type?: string;
 }

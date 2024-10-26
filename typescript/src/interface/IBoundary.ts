@@ -1,4 +1,4 @@
 export interface IBoundary {
-    zCeil?: number;
-    zFloor?: number
+  zCeil?: number;
+  zFloor?: number
 }

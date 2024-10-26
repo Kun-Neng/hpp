@@ -3,5 +3,5 @@ import { Dijkstra } from './Dijkstra';
 import { JPS } from './JPS';
 
 export {
-    AStar, Dijkstra, JPS
+  AStar, Dijkstra, JPS
 };
